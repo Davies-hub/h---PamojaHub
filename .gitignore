@@ -1,0 +1,37 @@
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.production
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+dist/
+*.egg-info/
+
+# Node
+node_modules/
+.expo/
+dist/
+web-build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Database
+*.sqlite3
+
+# Tooling scratch / local config (not project source)
+.playwright-mcp/
+.claude/
+# stray Playwright a11y dump, not project config
+more.yml

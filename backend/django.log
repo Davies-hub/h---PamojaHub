@@ -1,0 +1,11 @@
+Method Not Allowed: /api/v1/donations/initiate/
+[04/Jun/2026 01:05:45] "GET /api/v1/donations/initiate/ HTTP/1.1" 405 40
+[04/Jun/2026 01:05:56] "POST /api/v1/auth/login/ HTTP/1.1" 200 834
+B2C_REQ_TEMP url='https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest' BusinessShortCode/PartyA='600977'
+B2C_RAW_ACK_TEMP status=200 body='{\n            "ConversationID": "AG_20260604_01001003027yv75fs3dl",\n            "OriginatorConversationID": "80c4-4cce-9edc-1f2f24eeab3b28122",\n            "ResponseCode":"0",\n            "ResponseDescription": "Accept the service request successfully."\n        }\n        '
+[04/Jun/2026 01:05:58] "POST /api/v1/withdrawals/3769eec8-8d7b-478c-aa81-47189b56a31c/approve/ HTTP/1.1" 200 429
+[04/Jun/2026 01:05:59] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260604_0100100302atjwhkquob orig=b73a-483b-a8cf-e649d5c84bd96740
+[04/Jun/2026 01:08:12] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260604_0100100302auiq6ol8y1 orig=b73a-483b-a8cf-e649d5c84bd96743
+[04/Jun/2026 01:08:13] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40

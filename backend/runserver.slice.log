@@ -1,0 +1,72 @@
+[23/Jun/2026 16:42:56] "GET /api/v1/churches/ HTTP/1.1" 200 1142
+[23/Jun/2026 16:42:57] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+[23/Jun/2026 16:42:57] "PATCH /api/v1/churches/me/ HTTP/1.1" 200 491
+[23/Jun/2026 16:42:58] "GET /api/v1/churches/me/ HTTP/1.1" 200 491
+[23/Jun/2026 16:42:58] "PATCH /api/v1/churches/me/ HTTP/1.1" 200 491
+Bad Request: /api/v1/churches/me/
+[23/Jun/2026 16:42:58] "PATCH /api/v1/churches/me/ HTTP/1.1" 400 71
+[23/Jun/2026 23:35:06] "OPTIONS /api/v1/auth/me/ HTTP/1.1" 200 0
+Unauthorized: /api/v1/auth/me/
+[23/Jun/2026 23:35:06] "GET /api/v1/auth/me/ HTTP/1.1" 401 172
+[23/Jun/2026 23:35:06] "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:06] "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+[23/Jun/2026 23:35:06] "GET /api/v1/auth/me/ HTTP/1.1" 200 274
+[23/Jun/2026 23:35:06] "OPTIONS /api/v1/churches/me/stats/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:06] "OPTIONS /api/v1/notifications/unread-count/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:06] "OPTIONS /api/v1/campaigns/mine/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:06] "GET /api/v1/churches/me/stats/ HTTP/1.1" 200 283
+[23/Jun/2026 23:35:06] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[23/Jun/2026 23:35:06] "GET /api/v1/notifications/unread-count/ HTTP/1.1" 200 11
+[23/Jun/2026 23:35:28] "OPTIONS /api/v1/churches/me/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:28] "OPTIONS /api/v1/churches/me/ HTTP/1.1" 200 0
+[23/Jun/2026 23:35:28] "GET /api/v1/churches/me/ HTTP/1.1" 200 491
+[23/Jun/2026 23:35:29] "GET /api/v1/churches/me/ HTTP/1.1" 200 491
+[23/Jun/2026 23:36:27] "PATCH /api/v1/churches/me/ HTTP/1.1" 200 484
+[23/Jun/2026 23:36:54] "GET /api/v1/notifications/unread-count/ HTTP/1.1" 200 11
+[23/Jun/2026 23:37:01] "GET /api/v1/churches/me/ HTTP/1.1" 200 484
+[23/Jun/2026 23:37:02] "GET /api/v1/churches/me/ HTTP/1.1" 200 484
+[23/Jun/2026 23:37:21] "PATCH /api/v1/churches/me/ HTTP/1.1" 200 484
+Bad Request: /api/v1/churches/me/
+[23/Jun/2026 23:37:44] "PATCH /api/v1/churches/me/ HTTP/1.1" 400 71
+Forbidden: /api/v1/churches/me/
+[23/Jun/2026 23:38:38] "PATCH /api/v1/churches/me/ HTTP/1.1" 403 74
+[24/Jun/2026 00:15:06] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+[24/Jun/2026 00:15:07] "GET /api/v1/campaigns/mine/dash-trace-youth-camp/ HTTP/1.1" 200 679
+[24/Jun/2026 00:15:07] "GET /api/v1/withdrawals/?campaign=da42de20-e239-4a47-8187-6e119d4e06fe HTTP/1.1" 200 1062
+[24/Jun/2026 00:15:07,256] - Broken pipe from ('127.0.0.1', 64426)
+Unauthorized: /api/v1/campaigns/mine/b2c-gate-camp/
+[24/Jun/2026 00:15:19] "GET /api/v1/campaigns/mine/b2c-gate-camp/ HTTP/1.1" 401 58
+Unauthorized: /api/v1/withdrawals/
+[24/Jun/2026 00:15:19] "GET /api/v1/withdrawals/?campaign=5edc13c3-4bb1-481f-ade8-ba68f4928100 HTTP/1.1" 401 58
+Unauthorized: /api/v1/withdrawals/
+[24/Jun/2026 00:15:19] "GET /api/v1/withdrawals/?campaign=bccf0c18-5640-4f8b-aa59-91c27dcfa858 HTTP/1.1" 401 58
+[24/Jun/2026 00:15:19,773] - Broken pipe from ('127.0.0.1', 64500)
+[24/Jun/2026 00:15:38] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+Forbidden: /api/v1/campaigns/mine/b2c-gate-camp/
+[24/Jun/2026 00:15:38] "GET /api/v1/campaigns/mine/b2c-gate-camp/ HTTP/1.1" 403 63
+[24/Jun/2026 00:15:39] "GET /api/v1/withdrawals/?campaign=5edc13c3-4bb1-481f-ade8-ba68f4928100 HTTP/1.1" 200 52
+[24/Jun/2026 00:15:39] "GET /api/v1/withdrawals/?campaign=bccf0c18-5640-4f8b-aa59-91c27dcfa858 HTTP/1.1" 200 52
+[24/Jun/2026 00:15:39,186] - Broken pipe from ('127.0.0.1', 64549)
+[24/Jun/2026 00:16:45] "OPTIONS /api/v1/auth/me/ HTTP/1.1" 200 0
+[24/Jun/2026 00:16:45] "GET /api/v1/auth/me/ HTTP/1.1" 200 274
+[24/Jun/2026 00:16:45] "OPTIONS /api/v1/churches/me/stats/ HTTP/1.1" 200 0
+[24/Jun/2026 00:16:45] "OPTIONS /api/v1/campaigns/mine/ HTTP/1.1" 200 0
+[24/Jun/2026 00:16:45] "OPTIONS /api/v1/notifications/unread-count/ HTTP/1.1" 200 0
+[24/Jun/2026 00:16:45] "GET /api/v1/churches/me/stats/ HTTP/1.1" 200 283
+[24/Jun/2026 00:16:45] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[24/Jun/2026 00:16:45] "GET /api/v1/notifications/unread-count/ HTTP/1.1" 200 11
+[24/Jun/2026 00:16:56] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[24/Jun/2026 00:17:05] "OPTIONS /api/v1/campaigns/mine/dash-trace-youth-camp/ HTTP/1.1" 200 0
+[24/Jun/2026 00:17:05] "GET /api/v1/campaigns/mine/dash-trace-youth-camp/ HTTP/1.1" 200 679
+[24/Jun/2026 00:17:05] "OPTIONS /api/v1/withdrawals/?campaign=da42de20-e239-4a47-8187-6e119d4e06fe HTTP/1.1" 200 0
+[24/Jun/2026 00:17:05] "GET /api/v1/withdrawals/?campaign=da42de20-e239-4a47-8187-6e119d4e06fe HTTP/1.1" 200 1062
+[24/Jun/2026 00:17:34] "GET /api/v1/campaigns/d1-seed-campaign-cleanup-debt/ HTTP/1.1" 200 476
+[24/Jun/2026 00:17:34] "GET /api/v1/auth/me/ HTTP/1.1" 200 274
+[24/Jun/2026 00:17:35] "GET /api/v1/churches/me/stats/ HTTP/1.1" 200 283
+[24/Jun/2026 00:17:35] "GET /api/v1/notifications/unread-count/ HTTP/1.1" 200 11
+[24/Jun/2026 00:17:35] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[24/Jun/2026 00:17:54] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[24/Jun/2026 00:17:58] "OPTIONS /api/v1/campaigns/mine/d1-seed-campaign-cleanup-debt/ HTTP/1.1" 200 0
+[24/Jun/2026 00:17:58] "GET /api/v1/campaigns/mine/d1-seed-campaign-cleanup-debt/ HTTP/1.1" 200 690
+[24/Jun/2026 00:17:58] "OPTIONS /api/v1/withdrawals/?campaign=bccf0c18-5640-4f8b-aa59-91c27dcfa858 HTTP/1.1" 200 0
+[24/Jun/2026 00:17:58] "GET /api/v1/withdrawals/?campaign=bccf0c18-5640-4f8b-aa59-91c27dcfa858 HTTP/1.1" 200 52

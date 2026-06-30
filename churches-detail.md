@@ -1,0 +1,294 @@
+- generic [ref=e1]:
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e174]:
+        - generic [ref=e175]:
+          - generic [ref=e176]: Super Admin
+          - generic [ref=e177]:
+            - button "Platform notifications" [ref=e403] [cursor=pointer]:
+              - generic [ref=e179]: 
+            - button "Sign out" [ref=e404] [cursor=pointer]:
+              - generic [ref=e181]: 
+        - generic [ref=e183]:
+          - generic [ref=e184]:
+            - generic [ref=e185]:
+              - generic [ref=e186]: 
+              - textbox "Search churches" [ref=e405]:
+                - /placeholder: Search churches…
+            - generic [ref=e189]:
+              - button "Filter by All Status" [ref=e406] [cursor=pointer]:
+                - generic [ref=e191]: All Status
+              - button "Filter by ACTIVE" [ref=e407] [cursor=pointer]:
+                - generic [ref=e193]: ACTIVE
+              - button "Filter by PENDING" [ref=e408] [cursor=pointer]:
+                - generic [ref=e195]: PENDING
+              - button "Filter by SUSPENDED" [ref=e409] [cursor=pointer]:
+                - generic [ref=e197]: SUSPENDED
+              - button "Filter by All Tiers" [ref=e410] [cursor=pointer]:
+                - generic [ref=e200]: All Tiers
+              - button "Filter by FREE" [ref=e411] [cursor=pointer]:
+                - generic [ref=e202]: FREE
+              - button "Filter by GROWTH" [ref=e412] [cursor=pointer]:
+                - generic [ref=e204]: GROWTH
+              - button "Filter by PARISH" [ref=e413] [cursor=pointer]:
+                - generic [ref=e206]: PARISH
+          - generic [ref=e208]:
+            - button "Trace Grace Chapel" [ref=e414] [cursor=pointer]:
+              - generic [ref=e211]:
+                - generic [ref=e212]: Trace Grace Chapel
+                - generic [ref=e213]:
+                  - generic [ref=e216]: ACTIVE
+                  - generic [ref=e219]: FREE
+                - generic [ref=e220]: Nairobi
+              - generic [ref=e221]:
+                - generic [ref=e222]: "1"
+                - generic [ref=e223]: campaigns
+                - generic [ref=e224]: KES 84,825
+                - generic [ref=e225]: raised
+              - generic [ref=e226]: 
+            - button "Live Reg Church" [ref=e416] [cursor=pointer]:
+              - generic [ref=e230]:
+                - generic [ref=e231]: Live Reg Church
+                - generic [ref=e232]:
+                  - generic [ref=e235]: PENDING
+                  - generic [ref=e238]: FREE
+              - generic [ref=e239]:
+                - generic [ref=e240]: "0"
+                - generic [ref=e241]: campaigns
+                - generic [ref=e242]: KES 0
+                - generic [ref=e243]: raised
+              - generic [ref=e244]: 
+            - button "Restart Check Church" [ref=e418] [cursor=pointer]:
+              - generic [ref=e248]:
+                - generic [ref=e249]: Restart Check Church
+                - generic [ref=e250]:
+                  - generic [ref=e253]: PENDING
+                  - generic [ref=e256]: FREE
+              - generic [ref=e257]:
+                - generic [ref=e258]: "0"
+                - generic [ref=e259]: campaigns
+                - generic [ref=e260]: KES 0
+                - generic [ref=e261]: raised
+              - generic [ref=e262]: 
+            - button "Test Pending Church" [ref=e420] [cursor=pointer]:
+              - generic [ref=e266]:
+                - generic [ref=e267]: Test Pending Church
+                - generic [ref=e268]:
+                  - generic [ref=e271]: PENDING
+                  - generic [ref=e274]: FREE
+                - generic [ref=e275]: Nakuru
+              - generic [ref=e276]:
+                - generic [ref=e277]: "0"
+                - generic [ref=e278]: campaigns
+                - generic [ref=e279]: KES 0
+                - generic [ref=e280]: raised
+              - generic [ref=e281]: 
+            - button "Test Active Church" [ref=e422] [cursor=pointer]:
+              - generic [ref=e285]:
+                - generic [ref=e286]: Test Active Church
+                - generic [ref=e287]:
+                  - generic [ref=e290]: ACTIVE
+                  - generic [ref=e293]: FREE
+                - generic [ref=e294]: Nairobi
+              - generic [ref=e295]:
+                - generic [ref=e296]: "1"
+                - generic [ref=e297]: campaigns
+                - generic [ref=e298]: KES 12,000
+                - generic [ref=e299]: raised
+              - generic [ref=e300]: 
+            - button "LIVE8006 Test Church a4f910" [ref=e424] [cursor=pointer]:
+              - generic [ref=e304]:
+                - generic [ref=e305]: LIVE8006 Test Church a4f910
+                - generic [ref=e306]:
+                  - generic [ref=e309]: ACTIVE
+                  - generic [ref=e312]: FREE
+                - generic [ref=e313]: Nairobi
+              - generic [ref=e314]:
+                - generic [ref=e315]: "1"
+                - generic [ref=e316]: campaigns
+                - generic [ref=e317]: KES 1,000
+                - generic [ref=e318]: raised
+              - generic [ref=e319]: 
+            - button "B2C Gate Church" [ref=e426] [cursor=pointer]:
+              - generic [ref=e323]:
+                - generic [ref=e324]: B2C Gate Church
+                - generic [ref=e325]:
+                  - generic [ref=e328]: ACTIVE
+                  - generic [ref=e331]: FREE
+                - generic [ref=e332]: Nairobi
+              - generic [ref=e333]:
+                - generic [ref=e334]: "1"
+                - generic [ref=e335]: campaigns
+                - generic [ref=e336]: KES 5,000
+                - generic [ref=e337]: raised
+              - generic [ref=e338]: 
+            - button "STK Test Church" [ref=e428] [cursor=pointer]:
+              - generic [ref=e342]:
+                - generic [ref=e343]: STK Test Church
+                - generic [ref=e344]:
+                  - generic [ref=e347]: ACTIVE
+                  - generic [ref=e350]: FREE
+                - generic [ref=e351]: Nairobi
+              - generic [ref=e352]:
+                - generic [ref=e353]: "1"
+                - generic [ref=e354]: campaigns
+                - generic [ref=e355]: KES 0
+                - generic [ref=e356]: raised
+              - generic [ref=e357]: 
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: Super Admin
+          - generic [ref=e15]:
+            - button [ref=e429] [cursor=pointer]:
+              - generic [ref=e17]: 
+            - button [ref=e430] [cursor=pointer]:
+              - generic [ref=e19]: 
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - generic [ref=e23]:
+              - generic [ref=e24]: 
+              - textbox [ref=e431]:
+                - /placeholder: Filter by church…
+            - generic [ref=e27]:
+              - button [ref=e432] [cursor=pointer]:
+                - generic [ref=e29]: All
+              - button [ref=e433] [cursor=pointer]:
+                - generic [ref=e31]: Pending
+              - button [ref=e434] [cursor=pointer]:
+                - generic [ref=e33]: Processing
+              - button [ref=e435] [cursor=pointer]:
+                - generic [ref=e35]: Paid
+              - button [ref=e436] [cursor=pointer]:
+                - generic [ref=e37]: Failed
+              - button [ref=e437] [cursor=pointer]:
+                - generic [ref=e39]: Failed Final
+              - button [ref=e438] [cursor=pointer]:
+                - generic [ref=e41]: Rejected
+              - button [ref=e439] [cursor=pointer]:
+                - generic [ref=e43]: Under Review
+          - generic [ref=e45]:
+            - generic [ref=e48]:
+              - generic [ref=e49]:
+                - generic [ref=e50]: Dash Youth Camp
+                - generic [ref=e51]: Reconciliation test payout
+                - generic [ref=e52]:
+                  - generic [ref=e53]: 0*** ***0222
+                  - generic [ref=e54]: ·
+                  - generic [ref=e55]: 3d ago
+              - generic [ref=e56]:
+                - generic [ref=e57]: KES 3,000
+                - generic [ref=e59]: Under Review
+            - generic [ref=e63]:
+              - generic [ref=e64]:
+                - generic [ref=e65]: LIVE8006 Test Campaign a4f910
+                - generic [ref=e66]: B2C 8006 retest payout
+                - generic [ref=e67]:
+                  - generic [ref=e68]: 0*** ***4149
+                  - generic [ref=e69]: ·
+                  - generic [ref=e70]: 10d ago
+              - generic [ref=e71]:
+                - generic [ref=e72]: KES 100
+                - generic [ref=e74]: Paid
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: B2C Gate Campaign
+                - generic [ref=e81]: B2C URL fix validation
+                - generic [ref=e82]:
+                  - generic [ref=e83]: 0*** ***4149
+                  - generic [ref=e84]: ·
+                  - generic [ref=e85]: 11d ago
+              - generic [ref=e86]:
+                - generic [ref=e87]: KES 100
+                - generic [ref=e89]: Paid
+            - generic [ref=e92]:
+              - generic [ref=e93]:
+                - generic [ref=e94]:
+                  - generic [ref=e95]: B2C Gate Campaign
+                  - generic [ref=e96]: B2C 404 raw-body capture
+                  - generic [ref=e97]:
+                    - generic [ref=e98]: 0*** ***4149
+                    - generic [ref=e99]: ·
+                    - generic [ref=e100]: 11d ago
+                - generic [ref=e101]:
+                  - generic [ref=e102]: KES 100
+                  - generic [ref=e104]: Failed
+              - generic [ref=e106]: Could not dispatch payout to M-Pesa. Retry from the Withdrawals panel.
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]: B2C Gate Campaign
+                - generic [ref=e113]: B2C gate test payout
+                - generic [ref=e114]:
+                  - generic [ref=e115]: 0*** ***4149
+                  - generic [ref=e116]: ·
+                  - generic [ref=e117]: 11d ago
+              - generic [ref=e118]:
+                - generic [ref=e119]: KES 100
+                - generic [ref=e121]: Paid
+    - tablist [ref=e123]:
+      - tab "  3 Queue" [ref=e125] [cursor=pointer]:
+        - generic [ref=e126]:
+          - generic [ref=e128]: 
+          - generic [ref=e130]: 
+          - generic [ref=e131]: "3"
+        - generic [ref=e132]: Queue
+      - tab "  Churches" [selected] [ref=e134] [cursor=pointer]:
+        - generic [ref=e135]:
+          - generic [ref=e137]: 
+          - generic [ref=e139]: 
+        - generic [ref=e140]: Churches
+      - tab "  Withdrawals" [ref=e142] [cursor=pointer]:
+        - generic [ref=e143]:
+          - generic [ref=e145]: 
+          - generic [ref=e147]: 
+        - generic [ref=e148]: Withdrawals
+      - tab "  Analytics" [ref=e150] [cursor=pointer]:
+        - generic [ref=e151]:
+          - generic [ref=e153]: 
+          - generic [ref=e155]: 
+        - generic [ref=e156]: Analytics
+      - tab "  Billing" [ref=e158] [cursor=pointer]:
+        - generic [ref=e159]:
+          - generic [ref=e161]: 
+          - generic [ref=e163]: 
+        - generic [ref=e164]: Billing
+      - tab "  More" [ref=e166] [cursor=pointer]:
+        - generic [ref=e167]:
+          - generic [ref=e169]: 
+          - generic [ref=e171]: 
+        - generic [ref=e172]: More
+  - dialog [ref=e448]:
+    - generic [ref=e454]:
+      - generic [ref=e455]:
+        - generic [ref=e456]: Trace Grace Chapel
+        - generic [ref=e457]:
+          - generic [ref=e460]: ACTIVE
+          - generic [ref=e463]: FREE
+      - generic [ref=e464]:
+        - generic [ref=e465]:
+          - generic [ref=e466]: Email
+          - generic [ref=e467]: trace-active@pamojatest.local
+        - generic [ref=e468]:
+          - generic [ref=e469]: Phone
+          - generic [ref=e470]: "254712000111"
+        - generic [ref=e471]:
+          - generic [ref=e472]: County
+          - generic [ref=e473]: Nairobi
+        - generic [ref=e474]:
+          - generic [ref=e475]: Denomination
+          - generic [ref=e476]: PCEA
+        - generic [ref=e477]:
+          - generic [ref=e478]: Address
+          - generic [ref=e479]: Trace Rd, Nairobi
+        - generic [ref=e480]:
+          - generic [ref=e481]: Registered
+          - generic [ref=e482]: 11 Jun 2026
+        - generic [ref=e483]:
+          - generic [ref=e484]: Description
+          - generic [ref=e485]: —
+      - generic [ref=e486]:
+        - button "Suspend church" [ref=e487] [cursor=pointer]:
+          - generic [ref=e488]: 
+          - generic [ref=e489]: Suspend Church
+        - button "View audit log" [ref=e490] [cursor=pointer]:
+          - generic [ref=e491]: 
+          - generic [ref=e492]: View Audit Log

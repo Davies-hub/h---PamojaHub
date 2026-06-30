@@ -1,0 +1,17 @@
+Starting project at J:\Pamoja_Hub\frontend
+Starting Metro Bundler
+
+Error: listen EADDRINUSE: address already in use :::8081
+Error: listen EADDRINUSE: address already in use :::8081
+    at Server.setupListenHandle [as _listen2] (node:net:2016:16)
+    at listenInCluster (node:net:2073:12)
+    at Server.listen (node:net:2178:7)
+    at J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\metro\runServer-fork.js:144:20
+    at new Promise (<anonymous>)
+    at runServer (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\metro\runServer-fork.js:140:12)
+    at async replaceMetroFileMap (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\metro\createFileMap-fork.js:191:20)
+    at async instantiateMetroAsync (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\metro\instantiateMetro.js:381:51)
+    at async MetroBundlerDevServer.startImplementationAsync (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\metro\MetroBundlerDevServer.js:928:82)
+    at async MetroBundlerDevServer.startAsync (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\BundlerDevServer.js:124:24)
+    at async DevServerManager.startAsync (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\server\DevServerManager.js:213:13)
+    at async startAsync (J:\Pamoja_Hub\frontend\node_modules\expo\node_modules\@expo\cli\build\src\start\startAsync.js:162:5)

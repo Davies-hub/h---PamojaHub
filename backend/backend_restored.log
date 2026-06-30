@@ -1,0 +1,14 @@
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 16, 2026 - 22:16:36
+Django version 5.2.14, using settings 'config.settings.development'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CTRL-BREAK.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/5.2/howto/deployment/
+Unauthorized: /api/v1/super/withdrawals/
+[16/Jun/2026 22:17:04] "GET /api/v1/super/withdrawals/ HTTP/1.1" 401 58
+Unauthorized: /api/v1/super/withdrawals/
+[16/Jun/2026 22:17:54] "GET /api/v1/super/withdrawals/ HTTP/1.1" 401 58

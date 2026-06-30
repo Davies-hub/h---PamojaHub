@@ -1,0 +1,35 @@
+[06/Jun/2026 02:37:18] "GET /api/v1/churches/ HTTP/1.1" 200 582
+[06/Jun/2026 02:37:19,740] - Broken pipe from ('127.0.0.1', 56687)
+Method Not Allowed: /api/v1/withdrawals/b2c-result/
+[06/Jun/2026 02:37:26] "GET /api/v1/withdrawals/b2c-result/ HTTP/1.1" 405 40
+[06/Jun/2026 02:38:05] "POST /api/v1/withdrawals/bb40b8b9-82d2-4219-b041-4c29144aaa1a/retry/ HTTP/1.1" 200 441
+[06/Jun/2026 02:38:05,357] - Broken pipe from ('127.0.0.1', 56761)
+[06/Jun/2026 02:38:06] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+Method Not Allowed: /api/v1/withdrawals/b2c-result/
+[07/Jun/2026 00:21:46] "GET /api/v1/withdrawals/b2c-result/ HTTP/1.1" 405 40
+[07/Jun/2026 00:25:39] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260607_0100100300tp67kvox7g orig=3bbc-4bca-9342-a9e5d35e42916374
+[07/Jun/2026 00:26:59] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+Method Not Allowed: /api/v1/withdrawals/b2c-result/
+[07/Jun/2026 00:56:09] "GET /api/v1/withdrawals/b2c-result/ HTTP/1.1" 405 40
+[07/Jun/2026 00:57:39] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260607_0100100301y58fhuxj2s orig=3bbc-4bca-9342-a9e5d35e42916893
+[07/Jun/2026 00:58:25] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260607_0100200901zimz1edmk4 orig=a71a-483d-be2d-b5dd69df628b9248
+[07/Jun/2026 00:59:29] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260607_010010030223n6vi2lxy orig=a71a-483d-be2d-b5dd69df628b9318
+[07/Jun/2026 01:01:30] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+B2C result for unknown ids conv=AG_20260607_010010030224vcf0z3j2 orig=a71a-483d-be2d-b5dd69df628b9320
+[07/Jun/2026 01:01:31] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+Method Not Allowed: /api/v1/donations/callback/
+[07/Jun/2026 13:03:51] "GET /api/v1/donations/callback/ HTTP/1.1" 405 40
+STK callback for unknown CheckoutRequestID ws_CO_07062026130515229708374149
+[07/Jun/2026 13:05:41] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40
+STK callback for unknown CheckoutRequestID ws_CO_08062026021004737708374149
+[08/Jun/2026 02:10:31] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40
+Method Not Allowed: /api/v1/donations/callback/
+[08/Jun/2026 22:06:07] "GET /api/v1/donations/callback/ HTTP/1.1" 405 40
+Method Not Allowed: /api/v1/donations/callback/
+[08/Jun/2026 22:06:09] "GET /api/v1/donations/callback/ HTTP/1.1" 405 40
+[08/Jun/2026 22:06:52] "POST /api/v1/donations/initiate/ HTTP/1.1" 200 130
+[08/Jun/2026 22:07:18] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40

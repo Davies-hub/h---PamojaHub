@@ -1,0 +1,187 @@
+[25/Jun/2026 14:19:39] "GET /api/v1/campaigns/ HTTP/1.1" 200 889
+[email-failed][registration-received] recipient=e*********@audit.test church=E2E Journey Church — church already registered (PENDING); acknowledgement NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:21:00] "POST /api/v1/auth/register/ HTTP/1.1" 201 252
+[email-failed][registration-approved] recipient=e*********@audit.test church=E2E Journey Church — church already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:21:02] "POST /api/v1/super/churches/5ad28aa6-bca9-4cbe-beef-3e23167292cc/approve/ HTTP/1.1" 200 433
+[25/Jun/2026 14:21:02] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40
+[25/Jun/2026 14:21:02] "POST /api/v1/donations/callback/ HTTP/1.1" 200 49
+Not Found: /api/v1/treasurer/request-disbursement/
+[25/Jun/2026 14:21:02] "POST /api/v1/treasurer/request-disbursement/ HTTP/1.1" 404 5569
+[email-failed][registration-received] recipient=e*********@audit.test church=E2E Journey Church — church already registered (PENDING); acknowledgement NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:22:33] "POST /api/v1/auth/register/ HTTP/1.1" 201 252
+[email-failed][registration-approved] recipient=e*********@audit.test church=E2E Journey Church — church already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:22:35] "POST /api/v1/super/churches/7e674d62-2e2e-4232-a210-be518d3ec1b2/approve/ HTTP/1.1" 200 433
+[25/Jun/2026 14:22:35] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40
+[25/Jun/2026 14:22:35] "POST /api/v1/donations/callback/ HTTP/1.1" 200 49
+Bad Request: /api/v1/treasurer/campaigns/4cd75823-5252-401d-86cd-09b0e8b356ff/request-disbursement/
+[25/Jun/2026 14:22:35] "POST /api/v1/treasurer/campaigns/4cd75823-5252-401d-86cd-09b0e8b356ff/request-disbursement/ HTTP/1.1" 400 67
+[email-failed][registration-received] recipient=e*********@audit.test church=E2E Journey Church — church already registered (PENDING); acknowledgement NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:23:48] "POST /api/v1/auth/register/ HTTP/1.1" 201 252
+[email-failed][registration-approved] recipient=e*********@audit.test church=E2E Journey Church — church already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for e*********@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:23:50] "POST /api/v1/super/churches/251ddab4-d0fe-4834-92bc-18c71a393c1a/approve/ HTTP/1.1" 200 433
+[25/Jun/2026 14:23:50] "POST /api/v1/donations/callback/ HTTP/1.1" 200 40
+[25/Jun/2026 14:23:50] "POST /api/v1/donations/callback/ HTTP/1.1" 200 49
+Bad Request: /api/v1/treasurer/campaigns/4cd75823-5252-401d-86cd-09b0e8b356ff/request-disbursement/
+[25/Jun/2026 14:23:50] "POST /api/v1/treasurer/campaigns/4cd75823-5252-401d-86cd-09b0e8b356ff/request-disbursement/ HTTP/1.1" 400 67
+J:\Pamoja_Hub\backend\venv\lib\site-packages\africastalking\Whatsapp.py:34: UserWarning: Sandbox is currently not available for the Whatsapp service.
+  warnings.warn(
+[email-failed][payout-approved] recipient=a****@audit.test campaign=Alpha Building Fund — payout already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 57, in _send_email
+    resp = resend.Emails.send({
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\emails\_emails.py", line 286, in send
+    ).perform_with_content()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 49, in perform_with_content
+    resp = self.perform()
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\request.py", line 37, in perform
+    raise_for_code_and_type(
+  File "J:\Pamoja_Hub\backend\venv\lib\site-packages\resend\exceptions.py", line 270, in raise_for_code_and_type
+    raise ResendError(
+resend.exceptions.ResendError: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 214, in send_payout_approved_email
+    _send_email(
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 64, in _send_email
+    raise EmailDeliveryError(
+integrations.resend_email.EmailDeliveryError: Resend send failed for a****@audit.test: The pamojahub.com domain is not verified. Please, add and verify your domain on https://resend.com/domains
+[25/Jun/2026 14:23:54] "POST /api/v1/withdrawals/5470f93b-e296-4064-9a60-366361b00beb/approve/ HTTP/1.1" 200 489
+[25/Jun/2026 14:23:55] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 40
+[25/Jun/2026 14:23:55] "POST /api/v1/withdrawals/b2c-result/ HTTP/1.1" 200 48
+[25/Jun/2026 14:23:55] "POST /api/v1/treasurer/campaigns/4cd75823-5252-401d-86cd-09b0e8b356ff/request-disbursement/ HTTP/1.1" 201 493
+[25/Jun/2026 14:23:55] "POST /api/v1/super/withdrawals/2c55e25b-31b6-46f8-b45e-f2c96c8de321/resolve-paid/ HTTP/1.1" 200 472
+Bad Request: /api/v1/super/withdrawals/2c55e25b-31b6-46f8-b45e-f2c96c8de321/resolve-paid/
+[25/Jun/2026 14:23:55] "POST /api/v1/super/withdrawals/2c55e25b-31b6-46f8-b45e-f2c96c8de321/resolve-paid/ HTTP/1.1" 400 56
+[25/Jun/2026 14:23:55] "POST /api/v1/super/churches/5742fad7-5e54-496e-85a2-cd5d47a919b4/suspend/ HTTP/1.1" 200 455
+[25/Jun/2026 14:23:55] "POST /api/v1/super/churches/5742fad7-5e54-496e-85a2-cd5d47a919b4/reactivate/ HTTP/1.1" 200 452
+[25/Jun/2026 14:23:55] "PATCH /api/v1/super/billing/ HTTP/1.1" 200 114
+[25/Jun/2026 14:23:55] "PATCH /api/v1/super/billing/ HTTP/1.1" 200 114
+[25/Jun/2026 14:23:55] "POST /api/v1/super/churches/5742fad7-5e54-496e-85a2-cd5d47a919b4/set-tier/ HTTP/1.1" 200 454

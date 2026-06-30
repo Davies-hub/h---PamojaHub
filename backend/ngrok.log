@@ -1,0 +1,1143 @@
+t=2026-06-02T17:51:10+0300 lvl=info msg="no configuration paths supplied"
+t=2026-06-02T17:51:10+0300 lvl=info msg="using configuration at default config path" path=C:\\Users\\Administrator\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-02T17:51:10+0300 lvl=info msg="open config file" path=C:\\Users\\Administrator\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-02T17:51:10+0300 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-02T17:51:10+0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-02T17:51:12+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T17:51:12+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T17:51:12+0300 lvl=info msg="update available" obj=updater
+t=2026-06-02T17:51:12+0300 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:8000 url=https://almighty-upbeat-reverse.ngrok-free.dev
+t=2026-06-02T17:51:50+0300 lvl=info msg=start pg=/api/tunnels id=b54f19f6c36444d2
+t=2026-06-02T17:51:50+0300 lvl=info msg=end pg=/api/tunnels id=b54f19f6c36444d2 status=200 dur=552.1µs
+t=2026-06-02T18:37:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9d224c6076ad clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T18:37:05+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-02T18:37:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T18:37:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T20:05:32+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:59007->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-02T20:05:32+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e6d475f53d67 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T20:05:36+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T20:05:36+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T20:31:31+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=31bc9cc69849 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T20:31:31+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-02T20:31:34+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T20:31:34+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T22:04:21+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:60578->3.108.187.139:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-02T22:04:21+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=0464e0f7f31b clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T22:04:25+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T22:04:25+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T22:33:07+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:56259->13.233.205.122:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-02T22:33:07+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c37af5a3c1b3 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T22:33:12+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T22:33:12+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T22:50:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=499b53504dec clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T22:50:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-02T22:50:18+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T22:50:18+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T23:22:39+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=4c17ba25a8a3 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-02T23:22:39+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:56850->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-02T23:22:42+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-02T23:22:42+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-02T23:51:14+0300 lvl=info msg="update available" obj=updater
+t=2026-06-03T00:31:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=cd2c155d3477 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T00:31:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-03T00:31:16+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T00:31:16+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T01:06:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:55151->3.108.166.207:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-03T01:06:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a56e260c45d9 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T01:06:27+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T01:06:27+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T01:15:31+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d3ccad0665cc clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T01:15:31+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-03T01:15:33+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T01:15:33+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T01:39:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:56455->13.233.205.122:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-03T01:39:55+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T01:39:55+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T01:39:58+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ed16536b81d5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T02:11:15+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=f1575e2ca3a9 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T02:11:15+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-03T02:11:17+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T02:11:17+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T16:31:16+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=de737f61959c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T16:31:17+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:59196->3.123.177.80:443: wsarecv: An established connection was aborted by the software in your host machine."
+t=2026-06-03T16:31:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-03T16:31:18+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-03T16:31:18+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-03T16:31:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-03T16:31:21+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-03T16:31:28+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T16:31:28+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T16:53:12+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:64384->13.233.205.122:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-03T16:53:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=12f7953c161e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T16:53:15+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T16:53:15+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T17:16:29+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:50342->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-03T17:16:29+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b5ffdeff733e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T18:01:38+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-03T18:01:41+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T18:01:41+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T18:52:11+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:51412->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-03T18:52:11+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c6f97b9fed02 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-03T18:52:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-03T18:52:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-03T19:59:37+0300 lvl=info msg="join connections" obj=join id=e00fcc52396f l=127.0.0.1:8000 r=196.201.212.74:41218
+t=2026-06-03T19:59:59+0300 lvl=info msg=start pg=/api/requests/http id=43abd933a527c7fc
+t=2026-06-03T19:59:59+0300 lvl=info msg=end pg=/api/requests/http id=43abd933a527c7fc status=200 dur=618.4µs
+t=2026-06-03T20:00:20+0300 lvl=info msg=start pg=/api/requests/http id=64a6a856af392f62
+t=2026-06-03T20:00:20+0300 lvl=info msg=end pg=/api/requests/http id=64a6a856af392f62 status=200 dur=0s
+t=2026-06-03T20:00:21+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=324019aeb0c3d292
+t=2026-06-03T20:00:21+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=324019aeb0c3d292 id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:00:21+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=324019aeb0c3d292 status=200 dur=0s
+t=2026-06-03T20:01:45+0300 lvl=info msg=start pg=/api/requests/http id=73d51a6fa84b517f
+t=2026-06-03T20:01:45+0300 lvl=info msg=end pg=/api/requests/http id=73d51a6fa84b517f status=200 dur=558.1µs
+t=2026-06-03T20:01:45+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=d13e1a2c217bdd59
+t=2026-06-03T20:01:45+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=d13e1a2c217bdd59 id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:01:45+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=d13e1a2c217bdd59 status=200 dur=0s
+t=2026-06-03T20:07:39+0300 lvl=info msg="join connections" obj=join id=6ad771c46cc7 l=127.0.0.1:8000 r=105.160.9.58:1558
+t=2026-06-03T20:08:11+0300 lvl=info msg=start pg=/api/requests/http id=1ed77001117186bd
+t=2026-06-03T20:08:11+0300 lvl=info msg=end pg=/api/requests/http id=1ed77001117186bd status=200 dur=540.4µs
+t=2026-06-03T20:08:11+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=123e0596810cd060
+t=2026-06-03T20:08:11+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=123e0596810cd060 id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:08:11+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=123e0596810cd060 status=200 dur=0s
+t=2026-06-03T20:08:16+0300 lvl=info msg=start pg=/api/requests/http id=6bd0bc203c405516
+t=2026-06-03T20:08:16+0300 lvl=info msg=end pg=/api/requests/http id=6bd0bc203c405516 status=200 dur=514.7µs
+t=2026-06-03T20:08:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=442493457524d01c
+t=2026-06-03T20:08:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=442493457524d01c id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:08:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=442493457524d01c status=200 dur=0s
+t=2026-06-03T20:08:19+0300 lvl=info msg="join connections" obj=join id=48b789ceea05 l=127.0.0.1:8000 r=196.201.212.74:39195
+t=2026-06-03T20:08:21+0300 lvl=info msg=start pg=/api/requests/http id=1c3c2aa40eda76f5
+t=2026-06-03T20:08:21+0300 lvl=info msg=end pg=/api/requests/http id=1c3c2aa40eda76f5 status=200 dur=513.7µs
+t=2026-06-03T20:08:21+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c5ad1743d9b13fdc
+t=2026-06-03T20:08:21+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c5ad1743d9b13fdc id=airt_3EdRXZoF64lAn460BkNNLxJR6dH
+t=2026-06-03T20:08:21+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c5ad1743d9b13fdc status=200 dur=0s
+t=2026-06-03T20:08:21+0300 lvl=info msg=start pg=/api/requests/http id=3099d0bfb788b606
+t=2026-06-03T20:08:21+0300 lvl=info msg=end pg=/api/requests/http id=3099d0bfb788b606 status=200 dur=0s
+t=2026-06-03T20:08:21+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=4cc9aa76c95ec39e
+t=2026-06-03T20:08:21+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=4cc9aa76c95ec39e id=airt_3EdRXZoF64lAn460BkNNLxJR6dH
+t=2026-06-03T20:08:21+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=4cc9aa76c95ec39e status=200 dur=0s
+t=2026-06-03T20:09:01+0300 lvl=info msg=start pg=/api/requests/http id=257ede0c66f05fd8
+t=2026-06-03T20:09:01+0300 lvl=info msg=end pg=/api/requests/http id=257ede0c66f05fd8 status=200 dur=538.1µs
+t=2026-06-03T20:09:01+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=b82daf581324f157
+t=2026-06-03T20:09:01+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=b82daf581324f157 id=airt_3EdRXZoF64lAn460BkNNLxJR6dH
+t=2026-06-03T20:09:01+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=b82daf581324f157 status=200 dur=0s
+t=2026-06-03T20:09:01+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=e131e1151a8766d4
+t=2026-06-03T20:09:01+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=e131e1151a8766d4 id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:09:01+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=e131e1151a8766d4 status=200 dur=0s
+t=2026-06-03T20:09:02+0300 lvl=info msg="join connections" obj=join id=8b7a679fa6d5 l=127.0.0.1:8000 r=196.201.212.74:62158
+t=2026-06-03T20:09:07+0300 lvl=info msg=start pg=/api/requests/http id=f087e9c461e60967
+t=2026-06-03T20:09:07+0300 lvl=info msg=end pg=/api/requests/http id=f087e9c461e60967 status=200 dur=694.6µs
+t=2026-06-03T20:09:07+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=2d1316729e5fab01
+t=2026-06-03T20:09:07+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=2d1316729e5fab01 id=airt_3EdRcxgwfoP0Ra4LA4HXd96syFD
+t=2026-06-03T20:09:07+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=2d1316729e5fab01 status=200 dur=0s
+t=2026-06-03T20:09:08+0300 lvl=info msg=start pg=/api/requests/http id=b5b88fd231154d62
+t=2026-06-03T20:09:08+0300 lvl=info msg=end pg=/api/requests/http id=b5b88fd231154d62 status=200 dur=0s
+t=2026-06-03T20:09:08+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=ffdcac3c92c7dc33
+t=2026-06-03T20:09:08+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=ffdcac3c92c7dc33 id=airt_3EdRcxgwfoP0Ra4LA4HXd96syFD
+t=2026-06-03T20:09:08+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=ffdcac3c92c7dc33 status=200 dur=0s
+t=2026-06-03T20:09:09+0300 lvl=info msg=start pg=/api/requests/http id=946a0bfccc6afa22
+t=2026-06-03T20:09:09+0300 lvl=info msg=end pg=/api/requests/http id=946a0bfccc6afa22 status=200 dur=0s
+t=2026-06-03T20:09:09+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=25ef66cfdd6e7102
+t=2026-06-03T20:09:09+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=25ef66cfdd6e7102 id=airt_3EdRcxgwfoP0Ra4LA4HXd96syFD
+t=2026-06-03T20:09:09+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=25ef66cfdd6e7102 status=200 dur=0s
+t=2026-06-03T20:09:32+0300 lvl=info msg="join connections" obj=join id=719200fef224 l=127.0.0.1:8000 r=196.201.212.74:50973
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http id=fed06d8159b368c3
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http id=fed06d8159b368c3 status=200 dur=573µs
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=c1138b980d2b77ad
+t=2026-06-03T20:10:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=c1138b980d2b77ad id=airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=c1138b980d2b77ad status=200 dur=0s
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http id=1a62f9c7f99bddf6
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http id=1a62f9c7f99bddf6 status=200 dur=517.4µs
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=ddfece03bcdb1f35
+t=2026-06-03T20:10:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=ddfece03bcdb1f35 id=airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRgkTv7aDw7HLJF4p0TqGrRdt id=ddfece03bcdb1f35 status=200 dur=0s
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=0354317b0d38f26d
+t=2026-06-03T20:10:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=0354317b0d38f26d id=airt_3EdRcxgwfoP0Ra4LA4HXd96syFD
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRcxgwfoP0Ra4LA4HXd96syFD id=0354317b0d38f26d status=200 dur=0s
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c742aae21418ff8e
+t=2026-06-03T20:10:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c742aae21418ff8e id=airt_3EdRXZoF64lAn460BkNNLxJR6dH
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdRXZoF64lAn460BkNNLxJR6dH id=c742aae21418ff8e status=200 dur=0s
+t=2026-06-03T20:10:16+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=6c1d1d85ec5d2757
+t=2026-06-03T20:10:16+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=6c1d1d85ec5d2757 id=airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9
+t=2026-06-03T20:10:16+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdQTxJA5Pkm9iTI2oauqVEhQG9 id=6c1d1d85ec5d2757 status=200 dur=0s
+t=2026-06-03T20:18:04+0300 lvl=info msg=start pg=/api/tunnels id=f3ab2ddaa60ddd30
+t=2026-06-03T20:18:04+0300 lvl=info msg=end pg=/api/tunnels id=f3ab2ddaa60ddd30 status=200 dur=0s
+t=2026-06-03T20:18:53+0300 lvl=info msg="join connections" obj=join id=e3ffdb6b6ea5 l=127.0.0.1:8000 r=105.160.9.58:1229
+t=2026-06-04T00:27:11+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:51805->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-04T00:27:11+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=8b0a49bb6b57 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T00:27:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T00:27:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T00:27:14+0300 lvl=info msg="update available" obj=updater
+t=2026-06-04T00:49:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2c5cc2f65691 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T00:49:42+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T00:49:45+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T00:49:45+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T00:55:51+0300 lvl=info msg=start pg=/api/requests/http id=747a75e195b7a3be
+t=2026-06-04T00:55:51+0300 lvl=info msg=end pg=/api/requests/http id=747a75e195b7a3be status=200 dur=1.267ms
+t=2026-06-04T00:56:05+0300 lvl=info msg=start pg=/api/requests/http id=60e376009a8fc4c5
+t=2026-06-04T00:56:05+0300 lvl=info msg=end pg=/api/requests/http id=60e376009a8fc4c5 status=200 dur=575.5µs
+t=2026-06-04T00:56:05+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f556ba42835690d2
+t=2026-06-04T00:56:05+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f556ba42835690d2 id=airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK
+t=2026-06-04T00:56:05+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f556ba42835690d2 status=200 dur=0s
+t=2026-06-04T01:05:59+0300 lvl=info msg="join connections" obj=join id=7684246d61b6 l=127.0.0.1:8000 r=196.201.212.74:46872
+t=2026-06-04T01:06:49+0300 lvl=info msg=start pg=/api/requests/http id=cfd890b6598e3660
+t=2026-06-04T01:06:49+0300 lvl=info msg=end pg=/api/requests/http id=cfd890b6598e3660 status=200 dur=616.6µs
+t=2026-06-04T01:06:49+0300 lvl=info msg=start pg=/api/requests/http/airt_3Ee1juQ75Ss0h5OB2BgSz2hSiBD id=77e781f529495f33
+t=2026-06-04T01:06:49+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3Ee1juQ75Ss0h5OB2BgSz2hSiBD id=77e781f529495f33 id=airt_3Ee1juQ75Ss0h5OB2BgSz2hSiBD
+t=2026-06-04T01:06:49+0300 lvl=info msg=end pg=/api/requests/http/airt_3Ee1juQ75Ss0h5OB2BgSz2hSiBD id=77e781f529495f33 status=200 dur=0s
+t=2026-06-04T01:06:49+0300 lvl=info msg=start pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f84604c98fdbb1a1
+t=2026-06-04T01:06:49+0300 lvl=info msg="get request" pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f84604c98fdbb1a1 id=airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK
+t=2026-06-04T01:06:49+0300 lvl=info msg=end pg=/api/requests/http/airt_3EdSpEtVd7G1Ukv0nVjyplRtTqK id=f84604c98fdbb1a1 status=200 dur=0s
+t=2026-06-04T01:08:12+0300 lvl=info msg="join connections" obj=join id=98c49cbccb23 l=127.0.0.1:8000 r=196.201.212.74:45965
+t=2026-06-04T01:08:13+0300 lvl=info msg="join connections" obj=join id=036a3c468f4a l=127.0.0.1:8000 r=196.201.212.74:45916
+t=2026-06-04T02:44:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.203:50284->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-04T02:44:55+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T02:44:55+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T02:45:18+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=46f9b06bf5b1 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T14:36:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2316dbe843f4 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T14:36:42+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.203:54733->3.108.208.206:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-04T14:36:43+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T14:36:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T14:36:47+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-04T14:36:55+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T14:37:00+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T14:37:00+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T14:42:37+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=bbbdeb19c888 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T14:42:37+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-04T14:42:40+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T14:42:40+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T15:03:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=0b30b7301b30 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T15:03:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T15:03:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T15:03:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T15:03:36+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T15:03:41+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T15:03:41+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T15:04:04+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=95b964af8b1a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T15:04:04+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T15:04:18+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-04T15:04:20+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T15:04:20+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T15:31:03+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=5e91a528d6d7 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T15:31:03+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T15:31:06+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T15:31:06+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T16:05:36+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=940aad293732 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T16:05:36+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T16:05:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T16:05:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T18:41:45+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:54252->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-04T18:41:45+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1be3da3a4b65 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T18:41:48+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T18:41:48+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T19:05:04+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=62a31177b7f4 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T19:05:04+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T19:05:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T19:05:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T21:25:25+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:51020->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-04T21:25:25+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=717cba7c339b clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T21:25:31+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-04T21:25:32+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T21:25:32+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T21:37:36+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1e114fbab1f5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T21:37:36+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T21:37:46+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T21:37:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T21:37:58+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T21:38:10+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T21:38:24+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T21:38:24+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T22:02:36+0300 lvl=info msg=start pg=/api/tunnels id=6f1e0304248d5624
+t=2026-06-04T22:02:36+0300 lvl=info msg=end pg=/api/tunnels id=6f1e0304248d5624 status=200 dur=0s
+t=2026-06-04T22:06:16+0300 lvl=info msg="join connections" obj=join id=1cf3508000ac l=127.0.0.1:8000 r=196.96.81.238:1041
+t=2026-06-04T22:12:07+0300 lvl=info msg=start pg=/api/requests/http id=a7180b7b45e3b0d5
+t=2026-06-04T22:12:07+0300 lvl=info msg=end pg=/api/requests/http id=a7180b7b45e3b0d5 status=200 dur=8.0405ms
+t=2026-06-04T22:12:50+0300 lvl=info msg="join connections" obj=join id=601ffed32926 l=127.0.0.1:8000 r=196.201.212.69:34776
+t=2026-06-04T22:14:23+0300 lvl=info msg=start pg=/api/requests/http id=9bb007a2680ef7cc
+t=2026-06-04T22:14:23+0300 lvl=info msg=end pg=/api/requests/http id=9bb007a2680ef7cc status=200 dur=631.8µs
+t=2026-06-04T22:16:39+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ca7fd0d2dafd clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T22:16:39+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T22:16:57+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-04T22:17:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=352e368b86ed
+t=2026-06-04T22:17:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-04T22:17:35+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp 3.108.187.139:443: i/o timeout"
+t=2026-06-04T22:17:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T22:17:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-04T22:17:59+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-04T22:18:20+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T22:18:20+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T22:35:07+0300 lvl=info msg="join connections" obj=join id=2cace72133d9 l=127.0.0.1:8000 r=196.96.81.238:1061
+t=2026-06-04T22:35:50+0300 lvl=info msg=start pg=/api/requests/http id=1e891ad5992d01d3
+t=2026-06-04T22:35:50+0300 lvl=info msg=end pg=/api/requests/http id=1e891ad5992d01d3 status=200 dur=781.2µs
+t=2026-06-04T22:35:53+0300 lvl=info msg="join connections" obj=join id=99922e790d8e l=127.0.0.1:8000 r=196.201.212.69:63040
+t=2026-06-04T22:36:13+0300 lvl=info msg=start pg=/api/requests/http id=54afeb1ce5749283
+t=2026-06-04T22:36:13+0300 lvl=info msg=end pg=/api/requests/http id=54afeb1ce5749283 status=200 dur=0s
+t=2026-06-04T22:55:11+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=7824754a31f7 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T22:55:11+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-04T22:55:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T22:55:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-04T23:23:34+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:52387->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-04T23:23:34+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=30e7ba55cf2f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-04T23:23:38+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-04T23:23:38+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-05T00:31:11+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:53113->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-05T00:31:11+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9ea0d290aeac clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-05T00:31:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-05T00:31:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-05T00:44:13+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=949001994748 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-05T00:44:13+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-05T00:44:16+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-05T00:44:16+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T02:07:39+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6f999bbc9967 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T02:07:39+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-06T02:07:39+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T02:07:40+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T02:07:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T02:07:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T02:07:44+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-06T02:07:48+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T02:08:06+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-06T02:08:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-06T02:09:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-06T02:09:44+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T02:09:44+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T02:17:08+0300 lvl=info msg=start pg=/api/tunnels id=24a573e544ae7ab3
+t=2026-06-06T02:17:08+0300 lvl=info msg=end pg=/api/tunnels id=24a573e544ae7ab3 status=200 dur=0s
+t=2026-06-06T02:17:57+0300 lvl=info msg="join connections" obj=join id=1a8430339abb l=127.0.0.1:8000 r=105.160.25.166:1239
+t=2026-06-06T02:18:30+0300 lvl=info msg="join connections" obj=join id=90a89c3ed252 l=127.0.0.1:8000 r=196.201.213.44:33342
+t=2026-06-06T02:18:46+0300 lvl=info msg=start pg=/api/requests/http id=45d86c0dfaf4ff41
+t=2026-06-06T02:18:46+0300 lvl=info msg=end pg=/api/requests/http id=45d86c0dfaf4ff41 status=200 dur=0s
+t=2026-06-06T02:37:24+0300 lvl=info msg=start pg=/api/tunnels id=d949a91c4ecfa069
+t=2026-06-06T02:37:24+0300 lvl=info msg=end pg=/api/tunnels id=d949a91c4ecfa069 status=200 dur=623µs
+t=2026-06-06T02:37:26+0300 lvl=info msg="join connections" obj=join id=25a225d622c6 l=127.0.0.1:8000 r=105.160.25.166:1273
+t=2026-06-06T02:38:06+0300 lvl=info msg="join connections" obj=join id=905a114ba13e l=127.0.0.1:8000 r=196.201.212.69:61799
+t=2026-06-06T02:38:20+0300 lvl=info msg=start pg=/api/requests/http id=321cae7052c0f2b6
+t=2026-06-06T02:38:20+0300 lvl=info msg=end pg=/api/requests/http id=321cae7052c0f2b6 status=200 dur=1.3059ms
+t=2026-06-06T15:00:17+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=0a35a7865c1c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T15:00:17+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-06T15:00:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T15:00:18+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T15:00:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T15:00:22+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-06T15:00:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-06T15:00:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T15:00:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T15:45:53+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9256a670a768 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T15:45:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-06T15:45:55+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T15:45:55+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T16:30:20+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:58012->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-06T16:30:21+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b9d6d811616a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T16:30:23+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T16:30:23+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T16:49:05+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:59747->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-06T16:49:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=25b769a9b130 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T16:49:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T16:49:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T17:14:03+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2b27484a078a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T17:14:03+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-06T17:14:06+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T17:14:06+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-06T23:53:01+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2fd659ae111d clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-06T23:53:01+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-06T23:53:01+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T23:53:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T23:53:02+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-06T23:53:03+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-06T23:53:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-06T23:53:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T00:19:32+0300 lvl=info msg=start pg=/api/tunnels id=d669aa6ff193b176
+t=2026-06-07T00:19:32+0300 lvl=info msg=end pg=/api/tunnels id=d669aa6ff193b176 status=200 dur=0s
+t=2026-06-07T00:21:46+0300 lvl=info msg="join connections" obj=join id=2f3425aa88a2 l=127.0.0.1:8000 r=105.161.213.243:1949
+t=2026-06-07T00:24:02+0300 lvl=info msg=start pg=/api/requests/http id=2937b55444c51e4a
+t=2026-06-07T00:24:02+0300 lvl=info msg=end pg=/api/requests/http id=2937b55444c51e4a status=200 dur=545.1µs
+t=2026-06-07T00:24:15+0300 lvl=info msg=start pg=/api/requests/http id=8c83310bf352c106
+t=2026-06-07T00:24:15+0300 lvl=info msg=end pg=/api/requests/http id=8c83310bf352c106 status=200 dur=1.2733ms
+t=2026-06-07T00:25:05+0300 lvl=info msg=start pg=/api/requests/http id=7ac1c8ebc6d06e58
+t=2026-06-07T00:25:05+0300 lvl=info msg=end pg=/api/requests/http id=7ac1c8ebc6d06e58 status=200 dur=535.3µs
+t=2026-06-07T00:25:36+0300 lvl=info msg=start pg=/api/requests/http id=5da77afc22be4f99
+t=2026-06-07T00:25:36+0300 lvl=info msg=end pg=/api/requests/http id=5da77afc22be4f99 status=200 dur=607.5µs
+t=2026-06-07T00:25:39+0300 lvl=info msg="join connections" obj=join id=c581beb6f90b l=127.0.0.1:8000 r=196.201.212.127:34958
+t=2026-06-07T00:26:01+0300 lvl=info msg=start pg=/api/requests/http id=e3bcc26eecb0b164
+t=2026-06-07T00:26:01+0300 lvl=info msg=end pg=/api/requests/http id=e3bcc26eecb0b164 status=200 dur=761.2µs
+t=2026-06-07T00:26:55+0300 lvl=info msg=start pg=/api/requests/http id=9252a45aeb0e5b51
+t=2026-06-07T00:26:55+0300 lvl=info msg=end pg=/api/requests/http id=9252a45aeb0e5b51 status=200 dur=527.6µs
+t=2026-06-07T00:26:58+0300 lvl=info msg="join connections" obj=join id=676a143779e8 l=127.0.0.1:8000 r=196.201.212.127:44436
+t=2026-06-07T00:27:14+0300 lvl=info msg=start pg=/api/requests/http id=af1afc6545ea4bc4
+t=2026-06-07T00:27:14+0300 lvl=info msg=end pg=/api/requests/http id=af1afc6545ea4bc4 status=200 dur=714µs
+t=2026-06-07T00:56:07+0300 lvl=info msg=start pg=/api/tunnels id=f8589c777970ae06
+t=2026-06-07T00:56:07+0300 lvl=info msg=end pg=/api/tunnels id=f8589c777970ae06 status=200 dur=0s
+t=2026-06-07T00:56:09+0300 lvl=info msg="join connections" obj=join id=797bf47b10f9 l=127.0.0.1:8000 r=105.161.213.243:1378
+t=2026-06-07T00:57:35+0300 lvl=info msg=start pg=/api/requests/http id=239e1ac55c5e0ba3
+t=2026-06-07T00:57:35+0300 lvl=info msg=end pg=/api/requests/http id=239e1ac55c5e0ba3 status=200 dur=1.147ms
+t=2026-06-07T00:57:37+0300 lvl=info msg=start pg=/api/requests/http id=aa5b37818ac0b7f2
+t=2026-06-07T00:57:37+0300 lvl=info msg=end pg=/api/requests/http id=aa5b37818ac0b7f2 status=200 dur=1.4016ms
+t=2026-06-07T00:57:39+0300 lvl=info msg="join connections" obj=join id=03b36ec91a2d l=127.0.0.1:8000 r=196.201.212.69:50898
+t=2026-06-07T00:57:39+0300 lvl=info msg=start pg=/api/requests/http id=aa7f270f2dd8cac4
+t=2026-06-07T00:57:39+0300 lvl=info msg=end pg=/api/requests/http id=aa7f270f2dd8cac4 status=200 dur=1.2066ms
+t=2026-06-07T00:58:23+0300 lvl=info msg=start pg=/api/requests/http id=a5666560aa6ba53b
+t=2026-06-07T00:58:23+0300 lvl=info msg=end pg=/api/requests/http id=a5666560aa6ba53b status=200 dur=579µs
+t=2026-06-07T00:58:24+0300 lvl=info msg=start pg=/api/requests/http id=cdf7fe1218f7b784
+t=2026-06-07T00:58:24+0300 lvl=info msg=end pg=/api/requests/http id=cdf7fe1218f7b784 status=200 dur=1.0598ms
+t=2026-06-07T00:58:25+0300 lvl=info msg="join connections" obj=join id=9ccf54624695 l=127.0.0.1:8000 r=196.201.212.69:30351
+t=2026-06-07T00:58:26+0300 lvl=info msg=start pg=/api/requests/http id=1c8953b7bcf320a7
+t=2026-06-07T00:58:26+0300 lvl=info msg=end pg=/api/requests/http id=1c8953b7bcf320a7 status=200 dur=1.1146ms
+t=2026-06-07T00:58:26+0300 lvl=info msg=start pg=/api/requests/http id=d0762ceb73fa275d
+t=2026-06-07T00:58:26+0300 lvl=info msg=end pg=/api/requests/http id=d0762ceb73fa275d status=200 dur=581.5µs
+t=2026-06-07T00:58:26+0300 lvl=info msg=start pg=/api/requests/http id=7033ce65b7f3d940
+t=2026-06-07T00:58:26+0300 lvl=info msg=end pg=/api/requests/http id=7033ce65b7f3d940 status=200 dur=768.1µs
+t=2026-06-07T00:58:28+0300 lvl=info msg=start pg=/api/requests/http id=0721182cc34470ea
+t=2026-06-07T00:58:28+0300 lvl=info msg=end pg=/api/requests/http id=0721182cc34470ea status=200 dur=2.2451ms
+t=2026-06-07T00:58:31+0300 lvl=info msg=start pg=/api/requests/http id=5af6a51a18060224
+t=2026-06-07T00:58:31+0300 lvl=info msg=end pg=/api/requests/http id=5af6a51a18060224 status=200 dur=542.7µs
+t=2026-06-07T00:58:33+0300 lvl=info msg=start pg=/api/requests/http id=e9be144b20331239
+t=2026-06-07T00:58:33+0300 lvl=info msg=end pg=/api/requests/http id=e9be144b20331239 status=200 dur=538.9µs
+t=2026-06-07T00:58:35+0300 lvl=info msg=start pg=/api/requests/http id=eb6bf9e778baadb4
+t=2026-06-07T00:58:35+0300 lvl=info msg=end pg=/api/requests/http id=eb6bf9e778baadb4 status=200 dur=730.5µs
+t=2026-06-07T00:58:37+0300 lvl=info msg=start pg=/api/requests/http id=c87131dc51b9c348
+t=2026-06-07T00:58:37+0300 lvl=info msg=end pg=/api/requests/http id=c87131dc51b9c348 status=200 dur=1.2687ms
+t=2026-06-07T00:58:39+0300 lvl=info msg=start pg=/api/requests/http id=854fc85497d0fd56
+t=2026-06-07T00:58:39+0300 lvl=info msg=end pg=/api/requests/http id=854fc85497d0fd56 status=200 dur=676µs
+t=2026-06-07T00:58:41+0300 lvl=info msg=start pg=/api/requests/http id=4fc942e3b586b37d
+t=2026-06-07T00:58:41+0300 lvl=info msg=end pg=/api/requests/http id=4fc942e3b586b37d status=200 dur=994.9µs
+t=2026-06-07T00:58:43+0300 lvl=info msg=start pg=/api/requests/http id=12f445ea975e3bfc
+t=2026-06-07T00:58:43+0300 lvl=info msg=end pg=/api/requests/http id=12f445ea975e3bfc status=200 dur=568.8µs
+t=2026-06-07T00:58:45+0300 lvl=info msg=start pg=/api/requests/http id=879701da5b429381
+t=2026-06-07T00:58:45+0300 lvl=info msg=end pg=/api/requests/http id=879701da5b429381 status=200 dur=821.1µs
+t=2026-06-07T00:58:47+0300 lvl=info msg=start pg=/api/requests/http id=9f6ff568913f3697
+t=2026-06-07T00:58:47+0300 lvl=info msg=end pg=/api/requests/http id=9f6ff568913f3697 status=200 dur=777.9µs
+t=2026-06-07T00:58:49+0300 lvl=info msg=start pg=/api/requests/http id=50ee5a314842eaae
+t=2026-06-07T00:58:49+0300 lvl=info msg=end pg=/api/requests/http id=50ee5a314842eaae status=200 dur=1.2117ms
+t=2026-06-07T00:58:51+0300 lvl=info msg=start pg=/api/requests/http id=bc6f26271feda543
+t=2026-06-07T00:58:51+0300 lvl=info msg=end pg=/api/requests/http id=bc6f26271feda543 status=200 dur=658µs
+t=2026-06-07T00:58:53+0300 lvl=info msg=start pg=/api/requests/http id=b9c0f14bed3c3bec
+t=2026-06-07T00:58:53+0300 lvl=info msg=end pg=/api/requests/http id=b9c0f14bed3c3bec status=200 dur=1.4456ms
+t=2026-06-07T00:58:55+0300 lvl=info msg=start pg=/api/requests/http id=dfb82923861452c2
+t=2026-06-07T00:58:55+0300 lvl=info msg=end pg=/api/requests/http id=dfb82923861452c2 status=200 dur=1.3689ms
+t=2026-06-07T00:58:57+0300 lvl=info msg=start pg=/api/requests/http id=321e3021738cef84
+t=2026-06-07T00:58:57+0300 lvl=info msg=end pg=/api/requests/http id=321e3021738cef84 status=200 dur=1.1488ms
+t=2026-06-07T00:58:59+0300 lvl=info msg=start pg=/api/requests/http id=3f973487a1f3447c
+t=2026-06-07T00:58:59+0300 lvl=info msg=end pg=/api/requests/http id=3f973487a1f3447c status=200 dur=1.1441ms
+t=2026-06-07T00:59:01+0300 lvl=info msg=start pg=/api/requests/http id=c1c1710b1b15c468
+t=2026-06-07T00:59:01+0300 lvl=info msg=end pg=/api/requests/http id=c1c1710b1b15c468 status=200 dur=685.7µs
+t=2026-06-07T00:59:03+0300 lvl=info msg=start pg=/api/requests/http id=bfb7fb0773a1d052
+t=2026-06-07T00:59:03+0300 lvl=info msg=end pg=/api/requests/http id=bfb7fb0773a1d052 status=200 dur=779.3µs
+t=2026-06-07T00:59:05+0300 lvl=info msg=start pg=/api/requests/http id=000a8490379b1e9a
+t=2026-06-07T00:59:05+0300 lvl=info msg=end pg=/api/requests/http id=000a8490379b1e9a status=200 dur=1.0689ms
+t=2026-06-07T00:59:07+0300 lvl=info msg=start pg=/api/requests/http id=7c8c8c40854c7266
+t=2026-06-07T00:59:07+0300 lvl=info msg=end pg=/api/requests/http id=7c8c8c40854c7266 status=200 dur=585.1µs
+t=2026-06-07T00:59:09+0300 lvl=info msg=start pg=/api/requests/http id=afe9a5c2e6b260b9
+t=2026-06-07T00:59:09+0300 lvl=info msg=end pg=/api/requests/http id=afe9a5c2e6b260b9 status=200 dur=562.6µs
+t=2026-06-07T00:59:11+0300 lvl=info msg=start pg=/api/requests/http id=0ff4daf5566579c2
+t=2026-06-07T00:59:11+0300 lvl=info msg=end pg=/api/requests/http id=0ff4daf5566579c2 status=200 dur=599µs
+t=2026-06-07T00:59:13+0300 lvl=info msg=start pg=/api/requests/http id=b3d369059debe921
+t=2026-06-07T00:59:13+0300 lvl=info msg=end pg=/api/requests/http id=b3d369059debe921 status=200 dur=1.0794ms
+t=2026-06-07T00:59:15+0300 lvl=info msg=start pg=/api/requests/http id=661edc44d359c410
+t=2026-06-07T00:59:15+0300 lvl=info msg=end pg=/api/requests/http id=661edc44d359c410 status=200 dur=1.3758ms
+t=2026-06-07T00:59:17+0300 lvl=info msg=start pg=/api/requests/http id=681895276fe25103
+t=2026-06-07T00:59:17+0300 lvl=info msg=end pg=/api/requests/http id=681895276fe25103 status=200 dur=1.0564ms
+t=2026-06-07T00:59:19+0300 lvl=info msg=start pg=/api/requests/http id=11685a74d5344e57
+t=2026-06-07T00:59:19+0300 lvl=info msg=end pg=/api/requests/http id=11685a74d5344e57 status=200 dur=807µs
+t=2026-06-07T00:59:21+0300 lvl=info msg=start pg=/api/requests/http id=efc3c3a96ba3d932
+t=2026-06-07T00:59:21+0300 lvl=info msg=end pg=/api/requests/http id=efc3c3a96ba3d932 status=200 dur=553.3µs
+t=2026-06-07T00:59:23+0300 lvl=info msg=start pg=/api/requests/http id=16f5f91e8d3fdc45
+t=2026-06-07T00:59:23+0300 lvl=info msg=end pg=/api/requests/http id=16f5f91e8d3fdc45 status=200 dur=570.9µs
+t=2026-06-07T00:59:25+0300 lvl=info msg=start pg=/api/requests/http id=68c89c65d64c9681
+t=2026-06-07T00:59:25+0300 lvl=info msg=end pg=/api/requests/http id=68c89c65d64c9681 status=200 dur=632.4µs
+t=2026-06-07T00:59:27+0300 lvl=info msg=start pg=/api/requests/http id=4aad0893867f9009
+t=2026-06-07T00:59:27+0300 lvl=info msg=end pg=/api/requests/http id=4aad0893867f9009 status=200 dur=674.7µs
+t=2026-06-07T00:59:28+0300 lvl=info msg=start pg=/api/requests/http id=2ed8cb93ab432164
+t=2026-06-07T00:59:28+0300 lvl=info msg=end pg=/api/requests/http id=2ed8cb93ab432164 status=200 dur=903.4µs
+t=2026-06-07T00:59:29+0300 lvl=info msg="join connections" obj=join id=55ca4c6636a2 l=127.0.0.1:8000 r=196.201.212.69:56250
+t=2026-06-07T00:59:30+0300 lvl=info msg=start pg=/api/requests/http id=d7b8a48e88e39a5d
+t=2026-06-07T00:59:30+0300 lvl=info msg=end pg=/api/requests/http id=d7b8a48e88e39a5d status=200 dur=600.2µs
+t=2026-06-07T00:59:30+0300 lvl=info msg=start pg=/api/requests/http id=bc3281420e7e7a81
+t=2026-06-07T00:59:30+0300 lvl=info msg=end pg=/api/requests/http id=bc3281420e7e7a81 status=200 dur=584.6µs
+t=2026-06-07T00:59:31+0300 lvl=info msg=start pg=/api/requests/http id=f50a3da93aee56ed
+t=2026-06-07T00:59:31+0300 lvl=info msg=end pg=/api/requests/http id=f50a3da93aee56ed status=200 dur=577.9µs
+t=2026-06-07T00:59:33+0300 lvl=info msg=start pg=/api/requests/http id=9ea39a1f920d8c83
+t=2026-06-07T00:59:33+0300 lvl=info msg=end pg=/api/requests/http id=9ea39a1f920d8c83 status=200 dur=598.1µs
+t=2026-06-07T00:59:35+0300 lvl=info msg=start pg=/api/requests/http id=34d66d2bfbc4ac44
+t=2026-06-07T00:59:35+0300 lvl=info msg=end pg=/api/requests/http id=34d66d2bfbc4ac44 status=200 dur=570.2µs
+t=2026-06-07T00:59:37+0300 lvl=info msg=start pg=/api/requests/http id=ba90666eb664b8dc
+t=2026-06-07T00:59:37+0300 lvl=info msg=end pg=/api/requests/http id=ba90666eb664b8dc status=200 dur=685.8µs
+t=2026-06-07T00:59:39+0300 lvl=info msg=start pg=/api/requests/http id=ec4dc4e02787a71b
+t=2026-06-07T00:59:39+0300 lvl=info msg=end pg=/api/requests/http id=ec4dc4e02787a71b status=200 dur=547.8µs
+t=2026-06-07T00:59:41+0300 lvl=info msg=start pg=/api/requests/http id=e8ea4153952abf4d
+t=2026-06-07T00:59:41+0300 lvl=info msg=end pg=/api/requests/http id=e8ea4153952abf4d status=200 dur=727.8µs
+t=2026-06-07T00:59:43+0300 lvl=info msg=start pg=/api/requests/http id=0254ca7e00d493b6
+t=2026-06-07T00:59:43+0300 lvl=info msg=end pg=/api/requests/http id=0254ca7e00d493b6 status=200 dur=1.1938ms
+t=2026-06-07T00:59:45+0300 lvl=info msg=start pg=/api/requests/http id=c0d3c1c3f10b6d76
+t=2026-06-07T00:59:45+0300 lvl=info msg=end pg=/api/requests/http id=c0d3c1c3f10b6d76 status=200 dur=792µs
+t=2026-06-07T00:59:47+0300 lvl=info msg=start pg=/api/requests/http id=255e9c8968c18b6a
+t=2026-06-07T00:59:47+0300 lvl=info msg=end pg=/api/requests/http id=255e9c8968c18b6a status=200 dur=631.4µs
+t=2026-06-07T00:59:49+0300 lvl=info msg=start pg=/api/requests/http id=8646d7c25d4f4e7c
+t=2026-06-07T00:59:49+0300 lvl=info msg=end pg=/api/requests/http id=8646d7c25d4f4e7c status=200 dur=666.8µs
+t=2026-06-07T00:59:51+0300 lvl=info msg=start pg=/api/requests/http id=6be9ebcf9ce0a04b
+t=2026-06-07T00:59:51+0300 lvl=info msg=end pg=/api/requests/http id=6be9ebcf9ce0a04b status=200 dur=560.3µs
+t=2026-06-07T00:59:53+0300 lvl=info msg=start pg=/api/requests/http id=9ccd1463852ba725
+t=2026-06-07T00:59:53+0300 lvl=info msg=end pg=/api/requests/http id=9ccd1463852ba725 status=200 dur=937.5µs
+t=2026-06-07T00:59:55+0300 lvl=info msg=start pg=/api/requests/http id=08e0055a9aadc8d8
+t=2026-06-07T00:59:55+0300 lvl=info msg=end pg=/api/requests/http id=08e0055a9aadc8d8 status=200 dur=1.1167ms
+t=2026-06-07T00:59:57+0300 lvl=info msg=start pg=/api/requests/http id=64e1fab75176d6dc
+t=2026-06-07T00:59:57+0300 lvl=info msg=end pg=/api/requests/http id=64e1fab75176d6dc status=200 dur=555.7µs
+t=2026-06-07T00:59:59+0300 lvl=info msg=start pg=/api/requests/http id=9ca4e60fad77061c
+t=2026-06-07T00:59:59+0300 lvl=info msg=end pg=/api/requests/http id=9ca4e60fad77061c status=200 dur=843µs
+t=2026-06-07T01:00:01+0300 lvl=info msg=start pg=/api/requests/http id=73d4ff9b034f97ba
+t=2026-06-07T01:00:01+0300 lvl=info msg=end pg=/api/requests/http id=73d4ff9b034f97ba status=200 dur=608.6µs
+t=2026-06-07T01:00:03+0300 lvl=info msg=start pg=/api/requests/http id=44b472a93f7d00a7
+t=2026-06-07T01:00:03+0300 lvl=info msg=end pg=/api/requests/http id=44b472a93f7d00a7 status=200 dur=0s
+t=2026-06-07T01:00:05+0300 lvl=info msg=start pg=/api/requests/http id=f98a3f48c480080a
+t=2026-06-07T01:00:05+0300 lvl=info msg=end pg=/api/requests/http id=f98a3f48c480080a status=200 dur=603.9µs
+t=2026-06-07T01:00:07+0300 lvl=info msg=start pg=/api/requests/http id=b408a8e1b4d8d810
+t=2026-06-07T01:00:07+0300 lvl=info msg=end pg=/api/requests/http id=b408a8e1b4d8d810 status=200 dur=1.1519ms
+t=2026-06-07T01:00:09+0300 lvl=info msg=start pg=/api/requests/http id=4bb0c038cd84e487
+t=2026-06-07T01:00:09+0300 lvl=info msg=end pg=/api/requests/http id=4bb0c038cd84e487 status=200 dur=803.9µs
+t=2026-06-07T01:00:11+0300 lvl=info msg=start pg=/api/requests/http id=086f354430ff59bf
+t=2026-06-07T01:00:11+0300 lvl=info msg=end pg=/api/requests/http id=086f354430ff59bf status=200 dur=710µs
+t=2026-06-07T01:00:13+0300 lvl=info msg=start pg=/api/requests/http id=412b413bdc8ea037
+t=2026-06-07T01:00:13+0300 lvl=info msg=end pg=/api/requests/http id=412b413bdc8ea037 status=200 dur=570.9µs
+t=2026-06-07T01:00:15+0300 lvl=info msg=start pg=/api/requests/http id=5b8fda8ceffedf06
+t=2026-06-07T01:00:15+0300 lvl=info msg=end pg=/api/requests/http id=5b8fda8ceffedf06 status=200 dur=564.8µs
+t=2026-06-07T01:00:17+0300 lvl=info msg=start pg=/api/requests/http id=79016a6fcab87a96
+t=2026-06-07T01:00:17+0300 lvl=info msg=end pg=/api/requests/http id=79016a6fcab87a96 status=200 dur=597.4µs
+t=2026-06-07T01:00:19+0300 lvl=info msg=start pg=/api/requests/http id=010138178d65661b
+t=2026-06-07T01:00:19+0300 lvl=info msg=end pg=/api/requests/http id=010138178d65661b status=200 dur=784.1µs
+t=2026-06-07T01:00:21+0300 lvl=info msg=start pg=/api/requests/http id=3c3dfd63e3922550
+t=2026-06-07T01:00:21+0300 lvl=info msg=end pg=/api/requests/http id=3c3dfd63e3922550 status=200 dur=810.9µs
+t=2026-06-07T01:00:23+0300 lvl=info msg=start pg=/api/requests/http id=7557129fdff89e27
+t=2026-06-07T01:00:23+0300 lvl=info msg=end pg=/api/requests/http id=7557129fdff89e27 status=200 dur=600.6µs
+t=2026-06-07T01:00:25+0300 lvl=info msg=start pg=/api/requests/http id=c057a9777eb08172
+t=2026-06-07T01:00:25+0300 lvl=info msg=end pg=/api/requests/http id=c057a9777eb08172 status=200 dur=592.9µs
+t=2026-06-07T01:00:27+0300 lvl=info msg=start pg=/api/requests/http id=e6701f152296ac8b
+t=2026-06-07T01:00:27+0300 lvl=info msg=end pg=/api/requests/http id=e6701f152296ac8b status=200 dur=648µs
+t=2026-06-07T01:00:29+0300 lvl=info msg=start pg=/api/requests/http id=b7772a099965f963
+t=2026-06-07T01:00:29+0300 lvl=info msg=end pg=/api/requests/http id=b7772a099965f963 status=200 dur=1.0078ms
+t=2026-06-07T01:01:30+0300 lvl=info msg="join connections" obj=join id=489066b15b21 l=127.0.0.1:8000 r=196.201.213.44:43320
+t=2026-06-07T01:01:31+0300 lvl=info msg="join connections" obj=join id=41a83800ef2b l=127.0.0.1:8000 r=196.201.212.127:47216
+t=2026-06-07T01:53:55+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=309397423135 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T01:53:55+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.206:50687->3.108.166.207:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-07T01:53:56+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T01:53:56+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T01:54:02+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T01:54:02+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T11:40:32+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=311b00fca641 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T11:40:32+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T11:40:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T11:40:33+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T11:40:34+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T11:40:38+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-07T11:40:38+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T11:40:38+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T11:56:36+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e0ddb7278eab clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T11:56:36+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T11:56:40+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T11:56:40+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T12:42:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=44a0095f8cfa clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T12:42:12+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T12:42:16+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T12:42:16+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T13:03:49+0300 lvl=info msg=start pg=/api/tunnels id=9046b989cd09dd38
+t=2026-06-07T13:03:49+0300 lvl=info msg=end pg=/api/tunnels id=9046b989cd09dd38 status=200 dur=0s
+t=2026-06-07T13:03:51+0300 lvl=info msg="join connections" obj=join id=1f9f5aa23824 l=127.0.0.1:8000 r=105.160.29.77:1728
+t=2026-06-07T13:05:14+0300 lvl=info msg=start pg=/api/requests/http id=e69a3d19577f0815
+t=2026-06-07T13:05:14+0300 lvl=info msg=end pg=/api/requests/http id=e69a3d19577f0815 status=200 dur=1.2894ms
+t=2026-06-07T13:05:32+0300 lvl=info msg=start pg=/api/requests/http id=b3a406b4edcafdde
+t=2026-06-07T13:05:32+0300 lvl=info msg=end pg=/api/requests/http id=b3a406b4edcafdde status=200 dur=0s
+t=2026-06-07T13:05:35+0300 lvl=info msg=start pg=/api/requests/http id=5305ba8fe297057f
+t=2026-06-07T13:05:35+0300 lvl=info msg=end pg=/api/requests/http id=5305ba8fe297057f status=200 dur=2.1163ms
+t=2026-06-07T13:05:38+0300 lvl=info msg=start pg=/api/requests/http id=abe2e5020fc7eb0d
+t=2026-06-07T13:05:38+0300 lvl=info msg=end pg=/api/requests/http id=abe2e5020fc7eb0d status=200 dur=1.3632ms
+t=2026-06-07T13:05:41+0300 lvl=info msg=start pg=/api/requests/http id=2fdcfc4b538e532c
+t=2026-06-07T13:05:41+0300 lvl=info msg=end pg=/api/requests/http id=2fdcfc4b538e532c status=200 dur=1.184ms
+t=2026-06-07T13:05:41+0300 lvl=info msg="join connections" obj=join id=9ba9db94e245 l=127.0.0.1:8000 r=196.201.213.44:17185
+t=2026-06-07T13:05:44+0300 lvl=info msg=start pg=/api/requests/http id=5eca918a44357941
+t=2026-06-07T13:05:44+0300 lvl=info msg=end pg=/api/requests/http id=5eca918a44357941 status=200 dur=1.8047ms
+t=2026-06-07T13:24:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9bd33a912773 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T13:24:42+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T13:24:48+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T13:24:48+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T14:00:34+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9dffc555df81 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T14:00:34+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T14:00:37+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T14:00:37+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T23:16:30+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=39a4ebbdf05d clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T23:16:30+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.206:54461->13.233.205.122:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-07T23:16:30+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T23:16:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-07T23:16:34+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": EOF"
+t=2026-06-07T23:16:35+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T23:16:35+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-07T23:45:31+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e05a5743cf9f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-07T23:45:31+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-07T23:45:34+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-07T23:45:34+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T00:03:32+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=3f45fa495cd3 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T00:03:32+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T00:03:38+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T00:03:38+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T00:20:20+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=476b1f9f81d2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T00:20:20+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T00:20:22+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T00:20:22+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T00:41:10+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:63471->3.108.166.207:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T00:41:10+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e7d90fb85147 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T00:41:13+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T00:41:13+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T01:29:22+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ccfe1d49ed13 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T01:29:22+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:64360->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T01:29:26+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T01:29:26+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T02:10:31+0300 lvl=info msg="join connections" obj=join id=b5b6d912a2f5 l=127.0.0.1:8000 r=196.201.212.69:60048
+t=2026-06-08T15:11:33+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1bea1e48dcb6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T15:11:33+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.206:50621->13.233.205.122:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-08T15:11:33+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-08T15:11:34+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-08T15:11:35+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-08T15:11:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-08T15:11:39+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-08T15:11:45+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T15:11:45+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T15:36:29+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-08T15:36:29+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a7f4f8187ed8 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T15:36:32+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T15:36:32+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T15:45:49+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a83d1012c9e5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T15:45:49+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T15:45:52+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T15:45:52+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T16:26:10+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:51357->52.28.187.147:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T16:26:10+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ec2741f5a637 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T16:26:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T16:26:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T17:09:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:52405->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T17:09:53+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ad6476f6dbed clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T17:09:57+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T17:09:57+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T17:17:19+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=39fb412848ea clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T17:17:19+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T17:17:22+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T17:17:22+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T17:21:46+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e4e635b8caa2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T17:21:46+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T17:21:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T17:21:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T17:27:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=01c0f2405459 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T17:27:47+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T17:27:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T17:27:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T17:34:30+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=34acdfb03a37 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T17:34:30+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-08T17:34:34+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T17:34:34+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T18:25:59+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:56407->13.233.205.122:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T18:25:59+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=dfb499729c31 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T18:26:02+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T18:26:02+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T18:55:35+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:58473->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-08T18:55:35+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c7bfce45e9b0 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-08T18:55:37+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-08T18:55:37+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-08T21:11:42+0300 lvl=info msg="update available" obj=updater
+t=2026-06-08T22:06:09+0300 lvl=info msg="join connections" obj=join id=fefbec1aaea8 l=127.0.0.1:8000 r=105.160.105.193:1816
+t=2026-06-08T22:06:09+0300 lvl=info msg=start pg=/api/requests/http id=c8b5385d6e02dab1
+t=2026-06-08T22:06:09+0300 lvl=info msg=end pg=/api/requests/http id=c8b5385d6e02dab1 status=200 dur=1.6235ms
+t=2026-06-08T22:07:18+0300 lvl=info msg="join connections" obj=join id=afb88931465e l=127.0.0.1:8000 r=196.201.212.69:42941
+t=2026-06-08T22:07:45+0300 lvl=info msg=start pg=/api/requests/http id=c054d48d0f26d065
+t=2026-06-08T22:07:45+0300 lvl=info msg=end pg=/api/requests/http id=c054d48d0f26d065 status=200 dur=1.6456ms
+t=2026-06-08T22:12:36+0300 lvl=info msg="join connections" obj=join id=1fdf0e5bb7ab l=127.0.0.1:8000 r=105.160.105.193:1407
+t=2026-06-08T22:13:49+0300 lvl=info msg="join connections" obj=join id=29bb395bee4d l=127.0.0.1:8000 r=196.201.212.69:10200
+t=2026-06-08T22:14:01+0300 lvl=info msg=start pg=/api/requests/http id=846bae1a8371d3fb
+t=2026-06-08T22:14:01+0300 lvl=info msg=end pg=/api/requests/http id=846bae1a8371d3fb status=200 dur=1.9524ms
+t=2026-06-09T00:39:27+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1d1a384a425c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T00:39:27+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T00:39:30+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T00:39:30+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T01:50:46+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=3900aaa173f1 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T01:50:46+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T01:50:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T01:50:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T02:04:01+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=0085c5009e1a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T02:04:01+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T02:04:05+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T02:04:05+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T03:08:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=8e2ad240cb15 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T03:08:47+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T03:08:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T03:08:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T03:11:46+0300 lvl=info msg="update available" obj=updater
+t=2026-06-09T03:15:02+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b040522b0391 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T03:15:02+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T03:15:04+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T03:15:04+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T03:22:09+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.206:56666->3.108.166.207:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-09T03:22:11+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T03:22:11+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T03:22:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b47ce4789d84 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T03:27:39+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=eb123641ce06 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T03:27:39+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T03:27:41+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T03:27:41+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T03:37:52+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=82d63f1f6b05 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T03:37:52+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T03:37:55+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T03:37:55+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T13:41:32+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c4602a73d8a1 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T13:41:32+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T13:41:32+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T13:41:33+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T13:41:34+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T13:41:34+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-09T13:41:48+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-09T13:42:19+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=12cb4988eb38
+t=2026-06-09T13:42:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T13:42:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T13:42:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T13:43:21+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=5a9ef935756c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T13:43:21+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T13:43:34+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T13:43:34+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T13:51:41+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ae324a87749d clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T13:51:41+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T13:51:55+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T13:52:17+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T13:52:17+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:01:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-09T14:01:40+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:01:40+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:01:49+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=07c4a1c00363 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:02:41+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=13669db07216 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:02:41+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:02:55+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T14:03:08+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: EOF"
+t=2026-06-09T14:03:16+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:03:16+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:10:33+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c2eaa9c1b03f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:10:33+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:10:46+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T14:10:54+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:10:54+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:16:08+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d5fac99b3145 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:16:08+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:16:20+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: EOF"
+t=2026-06-09T14:16:31+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:16:31+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:18:15+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=797a3deda45e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:18:15+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:18:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-09T14:18:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:18:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:27:51+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=23d073e5d9c2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:27:51+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:28:05+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:28:05+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:31:18+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-09T14:31:18+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=7b5a5b24dbb3 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:31:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=56cdd240f0dc
+t=2026-06-09T14:31:48+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T14:32:02+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-09T14:32:07+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:32:07+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:39:50+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-09T14:40:04+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:40:04+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T14:40:11+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d3f50ae86056 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:55:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=5ec87e4b15c6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T14:55:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T14:55:22+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T14:55:22+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T15:00:06+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e7f244092adc clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T15:00:06+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T15:00:27+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-09T15:00:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-09T15:00:38+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:00:40+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:00:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:00:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:01:08+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:01:38+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:02:08+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:02:52+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: EOF"
+t=2026-06-09T15:03:42+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T15:03:42+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T15:09:27+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=671f4199eadb clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T15:09:27+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T15:09:38+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: session closed"
+t=2026-06-09T15:09:40+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T15:09:40+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T15:29:43+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=cad4dc587dba clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T15:29:43+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T15:29:43+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:29:43+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T15:29:54+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp 3.108.187.139:443: i/o timeout"
+t=2026-06-09T15:30:06+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T15:30:06+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T16:27:30+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-09T16:27:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=aaaf21004976 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T16:27:42+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T16:27:42+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T17:05:47+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ddafe3fe0e84 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T17:05:47+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T17:05:55+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T17:05:55+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T18:07:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=bc19b0305d2f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T18:07:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T18:07:14+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:14+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:21+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:29+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:07:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:08:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:08:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:09:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:09:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:10:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:10:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:11:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:11:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:12:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:12:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:13:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:13:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:14:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:14:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:15:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:15:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:16:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:16:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:23:43+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-09T18:24:24+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T18:24:24+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T18:25:55+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-09T18:26:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ad8b03d69eaa clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T18:26:21+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=8e355c5a82a3 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T18:26:21+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="session closed"
+t=2026-06-09T18:26:29+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T18:26:29+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T19:04:09+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=00b359806132 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T19:04:09+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T19:04:12+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T19:04:12+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T19:04:35+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=52566654008a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T19:04:35+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T19:04:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to send authentication request: failed to fetch CRL. errors encountered: timed out fetching CRL"
+t=2026-06-09T19:04:49+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T19:04:49+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T19:38:16+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=bd3e4bda48ce clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T19:38:16+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T19:38:19+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T19:38:19+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T19:41:37+0300 lvl=info msg="update available" obj=updater
+t=2026-06-09T20:02:45+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2fba8313f8aa clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T20:02:45+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T20:02:48+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T20:02:48+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T20:13:13+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=842a2489e155 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T20:13:13+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-09T20:13:15+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T20:13:15+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T20:32:57+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:61929->13.233.205.122:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-09T20:32:57+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=4a80a16e425c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-09T20:33:00+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T20:33:00+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T00:27:45+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:62527->13.127.105.236:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-10T00:27:45+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a7d05dad68a2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T00:53:07+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="session closed"
+t=2026-06-10T00:53:11+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T00:53:11+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T01:41:40+0300 lvl=info msg="update available" obj=updater
+t=2026-06-10T01:59:20+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=fe96be536ba6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T01:59:20+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T01:59:22+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T01:59:22+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T02:15:37+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=dfb9dd8580c7 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T02:15:37+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T02:15:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T02:15:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T13:49:14+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c3f6270c5d28 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T13:49:14+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.202:65491->13.127.105.236:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-10T13:49:14+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-10T13:49:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-10T13:49:15+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-10T13:49:26+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-10T13:49:30+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T13:49:30+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T15:06:15+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e051887e5bb6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T15:06:15+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T15:06:17+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T15:06:17+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T15:21:48+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=91b31e4f6a38 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T15:21:48+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-10T15:21:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T15:21:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T16:17:58+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read EOF from remote peer"
+t=2026-06-10T16:17:58+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=3e598c385615 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T16:18:01+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T16:18:01+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T18:22:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=187c00da914f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T18:22:42+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T18:22:45+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T18:22:45+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T19:35:29+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=8fa4f4b02e64 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T19:35:29+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T19:35:32+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T19:35:32+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-10T19:49:18+0300 lvl=info msg="update available" obj=updater
+t=2026-06-10T23:33:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=0cc84dcfdeaa clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-10T23:33:05+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-10T23:33:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-10T23:33:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T01:44:31+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:64407->3.123.83.158:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-11T01:44:31+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=03acc2ee44a4 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T01:44:33+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T01:44:33+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T01:49:20+0300 lvl=info msg="update available" obj=updater
+t=2026-06-11T02:20:03+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a2796f6b4495 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T02:20:03+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-11T02:20:05+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T02:20:05+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T19:18:12+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:49400->3.108.166.207:443: wsarecv: An established connection was aborted by the software in your host machine."
+t=2026-06-11T19:18:12+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6cd9ba727fa5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T19:18:12+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-11T19:18:13+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-11T19:18:17+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-11T19:18:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-11T19:18:28+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T19:18:28+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T19:36:31+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=33f3be0a35bf clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T19:36:31+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-11T19:36:34+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T19:36:34+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T21:17:53+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9341e5a40c31 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T21:17:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:62874->13.127.105.236:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-11T21:17:56+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T21:17:56+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T21:49:00+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:63793->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-11T21:49:00+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a99580d1d1f6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T21:49:03+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T21:49:03+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-11T23:16:48+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:64372->3.108.166.207:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-11T23:16:48+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6fadae8a8832 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-11T23:16:50+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-11T23:16:50+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-12T00:01:45+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:49916->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-12T00:01:45+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=c778d1621ee9 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-12T00:01:55+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:01:56+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:02:07+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:02:09+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:02:13+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:02:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:02:47+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:03:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:03:57+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:04:27+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:05:07+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:05:37+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:06:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:06:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:07:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:07:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:08:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:09:01+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:09:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:10:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:10:41+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:11:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:11:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:12:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:13:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:13:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:14:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:15:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:15:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:16:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:17:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:17:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:18:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:19:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:19:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:20:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:21:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:21:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:22:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:23:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:23:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:24:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:25:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:25:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:26:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:27:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:27:51+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:28:31+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:29:11+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:29:49+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:30:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:30:59+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:31:39+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:32:09+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:32:39+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-12T00:33:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:33:59+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:34:39+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-12T00:35:19+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-13T03:30:22+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-13T03:30:29+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-13T03:30:56+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T03:30:56+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T14:55:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=5588c4b67b7b clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T14:55:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T14:55:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-13T14:55:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-13T14:55:29+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T14:55:29+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T14:55:29+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-13T15:15:33+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=59c86be0d35a clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T15:15:33+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T15:15:36+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T15:15:36+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T15:53:57+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:57974->3.108.166.207:443: wsarecv: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+t=2026-06-13T15:53:57+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=e5cabe6310fb clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T15:53:59+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T15:53:59+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T16:03:43+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=09500c55e966 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T16:03:43+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T16:03:45+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T16:03:45+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T16:08:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=50037ff4b323 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T16:08:05+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T16:08:07+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T16:08:07+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T16:40:00+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=b44e38a71210 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T16:40:00+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T16:40:06+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T16:40:06+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T16:46:20+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=351f0f8e1c1f clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T16:46:20+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T16:46:25+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T16:46:25+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T19:36:41+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=ea9deaacbf06 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T19:36:41+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T19:36:44+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T19:36:44+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T20:22:00+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1c4d170b68e0 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T20:22:00+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T20:22:02+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T20:22:02+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T20:34:41+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d44f85a5f03e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T20:34:41+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T20:34:44+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T20:34:44+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T20:55:31+0300 lvl=info msg="update available" obj=updater
+t=2026-06-13T23:09:07+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=63566e904d0e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T23:09:07+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-13T23:09:12+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T23:09:12+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-13T23:25:05+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=a6edfea387f6 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-13T23:25:05+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:56925->3.108.187.139:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-13T23:25:08+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-13T23:25:08+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T20:25:15+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d48ef2b1c5d5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T20:25:15+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T20:25:15+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-14T20:25:16+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-14T20:25:16+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": dial tcp: lookup update.ngrok-agent.com: no such host"
+t=2026-06-14T20:25:17+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-14T20:25:29+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-14T20:25:35+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T20:25:35+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T20:59:59+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d84a9423600e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T20:59:59+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T21:00:01+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T21:00:01+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T21:25:36+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=d7c58e7389b7 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T21:25:36+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T21:25:39+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T21:25:39+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T21:33:27+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=accd3890bfe2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T21:33:27+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T21:33:30+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T21:33:30+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T23:26:38+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=2d15a2579bd2 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T23:26:38+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T23:26:41+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T23:26:41+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-14T23:42:42+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6758083027da clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-14T23:42:42+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-14T23:42:45+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-14T23:42:45+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T00:21:49+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=9c10c00f54cd clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T00:21:49+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.202:59622->3.108.208.206:443: wsasend: An existing connection was forcibly closed by the remote host."
+t=2026-06-15T00:21:51+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T00:21:51+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T02:25:18+0300 lvl=info msg="update available" obj=updater
+t=2026-06-15T14:12:23+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=be1126bd5ebf clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T14:12:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.202:59771->3.108.208.206:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-15T14:12:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T14:12:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T14:12:27+0300 lvl=info msg="update available" obj=updater
+t=2026-06-15T14:12:28+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T14:12:28+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T19:18:48+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=88761287eb4b clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T19:18:48+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-15T19:18:49+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T19:18:49+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T19:18:54+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T19:18:54+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T19:24:02+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=6e1bb0f18bc5 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T19:24:02+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-15T19:24:05+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T19:24:05+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T19:50:44+0300 lvl=info msg="join connections" obj=join id=c2f32fd6ffc7 l=127.0.0.1:8000 r=196.201.214.200:43799
+t=2026-06-15T20:12:30+0300 lvl=info msg="update available" obj=updater
+t=2026-06-15T23:15:44+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=73d880d7f14e clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T23:15:44+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-15T23:15:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T23:15:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T23:15:52+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T23:15:52+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-15T23:30:44+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=7c6e195467ea clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-15T23:30:44+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.202:57682->3.108.208.206:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-15T23:30:44+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T23:30:45+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-15T23:30:48+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-15T23:30:48+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T00:27:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=1978376cf75c clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-16T00:27:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-16T00:27:24+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-16T00:27:25+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-16T00:27:28+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-16T00:27:28+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T00:47:33+0300 lvl=info msg="join connections" obj=join id=a31b1902b704 l=127.0.0.1:8000 r=196.201.214.200:32778
+t=2026-06-16T00:50:43+0300 lvl=info msg="join connections" obj=join id=ef5f1b0c257b l=127.0.0.1:8000 r=196.201.214.200:53480
+t=2026-06-16T01:02:24+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=51c3ae02f1ae clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-16T01:02:24+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-16T01:02:27+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-16T01:02:27+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T01:15:59+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=91c508d51149 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-16T01:15:59+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="session closed"
+t=2026-06-16T01:16:03+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-16T01:16:03+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T02:05:22+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=51276b94b4ef clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-16T02:05:22+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="read tcp 192.168.150.202:63111->3.108.208.206:443: wsarecv: An existing connection was forcibly closed by the remote host."
+t=2026-06-16T02:05:25+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-16T02:05:25+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T02:12:32+0300 lvl=info msg="update available" obj=updater
+t=2026-06-16T14:39:53+0300 lvl=eror msg="heartbeat timeout, terminating session" obj=tunnels.session obj=csess id=245854992a12 clientid=c10682cdb8d905c2f3213176950b22c4
+t=2026-06-16T14:39:53+0300 lvl=eror msg="session closed, starting reconnect loop" obj=tunnels.session obj=csess id=3bf0730a97c0 err="write tcp 192.168.150.202:64858->3.108.166.207:443: wsasend: An established connection was aborted by the software in your host machine."
+t=2026-06-16T14:39:53+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-16T14:39:54+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-16T14:39:55+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: no such host"
+t=2026-06-16T14:39:58+0300 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context deadline exceeded"
+t=2026-06-16T14:40:07+0300 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="failed to dial ngrok server with address \"connect.ngrok-agent.com:443\": dial tcp: lookup connect.ngrok-agent.com: i/o timeout"
+t=2026-06-16T14:40:14+0300 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-16T14:40:14+0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-16T15:04:09+0300 lvl=info msg="join connections" obj=join id=d6e2f7ec1245 l=127.0.0.1:8000 r=105.160.35.225:1117
+t=2026-06-16T15:04:09+0300 lvl=info msg=start pg=/api/tunnels id=97b9d1a421139fdc
+t=2026-06-16T15:04:09+0300 lvl=info msg=end pg=/api/tunnels id=97b9d1a421139fdc status=200 dur=0s
+t=2026-06-16T15:06:48+0300 lvl=info msg="join connections" obj=join id=bff748ef21c8 l=127.0.0.1:8000 r=196.201.214.200:61204
+t=2026-06-16T15:08:37+0300 lvl=info msg="join connections" obj=join id=4752b45ca72e l=127.0.0.1:8000 r=196.201.214.200:37188
+t=2026-06-16T15:09:56+0300 lvl=info msg="join connections" obj=join id=7615fd16f41a l=127.0.0.1:8000 r=196.201.214.200:43500
+t=2026-06-16T15:15:20+0300 lvl=info msg=start pg=/api/tunnels id=4648ed348331b228
+t=2026-06-16T15:15:20+0300 lvl=info msg=end pg=/api/tunnels id=4648ed348331b228 status=200 dur=0s

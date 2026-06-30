@@ -1,0 +1,15 @@
+=== V1: Treasurer OTP Portal ===
+V1 State1: "Treasurer Portal" heading visible; Send OTP buttons=1
+V1 State2: OTP boxes=6; buttons matching /verify/i =0 (GOOD: no Verify button)
+V1: entered 6 digits, awaiting auto-submit (no button tapped)...
+V1 State3: dashboard reached AUTO (campaign picker: "Select a campaign to view its report" visible)
+V1 State3 scoped: progress card ["KES 50,700 raised" / "KES 38,700 to disburse"], "Request Payout" button visible
+
+=== V2: Disbursement Approval (Treasurer > Payouts) ===
+V2: logged in as treasurer; url=http://localhost:8081/
+V2: Payouts list loaded; Approve buttons=2
+V2 dialog: native browser alert? no (custom bottom sheet)
+V2 phone display: {"text":"0712 345 678","fontSize":"28px","fontWeight":"400","fontFamily":"Poppins-Bold","letterSpacing":"1px"}
+V2 dialog checks: "Edit number" link=1; warning("Verify this number carefully")=1; Cancel btn=1; Confirm Payout btn=1; editable amount field=1
+
+ALL STEPS COMPLETED

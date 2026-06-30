@@ -1,0 +1,425 @@
+Creating test database for alias 'default'...
+....................Withdrawal 36f5a783-6f7b-4497-9358-f95d601c0330 → NEEDS_RECONCILIATION (originator=pmj-amb): Stranded payout: no terminal M-Pesa callback received; escalated by sweep for manual reconciliation.
+.Withdrawal 5e4be53c-9a85-4ad7-8bdf-fa5ba223b9f9 → NEEDS_RECONCILIATION (originator=pmj-orig-1): Stranded payout: no terminal M-Pesa callback received; escalated by sweep for manual reconciliation.
+.Withdrawal 7321dec3-00ca-442f-9775-59fc472e6102 → NEEDS_RECONCILIATION (originator=pmj-x): Stranded payout: no terminal M-Pesa callback received; escalated by sweep for manual reconciliation.
+..Withdrawal f292724d-bafe-4fc4-b265-419601b44570 → NEEDS_RECONCILIATION (originator=pmj-orig): Stranded payout: no terminal M-Pesa callback received; escalated by sweep for manual reconciliation.
+..........Withdrawal c7ae7eef-43c5-427c-8b21-26d072b0c527 → NEEDS_RECONCILIATION (originator=pmj-cmd): Stranded payout: no terminal M-Pesa callback received; escalated by sweep for manual reconciliation.
+................................................................Donation d7801444-8048-47ae-9c65-a1008f0b0494 flagged NEEDS_REVIEW (STK Query=PAID, not auto-credited); checkout_request_id=ws_CO_1
+..Donation ba8cfc41-c8d4-4470-b908-b235115e5eaa flagged NEEDS_REVIEW (STK Query=PAID, not auto-credited); checkout_request_id=ws_CO_pd
+...STK callback for unknown CheckoutRequestID ws_CO_UNKNOWN
+..STK callback with no CheckoutRequestID: {'Body': {'stkCallback': {'ResultCode': 0}}}
+.STK callback for unknown CheckoutRequestID ws_CO_DOES_NOT_EXIST
+.........STK push failed for donation b64c1797-7e79-43ab-bc37-87e17d7f8322: STK push ack missing CheckoutRequestID
+.STK push failed for donation b194252e-1ff3-4d73-b8d4-0a04004b6119: STK push network error: down
+.....[email-failed][registration-approved] recipient=a******@example.org church=Reg Church — church already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+.[email-failed][registration-rejected] recipient=r*****@example.org church=Reg Church — church already rejected; email NOT delivered, needs replay (reason also available via login, so not the sole channel)
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+.[email-failed][password-changed] recipient=*@example.org — password already changed; confirmation email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][registration-approved] recipient=*@example.org church=Ch — church already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][registration-rejected] recipient=*@example.org church=Ch — church already rejected; email NOT delivered, needs replay (reason also available via login, so not the sole channel)
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][registration-received] recipient=*@example.org church=Ch — church already registered (PENDING); acknowledgement NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][donation-receipt] recipient=*@example.org campaign=Roof Fund receipt=NLJ7RT61SV — donation already credited; receipt email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][donation-receipt] recipient=*@example.org campaign=Roof Fund receipt=NLJ7RT61SV — donation already credited; receipt email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][payout-approved] recipient=*@example.org campaign=Roof Fund — payout already approved; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 214, in send_payout_approved_email
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+[email-failed][payout-rejected] recipient=*@example.org campaign=Roof Fund — payout already rejected; email NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 233, in send_payout_rejected_email
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 214, in send_payout_approved_email
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 192, in send_donation_receipt
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 142, in send_registration_rejected
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 117, in send_registration_approved
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 99, in send_password_changed
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+.......[email-failed][registration-received] recipient=g****@example.org church=Grace Chapel — church already registered (PENDING); acknowledgement NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 166, in send_registration_received
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+....Password-reset OTP email delivery failed for r******@example.org
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\accounts\views.py", line 357, in post
+    send_password_reset_otp(email, otp_plain)
+  File "J:\Pamoja_Hub\backend\integrations\resend_email.py", line 85, in send_password_reset_otp
+    _send_email(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.resend_email.EmailDeliveryError: resend down
+........................................................................[sms-failed][payout-approved] recipient=254712345678 amount=1000.00 campaign=SMS Camp — money op already committed; SMS NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\africastalking.py", line 112, in send_payout_approved
+    _send_sms(phone, message)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.africastalking.SMSDeliveryError: AT down
+.[sms-failed][payout-rejected] recipient=254712345678 campaign=SMS Camp reason=Incomplete documentation — money op already committed; SMS NOT delivered, needs replay
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\integrations\africastalking.py", line 133, in send_payout_rejected
+    _send_sms(phone, message)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.africastalking.SMSDeliveryError: AT down
+....Portal OTP SMS delivery failed for a request
+Traceback (most recent call last):
+  File "J:\Pamoja_Hub\backend\treasurer_portal\views.py", line 154, in post
+    send_portal_otp(phone, otp_plain)
+  File "J:\Pamoja_Hub\backend\integrations\africastalking.py", line 94, in send_portal_otp
+    _send_sms(
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1173, in _execute_mock_call
+    raise effect
+integrations.africastalking.SMSDeliveryError: AT down
+......................Subscription STK callback for unknown CheckoutRequestID ws_CO_nonexistent
+...........................STK push failed for subscription payment c206a070-3d19-431f-8763-994d3388e33f: boom
+.........................B2C dispatch failed (AMBIGUOUS_FAILURE → FAILED) for withdrawal a3bb734f-ee7a-4375-9437-284bb4b01e35: B2C 200 with non-zero ResponseCode='1' (may be queued): system busy
+.B2C dispatch failed (CLEAN_FAILURE → FAILED) for withdrawal 8fdc1244-73df-465c-a3a8-877433693ecd: B2C dispatch network error: upstream unreachable
+.............................................J:\Pamoja_Hub\backend\venv\lib\site-packages\africastalking\Whatsapp.py:34: UserWarning: Sandbox is currently not available for the Whatsapp service.
+  warnings.warn(
+..B2C dispatch failed (CLEAN_FAILURE → FAILED) for withdrawal 5ea73967-f8ad-4ada-8744-c451a9ea7273: B2C dispatch network error: upstream unreachable
+.B2C dispatch failed (CLEAN_FAILURE → FAILED) for withdrawal 21c08cb5-55a6-4e23-9731-d242b8691772: B2C dispatch network error: t
+B2C dispatch failed (AMBIGUOUS_FAILURE → FAILED) for withdrawal e0413694-6d23-4fa7-9987-1981321775b1: B2C 200 + ResponseCode 0 but missing ConversationID (may be queued)
+.B2C dispatch failed (CLEAN_FAILURE → FAILED) for withdrawal 8d17edde-b18a-4266-8348-4b3ef8f34a70: B2C dispatch network error: refused
+.B2C dispatch failed (AMBIGUOUS_FAILURE → FAILED) for withdrawal 9ca20056-2670-4e40-aa34-2de81bba3450: B2C 200 with non-zero ResponseCode='1' (may be queued): system busy
+......................................................................
+----------------------------------------------------------------------
+Ran 406 tests in 400.777s
+
+OK
+Destroying test database for alias 'default'...
+Found 406 test(s).
+System check identified no issues (0 silenced).

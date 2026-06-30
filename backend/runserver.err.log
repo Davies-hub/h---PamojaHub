@@ -1,0 +1,23 @@
+[20/Jun/2026 20:53:36] "GET /api/v1/churches/ HTTP/1.1" 200 1142
+[20/Jun/2026 20:53:36,485] - Broken pipe from ('127.0.0.1', 57740)
+[20/Jun/2026 20:54:34] "OPTIONS /api/v1/auth/me/ HTTP/1.1" 200 0
+Unauthorized: /api/v1/auth/me/
+[20/Jun/2026 20:54:34] "GET /api/v1/auth/me/ HTTP/1.1" 401 172
+[20/Jun/2026 20:54:34] "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+[20/Jun/2026 20:54:34] "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+[20/Jun/2026 20:54:34] "GET /api/v1/auth/me/ HTTP/1.1" 200 203
+[20/Jun/2026 20:54:35] "OPTIONS /api/v1/super/churches/pending/ HTTP/1.1" 200 0
+[20/Jun/2026 20:54:35] "GET /api/v1/super/churches/pending/ HTTP/1.1" 200 52
+[20/Jun/2026 20:54:41] "OPTIONS /api/v1/auth/logout/ HTTP/1.1" 200 0
+[20/Jun/2026 20:54:42] "POST /api/v1/auth/logout/ HTTP/1.1" 200 0
+[20/Jun/2026 20:55:01] "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+[20/Jun/2026 20:55:02] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+[20/Jun/2026 20:55:03] "OPTIONS /api/v1/churches/me/stats/ HTTP/1.1" 200 0
+[20/Jun/2026 20:55:03] "OPTIONS /api/v1/campaigns/mine/ HTTP/1.1" 200 0
+[20/Jun/2026 20:55:03] "GET /api/v1/churches/me/stats/ HTTP/1.1" 200 283
+[20/Jun/2026 20:55:03] "GET /api/v1/campaigns/mine/ HTTP/1.1" 200 2687
+[20/Jun/2026 20:55:14] "OPTIONS /api/v1/churches/me/ HTTP/1.1" 200 0
+[20/Jun/2026 20:55:14] "GET /api/v1/churches/me/ HTTP/1.1" 200 478
+[20/Jun/2026 20:56:39] "GET /api/v1/churches/me/ HTTP/1.1" 200 478
+[20/Jun/2026 20:57:19] "GET /api/v1/churches/me/ HTTP/1.1" 200 478
+[20/Jun/2026 20:58:16] "GET /api/v1/churches/me/ HTTP/1.1" 200 451

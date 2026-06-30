@@ -1,0 +1,18 @@
+[20/Jun/2026 21:42:28] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+[20/Jun/2026 21:42:29,114] - Broken pipe from ('127.0.0.1', 57947)
+[20/Jun/2026 21:43:48] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+Bad Request: /api/v1/subscriptions/initiate/
+[20/Jun/2026 21:43:50] "POST /api/v1/subscriptions/initiate/ HTTP/1.1" 400 135
+[20/Jun/2026 21:43:54] "POST /api/v1/subscriptions/initiate/ HTTP/1.1" 200 142
+[20/Jun/2026 21:43:55] "POST /api/v1/subscriptions/callback/ HTTP/1.1" 200 40
+STK push failed for subscription payment 0f56cf31-5c76-4438-9cfd-6ce64a651dd9: STK push returned HTTP 500
+Bad Gateway: /api/v1/subscriptions/initiate/
+[20/Jun/2026 21:43:59] "POST /api/v1/subscriptions/initiate/ HTTP/1.1" 502 65
+[20/Jun/2026 21:44:03] "POST /api/v1/subscriptions/cancel/ HTTP/1.1" 200 38
+[20/Jun/2026 21:44:08,334] - Broken pipe from ('127.0.0.1', 57959)
+[20/Jun/2026 21:44:58] "POST /api/v1/auth/login/ HTTP/1.1" 200 855
+Bad Request: /api/v1/subscriptions/initiate/
+[20/Jun/2026 21:45:00] "POST /api/v1/subscriptions/initiate/ HTTP/1.1" 400 135
+[20/Jun/2026 21:45:06] "POST /api/v1/subscriptions/initiate/ HTTP/1.1" 200 142
+[20/Jun/2026 21:45:07] "POST /api/v1/subscriptions/callback/ HTTP/1.1" 200 40
+[20/Jun/2026 21:45:07,794] - Broken pipe from ('127.0.0.1', 58000)
