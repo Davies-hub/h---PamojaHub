@@ -1,0 +1,20 @@
+# Normalize all text to LF in the repo; working-tree EOL is git's call per platform.
+* text=auto eol=lf
+
+# Binary assets — never normalize, never diff as text (covers all 41 tracked binaries + future).
+*.png      binary
+*.webp     binary
+*.ttf      binary
+*.otf      binary
+*.woff     binary
+*.woff2    binary
+*.docx     binary
+*.xlsx     binary
+*.pdf      binary
+*.ico      binary
+*.jar      binary
+*.keystore binary
+
+# Hard EOL constraints (must override the blanket rule above):
+frontend/android/gradlew      text eol=lf
+frontend/android/gradlew.bat  text eol=crlf
