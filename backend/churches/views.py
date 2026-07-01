@@ -28,6 +28,7 @@ Stats aggregation Coalesce:
 """
 
 import logging
+import uuid
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
@@ -37,6 +38,7 @@ from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -64,6 +66,9 @@ from donations.models import Donation, DonationStatus
 from donations.serializers import PortalDonationReportSerializer
 from donations.views import _extract_stk_callback
 from integrations.daraja import DarajaClient, STKPushError
+from integrations.object_storage import ObjectStorageClient, ObjectStorageError
+from media.models import MediaAsset, MediaKind
+from media.validation import MAX_UPLOAD_BYTES, validate_and_reencode
 from notifications.models import Notification, NotificationType
 from superadmin.models import PlatformSettings
 # _parse_date_param: the single date-param parser (YYYY-MM-DD → date, or DRF 400 on
@@ -172,6 +177,74 @@ class ChurchMeView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class ChurchLogoUploadView(APIView):
+    """POST /api/v1/churches/me/logo/ — upload the logo for the treasurer's OWN church.
+    Self-scoped: the church is ALWAYS request.user.church. This endpoint reads NO church id
+    from the URL (route has no param) or the body — a client-supplied church_id is ignored,
+    which is what makes self-scope structural, not incidental. logo_url is server-set here
+    (read_only on AdminChurchSerializer since Slice 1). Guard order mirrors the banner endpoint:
+      1. ChurchNotSuspended (view-level) — fails closed on church=None and on SUSPENDED.
+      2. DoS gate — declared-size reject, then capped read.
+      3. Content gate — validate_and_reencode (magic-byte + Pillow decode + re-encode); the
+         RE-ENCODED bytes are stored, never the raw upload.
+      4. put_object BEFORE the metadata commit — a failed commit leaves a harmless orphan
+         object, never a dangling logo_url.
+    """
+    parser_classes = [MultiPartParser]
+
+    def get_permissions(self):
+        return [ChurchNotSuspended()]
+
+    def post(self, request):
+        church = getattr(request.user, 'church', None)     # self-scope — the ONLY source of church
+        if church is None:                                 # defensive; ChurchNotSuspended already guarantees non-None
+            return Response({'detail': 'No church associated with this account.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        uploaded = request.FILES.get('file')
+        if uploaded is None:
+            return Response({'detail': 'No file provided (field name: file).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if uploaded.size > MAX_UPLOAD_BYTES:                # DoS gate (declared size)
+            return Response({'detail': 'File too large (max 5 MB).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        raw = uploaded.read(MAX_UPLOAD_BYTES + 1)           # capped read
+        if len(raw) > MAX_UPLOAD_BYTES:
+            return Response({'detail': 'File too large (max 5 MB).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        clean_bytes, content_type = validate_and_reencode(raw)   # content gate (raises → 400)
+
+        ext = 'jpg' if content_type == 'image/jpeg' else 'png'
+        key = f'church/{church.id}/logo/{uuid.uuid4().hex}.{ext}'   # server keygen, church from token
+
+        client = ObjectStorageClient()
+        try:
+            result = client.put_object(key, clean_bytes, content_type)   # store CLEAN bytes
+        except ObjectStorageError:
+            return Response({'detail': 'Could not store the image. Please retry.'},
+                            status=status.HTTP_502_BAD_GATEWAY)
+
+        with transaction.atomic():                          # metadata AFTER confirmed PUT
+            asset = MediaAsset.objects.create(
+                kind=MediaKind.LOGO, church=church, campaign=None,
+                object_key=result['key'], bucket=settings.S3_BUCKET_NAME,
+                content_type=content_type, size_bytes=len(clean_bytes),
+                uploaded_by=request.user,
+            )
+            church.logo_url = result['url']
+            church.save(update_fields=['logo_url'])
+            AuditLog.objects.create(
+                actor=request.user, action='CHURCH_LOGO_UPLOADED',
+                entity_type='Church', entity_id=church.id,
+                details={'church_id': str(church.id), 'object_key': result['key'],
+                         'asset_id': str(asset.id)},
+                ip_address=_client_ip(request) or None,
+            )
+        return Response(AdminChurchSerializer(church).data, status=status.HTTP_200_OK)
 
 
 # ───────────────────── Treasurer dashboard summary ───────────────────────────
