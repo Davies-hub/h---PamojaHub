@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -18,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import SubscriptionCard from '../../components/treasurer/SubscriptionCard';
 import Card from '../../components/ui/Card';
 import CountyPicker from '../../components/ui/CountyPicker';
+import RemoteImage from '../../components/ui/RemoteImage';
 import Spinner from '../../components/ui/Spinner';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -121,7 +123,9 @@ export default function SettingsScreen() {
   const [description, setDescription]   = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast]       = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  // One toast surface shared by profile-save AND logo-upload (success OR error).
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   // Per-field 400 errors keyed by backend field name (phone/name/…); a non-field
   // {"detail":…}, a 403 (suspended), or an unknown failure → generalError.
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -138,9 +142,9 @@ export default function SettingsScreen() {
     setDescription(church.description ?? '');
   }, [church]);
 
-  function showToast() {
-    setToast(true);
-    setTimeout(() => setToast(false), 3000);
+  function showToast(type: 'success' | 'error', message: string) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
   }
 
   // Map an axios failure to per-field + general error surfaces (no silent failure).
@@ -192,7 +196,7 @@ export default function SettingsScreen() {
       setDenomination(updated.denomination);
       setDescription(updated.description ?? '');
       setIsSaving(false);
-      showToast();
+      showToast('success', 'Church profile updated.');
     } catch (e) {
       setIsSaving(false);
       applyError(e);
@@ -204,9 +208,51 @@ export default function SettingsScreen() {
     router.push('/(auth)/reset-password' as any);
   }
 
-  function handleChangeLogo() {
-    // STUBBED — logo_url upload is its own slice (not wired here).
-    Alert.alert('Change Logo', 'Logo upload is available after backend connection.', [{ text: 'OK' }]);
+  // Pick an image → upload to /churches/me/logo/ (multipart) → re-read the church so
+  // RemoteImage shows the server-set logo_url. All FE checks here are UX ONLY — the
+  // backend re-validates permission/size/format/re-encode regardless (Slice 3).
+  async function handleChangeLogo() {
+    if (uploadingLogo) return;
+
+    // Permission gate (UX): on web this resolves granted; on native it prompts.
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Allow photo access to change your church logo.', [{ text: 'OK' }]);
+      return;
+    }
+
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+    });
+    if (res.canceled) return;
+    const asset = res.assets[0];
+
+    // UX-only pre-check — a friendly early reject; the server re-checks the real size.
+    if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+      showToast('error', 'Image must be under 5 MB.');
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      await churchesService.uploadLogo({
+        uri: asset.uri,
+        fileName: asset.fileName ?? undefined,
+        mimeType: asset.mimeType ?? undefined,
+      });
+      retry();                             // re-read church → RemoteImage shows the new logo (server truth)
+      showToast('success', 'Logo updated.');
+    } catch (e) {
+      // Surface the server's 400 detail (too large / bad format / re-encode reject land here).
+      let msg = 'Could not upload the logo. Please try again.';
+      if (axios.isAxiosError(e) && e.response) {
+        msg = extractDetail(e.response.data) ?? msg;
+      }
+      showToast('error', msg);
+    } finally {
+      setUploadingLogo(false);
+    }
   }
 
   function handleCloseAccount() {
@@ -233,8 +279,8 @@ export default function SettingsScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Toast */}
-          <Toast type="success" message="Church profile updated." visible={toast} />
+          {/* Toast — profile-save + logo-upload success/error share this surface */}
+          {toast ? <Toast type={toast.type} message={toast.message} visible /> : null}
 
           {/* ── 1. Church Profile ────────────────────────────────────────── */}
           <SectionHeader title="Church Profile" />
@@ -261,18 +307,29 @@ export default function SettingsScreen() {
               </View>
             ) : (
               <>
-                {/* Logo placeholder */}
+                {/* Logo — real image if uploaded, initials circle otherwise */}
                 <View style={styles.logoRow}>
-                  <View style={styles.logoCircle}>
-                    <Text style={styles.logoInitials}>{initials}</Text>
-                  </View>
+                  <RemoteImage
+                    uri={church?.logoUrl}
+                    style={styles.logoCircle}
+                    resizeMode="cover"
+                    fallback={
+                      <View style={styles.logoCircle}>
+                        <Text style={styles.logoInitials}>{initials}</Text>
+                      </View>
+                    }
+                  />
                   <TouchableOpacity
                     onPress={handleChangeLogo}
+                    disabled={uploadingLogo}
                     activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel="Change church logo"
+                    accessibilityState={{ busy: uploadingLogo, disabled: uploadingLogo }}
                   >
-                    <Text style={styles.changeLogoLink}>Change Logo</Text>
+                    <Text style={[styles.changeLogoLink, uploadingLogo && styles.changeLogoLinkDisabled]}>
+                      {uploadingLogo ? 'Uploading…' : 'Change Logo'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -483,6 +540,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.primary,
   },
+  changeLogoLinkDisabled: { color: Colors.textMuted },
 
   // Form fields
   fieldLabel: {

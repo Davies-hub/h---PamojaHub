@@ -73,7 +73,7 @@ export interface Campaign {
   raisedAmount: number;
   walletBalance: number;
   status: CampaignStatus;
-  bannerImageUrl: string;
+  bannerImageUrl?: string;
   documentUrl?: string;
   category: CampaignCategory;
   treasurerPhone?: string;  // NEVER shown on public screens
@@ -95,7 +95,7 @@ export interface PublicCampaign {
   raisedAmount: number;
   donorCount: number;
   status: CampaignStatus;
-  bannerImageUrl: string;
+  bannerImageUrl?: string;
   documentUrl?: string;
   category: CampaignCategory;
   createdAt: string;

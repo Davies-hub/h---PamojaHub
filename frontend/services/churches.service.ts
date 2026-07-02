@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { Church, PaginatedResponse, PublicChurch } from '../types';
 import { api } from './api';
 import {
@@ -76,5 +77,36 @@ export const churchesService = {
       { params },
     );
     return data.results.map(mapMyDonation);
+  },
+
+  // Authed WRITE: POST /churches/me/logo/ (multipart) — upload the treasurer's OWN
+  // church logo. Self-scoped server-side (church = request.user.church; no id in the
+  // URL/body). The wire field name is 'file' (churches/views.py request.FILES.get('file')).
+  // The 200 body is AdminChurchSerializer ('__all__') with the server-set logo_url, so we
+  // map it via mapMyChurch and the caller reflects server truth. Errors PROPAGATE (axios
+  // throws): a 400 carries {"detail": ...} from the DoS/content gate (too large / bad
+  // format / re-encode reject) the screen surfaces; a 403 = suspended church.
+  //
+  // Cross-platform FormData: on WEB the picker uri is a blob/data URL — it MUST be
+  // fetched into a real Blob or the multipart body is empty; on NATIVE RN's FormData
+  // uploads the {uri,name,type} triple directly. The instance default Content-Type is
+  // JSON, so we blank it here to let the platform set the multipart boundary, and
+  // pass-through transformRequest so axios doesn't JSON-stringify the FormData.
+  async uploadLogo(asset: { uri: string; fileName?: string; mimeType?: string }): Promise<Church> {
+    const form = new FormData();
+    const name = asset.fileName || 'logo.jpg';
+    const type = asset.mimeType || 'image/jpeg';
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(asset.uri)).blob();
+      form.append('file', blob, name);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      form.append('file', { uri: asset.uri, name, type } as any);
+    }
+    const { data } = await api.post<BackendMyChurch>('/churches/me/logo/', form, {
+      headers: { 'Content-Type': undefined },   // CRITICAL: platform sets the multipart boundary
+      transformRequest: (d) => d,                // don't let axios JSON-stringify the FormData
+    });
+    return mapMyChurch(data);
   },
 };

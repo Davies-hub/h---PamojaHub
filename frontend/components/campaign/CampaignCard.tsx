@@ -3,6 +3,7 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { PublicCampaign } from '../../types';
 import ProgressBar from '../ui/ProgressBar';
+import RemoteImage from '../ui/RemoteImage';
 
 // Category icon letters used as visual placeholder until real images are loaded
 const CATEGORY_INITIALS: Record<string, string> = {
@@ -27,15 +28,22 @@ function CampaignCard({ campaign, onDonate }: CampaignCardProps) {
 
   return (
     <View style={styles.card}>
-      {/* Banner placeholder — teal-tinted, 160px height */}
-      <View
+      {/* Banner — real image if uploaded, teal placeholder + initial otherwise */}
+      <RemoteImage
+        uri={campaign.bannerImageUrl}
         style={styles.banner}
-        accessible={false}
-      >
-        <View style={styles.bannerIconCircle}>
-          <Text style={styles.bannerIconText}>{initial}</Text>
-        </View>
-      </View>
+        resizeMode="cover"
+        fallback={
+          <View
+            style={styles.banner}
+            accessible={false}
+          >
+            <View style={styles.bannerIconCircle}>
+              <Text style={styles.bannerIconText}>{initial}</Text>
+            </View>
+          </View>
+        }
+      />
 
       <View style={styles.body}>
         {/* Pills row */}

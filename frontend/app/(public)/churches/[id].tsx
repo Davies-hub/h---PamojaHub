@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CampaignCard from '../../../components/campaign/CampaignCard';
+import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { churchesService } from '../../../services/churches.service';
@@ -35,9 +36,16 @@ function ProfileHeader({ church }: { church: PublicChurch }) {
 
   return (
     <View style={styles.profileSection}>
-      <View style={styles.logoCircle}>
-        <Text style={styles.logoText}>{initials}</Text>
-      </View>
+      <RemoteImage
+        uri={church.logoUrl}
+        style={styles.logoCircle}
+        resizeMode="cover"
+        fallback={
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoText}>{initials}</Text>
+          </View>
+        }
+      />
 
       <Text style={styles.churchName}>{church.name}</Text>
       <Text style={styles.denomination}>

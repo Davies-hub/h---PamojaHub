@@ -110,7 +110,7 @@ export interface BackendPublicCampaign {
   raised_amount: string;      // DecimalField → STRING
   donor_count: number;
   status: string;
-  banner_image_url: string;
+  banner_image_url: string | null;
   document_url: string | null;
   category: string;
   created_at: string;
@@ -139,7 +139,7 @@ export function mapPublicCampaign(b: BackendPublicCampaign): PublicCampaign {
     donorCount: b.donor_count,
     status: b.status as CampaignStatus,        // enum values match 1:1 (verified)
     category: b.category as CampaignCategory,  // enum values match 1:1 (verified)
-    bannerImageUrl: b.banner_image_url,
+    bannerImageUrl: b.banner_image_url ?? undefined,   // null (pre-upload rows) → undefined
     documentUrl: b.document_url ?? undefined,  // null → undefined
     createdAt: b.created_at,
   };

@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DonationForm from '../../../components/campaign/DonationForm';
 import WhatsAppShareButton from '../../../components/campaign/WhatsAppShareButton';
 import ProgressBar from '../../../components/ui/ProgressBar';
+import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { PublicCampaign } from '../../../types';
@@ -120,12 +121,19 @@ export default function CampaignDetailScreen() {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
               >
-                {/* 1. Banner */}
-                <LinearGradient
-                  colors={[Colors.primary, Colors.primaryDark]}
-                  start={{ x: 0.15, y: 0 }}
-                  end={{ x: 0.85, y: 1 }}
+                {/* 1. Banner — real image if uploaded, gradient placeholder otherwise */}
+                <RemoteImage
+                  uri={campaign.bannerImageUrl}
                   style={styles.banner}
+                  resizeMode="cover"
+                  fallback={
+                    <LinearGradient
+                      colors={[Colors.primary, Colors.primaryDark]}
+                      start={{ x: 0.15, y: 0 }}
+                      end={{ x: 0.85, y: 1 }}
+                      style={styles.banner}
+                    />
+                  }
                 />
 
                 {/* 2. Campaign info */}
