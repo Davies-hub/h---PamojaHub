@@ -208,7 +208,7 @@ Ship without these. Listed so they're not forgotten.
 
 ## ✅ IMAGE UPLOAD — built as a SECURITY feature (the audit's "no upload surface" is now a *guarded* surface)
 
-Built backend-guard-first, RED→GREEN on every guard, proven at the DB layer, the patched seam, AND the live MinIO wire. Baseline 422 → 454.
+Built backend-guard-first, RED→GREEN on every guard, proven at the DB layer, the patched seam, AND the live MinIO wire. Baseline 422 → 480.
 
 - **Slice 1 — URL-field write-lock (CLOSED, live-gated).** `banner_image_url` (Campaign) + `logo_url` (Church) were client-writable free-text URLField on the admin serializers (a treasurer could PATCH any off-domain URL). Flipped server-set-only (banner: `read_only=True` on the declared field; logo: into `read_only_fields`). Live PATCH gate: evil URL silently dropped, DB unchanged. Broke no FE write. 422→425.
 - **Slice 2a — object-storage client (CLOSED, live-gated).** `integrations/object_storage.py` (boto3, mirrors the daraja client; NOT django-storages). Single `ObjectStorageError` (no clean/ambiguous split — no money in flight). 6 `S3_*` settings via `env()`. Seam-tested + live round-trip (head_object ruled out an FS-fallback false-green). 425→431.
@@ -216,6 +216,10 @@ Built backend-guard-first, RED→GREEN on every guard, proven at the DB layer, t
 - **Slice 2b-ii — image validator (CLOSED).** `media/validation.py` pure `validate_and_reencode`. Order: size cap → magic-byte → Pillow decode under MAX_IMAGE_PIXELS bomb guard → JPEG/PNG allowlist → re-encode (strips polyglot tail+metadata) → downscale to 2000. Seen-failing-first on re-encode, proven for BOTH JPEG and PNG containers. 437→449.
 - **Slice 2b-iii — banner endpoint (CLOSED, seam-proven).** `POST /api/v1/campaigns/mine/<slug>/banner/` — `CampaignBannerUploadView(_CampaignActionBase)`, MultiPartParser. Order: IDOR (object-scope BEFORE bytes read) → DoS (size gate before read) → validate → server keygen `campaign/<id>/banner/<uuid4>.<ext>` → put_object(CLEAN bytes) → metadata commit after confirmed PUT. REDs (patched storage): cross-tenant IDOR (403, put_object+validator never called), stores-clean-not-raw (C-teeth proven). 449→454.
 - **Slice 2b-iv — live banner upload (CLOSED, unpatched, live-gated).** E2E over HTTP vs real MinIO: URL resolves (GET 200), polyglot tail gone from the *served* object, >2.5MB spill-to-temp re-encodes+downscales on the wire. Drift caught: endpoint is under `mine/`; wire `category` is title-case.
+- **Slice 3 — church logo upload (CLOSED, live-gated).** Self-scoped (church from request.user; injected church_id ignored — proven structural via C-teeth). Reuses validator + storage client + MediaAsset(kind=LOGO). Live: church/* prefix serves, polyglot stripped on the wire. 460 tests.
+- **Slice 4a — FE render (CLOSED, live-gated).** Fixed banner-nullability type lie (bannerImageUrl optional + mapper ?? undefined); RemoteImage null-guard at 4 sites. Live: real banner + placeholder on one screen, image GETs 200, no broken icons. tsc clean.
+- **Slice 4b — user-driven logo upload (CLOSED, live-gated).** Picker → multipart POST /churches/me/logo/ → server re-validate → MinIO → render. Web-blob branch + Content-Type override for the boundary. Live: pick a file, logo changes AND survives hard refresh. Added expo-image-picker. Backend guard is the trust boundary; FE checks are UX only.
+- **Cleanup slice (CLOSED, live-gated).** SS0 delete_object (idempotent, live-proven). SS1 object_key UNIQUE index (Postgres-verified + RED). SS2 replace/dedup (owner-scoped, best-effort post-commit; cross-owner-delete C-teeth; live: re-upload deletes old object, OLD_URL 404). SS3a list_objects (paginated, multi-page proven). SS3b sweep_orphan_media (dry-run default, grace window, referenced-set diff; over-delete C-teeth; live: takes only the orphan, live survives --commit). 480 tests.
 
 ## 🔜 Image-upload carry-forwards (deploy/ops + remaining slices)
 
@@ -226,6 +230,9 @@ Deploy/ops (go-live, NOT buildable pre-deploy):
 - **Reverse-proxy body cap** (`client_max_body_size` ~5–6 MB) as first-line DoS gate ahead of Django's read.
 - **Gate `S3_*` in `validate_env()`** prod-required list once upload is prod-reachable (currently NOT gated — fine while dev-only).
 - deps added: `boto3==1.40.0`, `botocore==1.40.76`, `jmespath==1.1.0`, `s3transfer==0.13.1`.
+- **Dev env-state lives OUTSIDE git:** MinIO data dir is J:\minio-data; bring-up script Downloads\minIO\minio_bringup.ps1 points at J:. A fresh checkout has neither — uploads 404 against an empty MinIO until bring-up runs. Add to the dev-setup runbook.
+- **Storage-full monitoring (prod ops):** a full bucket → XMinioStorageFull → endpoint 502s, persists nothing (proven live). Prod needs free-space alerting before the store fills.
+- **sweep_orphan_media cron:** schedule (dry-run first, then --commit) with the unscheduled sweep_stranded_withdrawals + process_subscriptions crons. It DELETES — dry-run in prod first to confirm the referenced-set is complete.
 
 Remaining buildable slices (pre-deploy):
 - **Slice 3 — church logo upload** (self-scoped to `request.user.church`; near-copy of the banner endpoint; reuses validator + storage client + MediaAsset `kind=LOGO`).
