@@ -345,3 +345,43 @@ class OnboardingWiringTests(TestCase):
             resp = self.client.post(reverse('donation-callback'), body, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         spy.assert_not_called()
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# PH2-02 — user-controlled values must be HTML-escaped into the email body.
+# A campaign title / rejection reason is free text (treasurer- or admin-supplied);
+# interpolated raw it is stored XSS in any HTML email client. Only the VALUES are
+# escaped — the static <p>/<strong> structure must survive.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class EmailHtmlEscapingTests(TestCase):
+    def _captured_html(self, fn, *args, **kwargs):
+        """Call an email builder with the network seam mocked; return the HTML body
+        it handed to _send_email (positional arg 2)."""
+        with patch('integrations.resend_email._send_email') as seam:
+            fn(*args, **kwargs)
+        seam.assert_called_once()
+        return seam.call_args.args[2]
+
+    def test_donation_receipt_escapes_campaign_title(self):
+        # DONOR-facing path: campaign_title originates from Campaign.title (treasurer
+        # free text). A <script> payload must NOT land raw in the receipt HTML.
+        html = self._captured_html(
+            send_donation_receipt,
+            'donor@example.org', 'Jane', '<script>evil()</script>',
+            '1000', 'NLJ7RT61SV',
+        )
+        self.assertNotIn('<script>evil()</script>', html)          # raw payload gone
+        self.assertIn('&lt;script&gt;evil()&lt;/script&gt;', html)  # escaped instead
+        self.assertIn('<strong>KES 1000</strong>', html)            # static structure survives
+
+    def test_payout_rejected_escapes_reason(self):
+        # Reject path: reason is admin/treasurer free text.
+        html = self._captured_html(
+            send_payout_rejected_email,
+            'treas@example.org', 'Roof Fund', '<b>x</b>',
+        )
+        self.assertNotIn('<b>x</b>', html)             # raw payload gone
+        self.assertIn('&lt;b&gt;x&lt;/b&gt;', html)     # escaped instead
+        self.assertIn('<p>Reason: ', html)              # static structure survives

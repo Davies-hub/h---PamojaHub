@@ -27,6 +27,7 @@ Single network seam: `_send_email()`. Tests patch exactly this one boundary; the
 real send fires in non-DEBUG too — there is NO no-op guard anymore.
 """
 
+import html
 import logging
 
 from django.conf import settings
@@ -117,7 +118,7 @@ def send_registration_approved(email: str, church_name: str) -> None:
         _send_email(
             email,
             'Your Pamoja Hub church registration was approved',
-            f'<p>Good news — <strong>{church_name}</strong> has been approved on '
+            f'<p>Good news — <strong>{html.escape(church_name)}</strong> has been approved on '
             f'Pamoja Hub. You can now sign in and start creating campaigns.</p>',
         )
     except EmailDeliveryError:
@@ -142,8 +143,8 @@ def send_registration_rejected(email: str, church_name: str, reason: str) -> Non
         _send_email(
             email,
             'Update on your Pamoja Hub church registration',
-            f'<p>Your registration for <strong>{church_name}</strong> on Pamoja Hub '
-            f'was not approved.</p><p>Reason: {reason}</p>'
+            f'<p>Your registration for <strong>{html.escape(church_name)}</strong> on Pamoja Hub '
+            f'was not approved.</p><p>Reason: {html.escape(reason)}</p>'
             f'<p>You can correct the issue and re-register, or reply for help.</p>',
         )
     except EmailDeliveryError:
@@ -166,7 +167,7 @@ def send_registration_received(email: str, church_name: str) -> None:
         _send_email(
             email,
             'We received your Pamoja Hub registration',
-            f'<p>Thanks for registering <strong>{church_name}</strong> on Pamoja Hub.</p>'
+            f'<p>Thanks for registering <strong>{html.escape(church_name)}</strong> on Pamoja Hub.</p>'
             f'<p>Your application is now under review. We will email you as soon as a '
             f'Super Admin approves it, and then you can sign in and create campaigns.</p>',
         )
@@ -187,15 +188,15 @@ def send_donation_receipt(email: str, donor_name, campaign_title: str,
     `amount` is the GROSS the donor paid (matches the M-Pesa SMS); `receipt` is the
     M-Pesa receipt number. donor_name is optional.
     """
-    greeting = f'Hello {donor_name},' if donor_name else 'Hello,'
+    greeting = f'Hello {html.escape(donor_name)},' if donor_name else 'Hello,'
     try:
         _send_email(
             email,
             'Your Pamoja Hub donation receipt',
             f'<p>{greeting}</p>'
             f'<p>Thank you for your donation of <strong>KES {amount}</strong> to '
-            f"'{campaign_title}'.</p>"
-            f'<p>M-Pesa receipt: <strong>{receipt}</strong></p>'
+            f"'{html.escape(campaign_title)}'.</p>"
+            f'<p>M-Pesa receipt: <strong>{html.escape(str(receipt))}</strong></p>'
             f'<p>Every shilling is on record. God bless you.</p>',
         )
     except EmailDeliveryError:
@@ -215,7 +216,7 @@ def send_payout_approved_email(email: str, amount, campaign_title: str) -> None:
             email,
             'Your Pamoja Hub payout was approved',
             f'<p>A payout of <strong>KES {amount}</strong> for '
-            f"'{campaign_title}' has been approved and is being processed.</p>",
+            f"'{html.escape(campaign_title)}' has been approved and is being processed.</p>",
         )
     except EmailDeliveryError:
         logger.exception(
@@ -233,8 +234,8 @@ def send_payout_rejected_email(email: str, campaign_title: str, reason: str) -> 
         _send_email(
             email,
             'Your Pamoja Hub payout was rejected',
-            f"<p>Your payout for '{campaign_title}' was not approved.</p>"
-            f'<p>Reason: {reason}</p>'
+            f"<p>Your payout for '{html.escape(campaign_title)}' was not approved.</p>"
+            f'<p>Reason: {html.escape(reason)}</p>'
             f'<p>You can submit a new payout request, or reply for help.</p>',
         )
     except EmailDeliveryError:
