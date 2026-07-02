@@ -26,6 +26,7 @@ from accounts.models import User, UserRole
 from audit.models import AuditLog
 from campaigns.models import Campaign, CampaignCategory, CampaignStatus
 from churches.models import Church, ChurchStatus
+from integrations.object_storage import ObjectStorageError
 from media.models import MediaAsset
 
 
@@ -72,6 +73,14 @@ class BannerUploadTests(APITestCase):
             banner_image_url=None, category=CampaignCategory.BUILDING,
             treasurer_phone='254712345678', treasurer_name='Treas Urer',
             created_by=cls.treasurer_a, status=CampaignStatus.ACTIVE,
+        )
+        # campaign_b under church_b — the other-owner asset that replace must NEVER touch.
+        cls.campaign_b = Campaign.objects.create(
+            slug='b-active', church=cls.church_b, title='Campaign B', description='desc',
+            goal_amount='100000', raised_amount='0', wallet_balance='0',
+            banner_image_url=None, category=CampaignCategory.BUILDING,
+            treasurer_phone='254712345679', treasurer_name='Treas Urer B',
+            created_by=cls.treasurer_b, status=CampaignStatus.ACTIVE,
         )
 
     def _url(self):
@@ -171,3 +180,79 @@ class BannerUploadTests(APITestCase):
                 action='CAMPAIGN_BANNER_UPLOADED', entity_id=self.campaign_a.id,
             ).exists()
         )
+
+    # ── Sub-slice 2: replace/dedup ───────────────────────────────────────────────
+    # The helper (media.replace) builds its OWN ObjectStorageClient, so the delete
+    # spy patches 'media.replace.ObjectStorageClient' — NOT the view's client. Every
+    # replace test patches BOTH: the view's (put) and the helper's (delete).
+    def _seed_banner(self, campaign, object_key):
+        return MediaAsset.objects.create(
+            kind='BANNER', campaign=campaign, church=None,
+            object_key=object_key, bucket='pamoja-media',
+            content_type='image/jpeg', size_bytes=633, uploaded_by=self.treasurer_a,
+        )
+
+    # ── RED-CROSS-OWNER (headline): replace deletes only A's prior, never B's ─────
+    @patch('media.replace.ObjectStorageClient')
+    @patch('campaigns.views.ObjectStorageClient')
+    def test_replace_cross_owner_never_touches_other_owner(self, mock_view_cls, mock_replace_cls):
+        _stub_put(mock_view_cls)
+        del_spy = mock_replace_cls.return_value.delete_object
+        old_a_key = f'campaign/{self.campaign_a.id}/banner/OLD_A.jpg'
+        old_b_key = f'campaign/{self.campaign_b.id}/banner/OLD_B.jpg'
+        self._seed_banner(self.campaign_a, old_a_key)
+        old_b = self._seed_banner(self.campaign_b, old_b_key)
+
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.post(self._url(), {'file': _upload(_jpeg())}, format='multipart')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+
+        called_keys = [c.args[0] for c in del_spy.call_args_list]
+        self.assertIn(old_a_key, called_keys)          # A's old key deleted
+        self.assertNotIn(old_b_key, called_keys)       # B's key NEVER touched
+        # B's asset row survives, untouched.
+        self.assertTrue(self.campaign_b.media_assets.filter(id=old_b.id).exists())
+        # A dedups to exactly one banner (the new one); OLD_A row is gone.
+        a_assets = MediaAsset.objects.filter(campaign=self.campaign_a, kind='BANNER')
+        self.assertEqual(a_assets.count(), 1)
+        self.assertFalse(a_assets.filter(object_key=old_a_key).exists())
+
+    # ── RED-DELETE-FAILS-SOFT: a delete error must NOT fail the upload ────────────
+    @patch('media.replace.ObjectStorageClient')
+    @patch('campaigns.views.ObjectStorageClient')
+    def test_replace_delete_failure_is_soft(self, mock_view_cls, mock_replace_cls):
+        put_spy = _stub_put(mock_view_cls)
+        mock_replace_cls.return_value.delete_object.side_effect = ObjectStorageError('boom')
+        old_a_key = f'campaign/{self.campaign_a.id}/banner/OLD_A.jpg'
+        self._seed_banner(self.campaign_a, old_a_key)
+
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.post(self._url(), {'file': _upload(_jpeg())}, format='multipart')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+
+        self.campaign_a.refresh_from_db()
+        self.assertEqual(
+            self.campaign_a.banner_image_url,
+            f'http://test.local/pamoja-media/{put_spy.call_args.args[0]}',   # the NEW url
+        )
+        # Delete failed → OLD row left for the sweep → 2 assets (old + new).
+        self.assertEqual(MediaAsset.objects.filter(campaign=self.campaign_a, kind='BANNER').count(), 2)
+        self.assertTrue(
+            MediaAsset.objects.filter(campaign=self.campaign_a, object_key=old_a_key).exists()
+        )
+
+    # ── GREEN-REUPLOAD-DEDUPS: re-upload leaves exactly one banner ───────────────
+    @patch('media.replace.ObjectStorageClient')
+    @patch('campaigns.views.ObjectStorageClient')
+    def test_replace_reupload_dedups_to_one(self, mock_view_cls, mock_replace_cls):
+        _stub_put(mock_view_cls)
+        del_spy = mock_replace_cls.return_value.delete_object
+        old_a_key = f'campaign/{self.campaign_a.id}/banner/OLD_A.jpg'
+        self._seed_banner(self.campaign_a, old_a_key)
+
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.post(self._url(), {'file': _upload(_jpeg())}, format='multipart')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+
+        del_spy.assert_called_once_with(old_a_key)
+        self.assertEqual(MediaAsset.objects.filter(campaign=self.campaign_a, kind='BANNER').count(), 1)

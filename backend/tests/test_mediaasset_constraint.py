@@ -155,3 +155,41 @@ class MediaAssetOwnerConstraintTest(TransactionTestCase):
             uploaded_by=self.user,
         )
         self.assertTrue(MediaAsset.objects.filter(id=asset.id).exists())
+
+    # ── RED: object_key is UNIQUE at the DB (cleanup-slice backstop) ──────────
+    def test_duplicate_object_key_rejected(self):
+        """R5: a second row reusing an existing object_key is rejected by the
+        UNIQUE index — even with a DIFFERENT valid owner, so it's ONLY the
+        object_key uniqueness that trips (both rows satisfy the owner-XOR)."""
+        MediaAsset.objects.create(
+            kind='LOGO',
+            church=self.church,
+            campaign=None,
+            object_key='church/x/logo/dup.png',
+            bucket='pamoja-media',
+            content_type='image/png',
+            size_bytes=633,
+            uploaded_by=self.user,
+        )
+        other_church = Church.objects.create(
+            name='Church B',
+            official_email='b@example.org',
+            phone='254700000002',
+            address='addr',
+            county='Nairobi',
+            denomination='ACK',
+            status=ChurchStatus.ACTIVE,
+            logo_url=None,
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                MediaAsset.objects.create(
+                    kind='LOGO',
+                    church=other_church,
+                    campaign=None,
+                    object_key='church/x/logo/dup.png',   # SAME key → UNIQUE trips
+                    bucket='pamoja-media',
+                    content_type='image/png',
+                    size_bytes=633,
+                    uploaded_by=self.user,
+                )

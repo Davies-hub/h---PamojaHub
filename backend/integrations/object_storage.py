@@ -111,6 +111,51 @@ class ObjectStorageClient:
         logger.info('Stored object %s in bucket %s', key, self.bucket)
         return {'key': key, 'url': self.public_url(key)}
 
+    def _delete(self, key):
+        """The ONLY network boundary for deletes (mirrors _put). Tests patch exactly
+        integrations.object_storage.ObjectStorageClient._delete. S3/MinIO DELETE is
+        idempotent — deleting a missing key returns success, not an error."""
+        return self._client().delete_object(Bucket=self.bucket, Key=key)
+
+    def delete_object(self, key):
+        """Delete the object at `key`. Idempotent: a missing key is a successful no-op
+        (S3 DELETE semantics). Raises ObjectStorageError on any real failure (endpoint
+        down, auth, network). Returns {'key': key, 'deleted': True} on success — the
+        caller treats delete as best-effort AFTER the replacement object is already
+        committed, so a raised error never leaves a dangling reference."""
+        try:
+            self._delete(key)
+        except Exception as exc:
+            raise ObjectStorageError(f'Object DELETE failed for key {key!r}: {exc}') from exc
+        logger.info('Deleted object %s from bucket %s', key, self.bucket)
+        return {'key': key, 'deleted': True}
+
+    def _list(self, prefix=''):
+        """The ONLY network boundary for listing (mirrors _put/_delete). Tests patch exactly
+        integrations.object_storage.ObjectStorageClient._list. Returns an ITERABLE of raw boto3
+        page dicts (each may have a 'Contents' list, or none if that page is empty). Uses the
+        list_objects_v2 paginator so ALL pages are walked, not just the first 1000 keys."""
+        paginator = self._client().get_paginator('list_objects_v2')
+        return paginator.paginate(Bucket=self.bucket, Prefix=prefix)
+
+    def list_objects(self, prefix=''):
+        """List every object under `prefix` (default: whole bucket) as
+        [{'key': str, 'last_modified': datetime, 'size': int}, ...]. Walks ALL pages.
+        Raises ObjectStorageError on any failure. An empty bucket/prefix returns []
+        (a page with no objects omits 'Contents' — handled via .get('Contents', []))."""
+        out = []
+        try:
+            for page in self._list(prefix):
+                for obj in page.get('Contents', []):        # empty page → no 'Contents' key → []
+                    out.append({
+                        'key': obj['Key'],
+                        'last_modified': obj['LastModified'],
+                        'size': obj['Size'],
+                    })
+        except Exception as exc:
+            raise ObjectStorageError(f'Object LIST failed for prefix {prefix!r}: {exc}') from exc
+        return out
+
     def public_url(self, key):
         """Path-style public URL for an object key. No double slash at the join."""
         return f"{self.public_url_base.rstrip('/')}/{key}"

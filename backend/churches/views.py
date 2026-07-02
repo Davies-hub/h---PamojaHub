@@ -68,6 +68,7 @@ from donations.views import _extract_stk_callback
 from integrations.daraja import DarajaClient, STKPushError
 from integrations.object_storage import ObjectStorageClient, ObjectStorageError
 from media.models import MediaAsset, MediaKind
+from media.replace import delete_prior_assets
 from media.validation import MAX_UPLOAD_BYTES, validate_and_reencode
 from notifications.models import Notification, NotificationType
 from superadmin.models import PlatformSettings
@@ -244,6 +245,9 @@ class ChurchLogoUploadView(APIView):
                          'asset_id': str(asset.id)},
                 ip_address=_client_ip(request) or None,
             )
+        # Replace: drop the church's PRIOR logos (object + row), best-effort, post-commit.
+        # OUTSIDE the atomic block so a delete failure cannot roll back the new asset.
+        delete_prior_assets(church, MediaKind.LOGO, asset.id)
         return Response(AdminChurchSerializer(church).data, status=status.HTTP_200_OK)
 
 

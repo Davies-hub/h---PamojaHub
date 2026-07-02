@@ -206,3 +206,52 @@ class LogoUploadTests(APITestCase):
                 action='CHURCH_LOGO_UPLOADED', entity_id=self.church_a.id,
             ).exists()
         )
+
+    # ── Sub-slice 2: replace/dedup (mirror of the banner suite) ──────────────────
+    # Delete spy patches 'media.replace.ObjectStorageClient' (the helper's own
+    # client); the view's put patches 'churches.views.ObjectStorageClient'.
+    def _seed_logo(self, church, object_key):
+        return MediaAsset.objects.create(
+            kind='LOGO', church=church, campaign=None,
+            object_key=object_key, bucket='pamoja-media',
+            content_type='image/jpeg', size_bytes=633, uploaded_by=self.treasurer_a,
+        )
+
+    # ── RED-CROSS-OWNER (headline): replace never touches church_b's logo ────────
+    @patch('media.replace.ObjectStorageClient')
+    @patch('churches.views.ObjectStorageClient')
+    def test_replace_cross_owner_never_touches_other_church(self, mock_view_cls, mock_replace_cls):
+        _stub_put(mock_view_cls)
+        del_spy = mock_replace_cls.return_value.delete_object
+        old_a_key = f'church/{self.church_a.id}/logo/OLD_A.jpg'
+        old_b_key = f'church/{self.church_b.id}/logo/OLD_B.jpg'
+        self._seed_logo(self.church_a, old_a_key)
+        old_b = self._seed_logo(self.church_b, old_b_key)
+
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.post(self._url(), {'file': _upload(_jpeg())}, format='multipart')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+
+        called_keys = [c.args[0] for c in del_spy.call_args_list]
+        self.assertIn(old_a_key, called_keys)          # A's old logo deleted
+        self.assertNotIn(old_b_key, called_keys)       # B's logo NEVER touched
+        self.assertTrue(self.church_b.media_assets.filter(id=old_b.id).exists())
+        a_assets = MediaAsset.objects.filter(church=self.church_a, kind='LOGO')
+        self.assertEqual(a_assets.count(), 1)
+        self.assertFalse(a_assets.filter(object_key=old_a_key).exists())
+
+    # ── GREEN-REUPLOAD-DEDUPS: re-upload leaves exactly one logo ─────────────────
+    @patch('media.replace.ObjectStorageClient')
+    @patch('churches.views.ObjectStorageClient')
+    def test_replace_reupload_dedups_to_one(self, mock_view_cls, mock_replace_cls):
+        _stub_put(mock_view_cls)
+        del_spy = mock_replace_cls.return_value.delete_object
+        old_a_key = f'church/{self.church_a.id}/logo/OLD_A.jpg'
+        self._seed_logo(self.church_a, old_a_key)
+
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.post(self._url(), {'file': _upload(_jpeg())}, format='multipart')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+
+        del_spy.assert_called_once_with(old_a_key)
+        self.assertEqual(MediaAsset.objects.filter(church=self.church_a, kind='LOGO').count(), 1)

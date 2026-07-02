@@ -25,8 +25,7 @@ class MediaAsset(models.Model):
         on_delete=models.CASCADE,
         related_name='media_assets',
     )
-    object_key = models.CharField(max_length=512)   # server-generated (campaign/<id>/banner/<uuid4>.<ext>); uniqueness rests on uuid4.
-    # DB unique index deferred to the media replace/cleanup slice.
+    object_key = models.CharField(max_length=512, unique=True)   # server-gen uuid4 key; unique index is the DB backstop (cleanup slice)
     bucket = models.CharField(max_length=255)
     content_type = models.CharField(max_length=100)
     size_bytes = models.PositiveIntegerField()
