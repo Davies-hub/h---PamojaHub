@@ -21,6 +21,7 @@ and unreliable; load testing in a dedicated phase covers that. This suite only
 confirms the lock is invoked and the external call is sequenced AFTER it.
 """
 
+from datetime import datetime
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -29,6 +30,7 @@ from django.db import connection, transaction
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -704,6 +706,49 @@ class ListLeakageTests(BaseTwoChurchSetUp):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         ids = {item['id'] for item in resp.data['results']}
         self.assertEqual(ids, {str(self.a_wd2.id)})
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# List date filter (from/to) — mirrors /churches/me/donations/ (created_at__date,
+# inclusive both ends; malformed → 400). Church A owns all three rows so the
+# leak-guard scope is orthogonal to the date filter under test.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class WithdrawalDateFilterTests(BaseTwoChurchSetUp):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.wd_early = _make_withdrawal(cls.camp_a, amount=Decimal('1000'))
+        cls.wd_mid = _make_withdrawal(cls.camp_a, amount=Decimal('2000'))
+        cls.wd_late = _make_withdrawal(cls.camp_a, amount=Decimal('3000'))
+        # created_at is auto_now_add — the value passed at create() is ignored, so
+        # stamp three distinct calendar days here (noon UTC to avoid tz-edge slop).
+        Withdrawal.objects.filter(id=cls.wd_early.id).update(
+            created_at=timezone.make_aware(datetime(2026, 1, 10, 12, 0)))
+        Withdrawal.objects.filter(id=cls.wd_mid.id).update(
+            created_at=timezone.make_aware(datetime(2026, 1, 20, 12, 0)))
+        Withdrawal.objects.filter(id=cls.wd_late.id).update(
+            created_at=timezone.make_aware(datetime(2026, 1, 30, 12, 0)))
+
+    def test_from_returns_only_on_or_after(self):
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.get(reverse('withdrawal-list'), {'from': '2026-01-20'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        ids = {item['id'] for item in resp.data['results']}
+        self.assertEqual(ids, {str(self.wd_mid.id), str(self.wd_late.id)})
+
+    def test_to_returns_only_on_or_before(self):
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.get(reverse('withdrawal-list'), {'to': '2026-01-20'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        ids = {item['id'] for item in resp.data['results']}
+        self.assertEqual(ids, {str(self.wd_early.id), str(self.wd_mid.id)})
+
+    def test_malformed_from_returns_400_not_500(self):
+        self.client.force_authenticate(user=self.treasurer_a)
+        resp = self.client.get(reverse('withdrawal-list'), {'from': 'notadate'})
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 # ═════════════════════════════════════════════════════════════════════════════

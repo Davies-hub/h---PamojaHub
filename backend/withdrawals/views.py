@@ -93,6 +93,9 @@ from integrations.daraja import (
     new_originator_conversation_id,
 )
 from notifications.models import Notification, NotificationType
+# _parse_date_param: shared YYYY-MM-DD parser (→ date or DRF 400). Imported (not
+# copied) so the withdrawals list from/to behaves EXACTLY like /churches/me/donations/.
+from superadmin.views import _parse_date_param
 from withdrawals.models import (
     MAX_RETRIES,
     RESULT_CALLBACK_IGNORED_STATUSES,
@@ -173,6 +176,14 @@ class WithdrawalListView(APIView):
             qs = qs.filter(status=status_filter)
         if campaign_filter:
             qs = qs.filter(campaign_id=campaign_filter)
+        # Date-inclusive from/to (created_at__date bounds), mirroring
+        # /churches/me/donations/. A malformed param raises 400 here, never a 500.
+        date_from = _parse_date_param(request.query_params.get('from'), 'from')
+        date_to = _parse_date_param(request.query_params.get('to'), 'to')
+        if date_from is not None:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to is not None:
+            qs = qs.filter(created_at__date__lte=date_to)
         qs = qs.order_by('-created_at')
 
         paginator = self.pagination_class()
