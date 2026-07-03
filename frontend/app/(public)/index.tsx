@@ -16,7 +16,9 @@ import CampaignCard from '../../components/campaign/CampaignCard';
 import BrandLogo from '../../components/ui/BrandLogo';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { campaignsService } from '../../services/campaigns.service';
-import { PublicCampaign } from '../../types';
+import { statsService } from '../../services/stats.service';
+import { PlatformTotals, PublicCampaign } from '../../types';
+import { fmtKes } from '../../utils/formatters';
 
 // ─── Top navigation bar ───────────────────────────────────────────────────────
 
@@ -139,13 +141,36 @@ function HeroSection() {
 }
 
 function StatsRow() {
+  const [totals, setTotals] = useState<PlatformTotals | null>(null);
+
+  // Live GET /stats/ (public, [AllowAny]) — real all-time platform figures. On
+  // failure we keep totals null and render em-dashes; we NEVER show a hardcoded
+  // figure on a platform that sells "every shilling on record".
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const t = await statsService.getPlatformTotals();
+        if (!cancelled) setTotals(t);
+      } catch {
+        if (!cancelled) setTotals(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Placeholder while loading AND on error — an em-dash, never a fake number.
+  const raised = totals ? fmtKes(totals.totalRaised) : '—';
+  const campaigns = totals ? String(totals.campaignCount) : '—';
+  const churches = totals ? String(totals.churchCount) : '—';
+
   return (
     <View style={styles.statsRow}>
-      <StatItem value="KES 4.2M" label="Raised" />
+      <StatItem value={raised} label="Raised" />
       <View style={styles.statDivider} />
-      <StatItem value="138" label="Campaigns" />
+      <StatItem value={campaigns} label="Campaigns" />
       <View style={styles.statDivider} />
-      <StatItem value="47" label="Churches" />
+      <StatItem value={churches} label="Churches" />
     </View>
   );
 }

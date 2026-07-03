@@ -18,6 +18,7 @@ import {
   DonationStatus,
   GroupLabel,
   PlatformSettings,
+  PlatformTotals,
   PortalCampaign,
   PublicCampaign,
   PublicChurch,
@@ -206,6 +207,21 @@ export function mapDashboardStats(b: BackendDashboardStats): DashboardStats {
     activeCampaigns: b.active_campaigns,
     pendingDisbursements: b.pending_disbursements,
     recentDonations: (b.recent_donations ?? []).map(mapRecentDonation),
+  };
+}
+
+// GET /stats/ (PlatformStatsSerializer) — public all-time platform totals.
+export interface BackendPlatformTotals {
+  total_raised: string;        // NET, all-time, STRING (DecimalField)
+  campaign_count: number;
+  church_count: number;
+}
+
+export function mapPlatformTotals(b: BackendPlatformTotals): PlatformTotals {
+  return {
+    totalRaised: toMoneyNumber('total_raised', b.total_raised),
+    campaignCount: b.campaign_count,
+    churchCount: b.church_count,
   };
 }
 

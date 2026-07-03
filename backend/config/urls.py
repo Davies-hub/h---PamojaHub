@@ -5,6 +5,7 @@ All API surface lives under /api/v1/<resource>/.
   * /treasurer/    — treasurer_portal.urls (Step 2.8: phone-portal OTP + scoped endpoints)
   * /churches/     — churches.urls (Step 2.9a: public browse + treasurer's own church)
   * /campaigns/    — campaigns.urls (Step 2.9a: public browse + treasurer's own campaigns)
+  * /stats/        — campaigns.stats_urls (PH4-02: public all-time platform totals)
   * /group-labels/ — campaigns.group_label_urls (Step 2.9a: treasurer's group labels)
   * /withdrawals/  — withdrawals.urls (Step 2.9b: list + approve/reject/retry)
   * /super/        — superadmin.urls (Step 2.9c: Super Admin reads + state-changers + billing)
@@ -22,6 +23,7 @@ urlpatterns = [
     path('api/v1/treasurer/', include('treasurer_portal.urls')),
     path('api/v1/churches/', include('churches.urls')),
     path('api/v1/campaigns/', include('campaigns.urls')),
+    path('api/v1/stats/', include('campaigns.stats_urls')),
     path('api/v1/group-labels/', include('campaigns.group_label_urls')),
     path('api/v1/withdrawals/', include('withdrawals.urls')),
     path('api/v1/super/', include('superadmin.urls')),

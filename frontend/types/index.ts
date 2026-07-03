@@ -233,6 +233,13 @@ export interface DashboardStats {
   recentDonations: RecentDonation[];
 }
 
+// Public all-time platform totals (GET /stats/) — the landing hero figures.
+export interface PlatformTotals {
+  totalRaised: number;    // NET, all-time (decimal string on wire → Number)
+  campaignCount: number;
+  churchCount: number;
+}
+
 // The treasurer's own campaign (AdminCampaignSerializer) — richer than PublicCampaign
 // (wallet_balance) but the screens read this subset.
 export interface TreasurerCampaign {

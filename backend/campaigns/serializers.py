@@ -255,3 +255,17 @@ class CampaignUpdateSerializer(serializers.ModelSerializer):
         # Plain text only — strip every tag. Defence-in-depth against an admin pasting
         # rich HTML into what the PRD specifies as a plain-text body.
         return bleach.clean(value, tags=[], strip=True)
+
+
+class PlatformStatsSerializer(serializers.Serializer):
+    """Public platform totals for the landing hero (GET /api/v1/stats/).
+
+    Read-only projection — never deserializes client input. total_raised is a
+    DecimalField so it renders as a STRING on the wire (COERCE_DECIMAL_TO_STRING
+    default; rule #11); the frontend converts via Number() in services/mappers.ts.
+    Counts are plain integers.
+    """
+
+    total_raised = serializers.DecimalField(max_digits=16, decimal_places=2)
+    campaign_count = serializers.IntegerField()
+    church_count = serializers.IntegerField()

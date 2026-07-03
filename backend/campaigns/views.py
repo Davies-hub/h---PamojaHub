@@ -51,6 +51,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
+from django.db.models import Sum
 from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
@@ -70,9 +71,11 @@ from campaigns.serializers import (
     AdminCampaignSerializer,
     CampaignUpdateSerializer,
     GroupLabelSerializer,
+    PlatformStatsSerializer,
     PublicCampaignSerializer,
 )
 from churches.models import Church, ChurchStatus, TIER_ACTIVE_CAMPAIGN_CAP
+from donations.models import Donation, DonationStatus
 from common.masking import mask_phone
 from common.pagination import StandardPagination
 from common.permissions import (
@@ -126,6 +129,42 @@ def _validate_group_label(value, user_church):
             status=status.HTTP_400_BAD_REQUEST,
         )
     return True, None
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Public platform stats
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class PlatformStatsView(APIView):
+    """GET /api/v1/stats/ — public, all-time platform totals for the landing hero.
+
+    AllowAny. Every figure is computed SERVER-SIDE (never trust a client) and is
+    ALL-TIME (no date filter, no status filter on campaigns/churches):
+      * total_raised   — Sum of Donation.net_amount over SUCCESSFUL donations
+                         (money on record; net_amount is NULL for PENDING/FAILED,
+                         which Sum skips). Same field SuperAnalytics sums.
+      * campaign_count — every Campaign, all statuses.
+      * church_count   — every Church, all statuses.
+
+    total_raised is a DecimalField → STRING on the wire (rule #11). This is a
+    NON-sensitive aggregate: no per-church or per-donor detail, so no allowlist
+    concern beyond emitting only these three figures.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        total_raised = Donation.objects.filter(
+            status=DonationStatus.SUCCESSFUL,
+        ).aggregate(s=Sum('net_amount'))['s'] or Decimal('0')
+
+        data = {
+            'total_raised': total_raised,
+            'campaign_count': Campaign.objects.count(),
+            'church_count': Church.objects.count(),
+        }
+        return Response(PlatformStatsSerializer(data).data)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
