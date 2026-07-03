@@ -7,6 +7,7 @@ from django.urls import path
 
 from churches.views import (
     ChurchLogoUploadView,
+    ChurchMeDonationsExportView,
     ChurchMeDonationsView,
     ChurchMeStatsView,
     ChurchMeView,
@@ -20,5 +21,6 @@ urlpatterns = [
     path('me/logo/', ChurchLogoUploadView.as_view(), name='church-logo-upload'),
     path('me/stats/', ChurchMeStatsView.as_view(), name='church-me-stats'),
     path('me/donations/', ChurchMeDonationsView.as_view(), name='church-me-donations'),
+    path('me/donations/export/', ChurchMeDonationsExportView.as_view(), name='church-me-donations-export'),
     path('<uuid:id>/', PublicChurchDetailView.as_view(), name='church-public-detail'),
 ]

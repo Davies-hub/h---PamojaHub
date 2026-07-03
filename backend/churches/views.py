@@ -27,6 +27,7 @@ Stats aggregation Coalesce:
   Sum aggregations don't — confirmed by test_stats_for_church_with_no_campaigns_returns_zeros.
 """
 
+import csv
 import logging
 import uuid
 from datetime import timedelta
@@ -36,10 +37,12 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
+from django.http import StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny
+from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -383,6 +386,71 @@ class ChurchMeDonationsView(APIView):
         page = paginator.paginate_queryset(qs, request, view=self)
         data = PortalDonationReportSerializer(page, many=True).data
         return paginator.get_paginated_response(data)
+
+
+class _PassthroughCSVRenderer(BaseRenderer):
+    """A no-op renderer so DRF content-negotiation accepts `?format=csv` instead of
+    404-ing on an unknown format. The export view returns a StreamingHttpResponse
+    directly (a Django response, not a DRF Response), so this renderer's render()
+    is never actually invoked — it exists purely to satisfy negotiation."""
+
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class _Echo:
+    """A write-only file-like whose write() returns the value, so csv.writer can be
+    driven row-by-row inside a generator for StreamingHttpResponse (Django docs
+    streaming-CSV idiom)."""
+
+    def write(self, value):
+        return value
+
+
+class ChurchMeDonationsExportView(APIView):
+    """GET /api/v1/churches/me/donations/export/?format=csv — the FULL, un-paginated
+    NET-only CSV of this church's SUCCESSFUL donations, for the treasurer Reports
+    screen's download button.
+
+    The paginated sibling ChurchMeDonationsView caps at StandardPagination.page_size
+    (20), so a church with >20 gifts can never download its complete history there.
+    This view reuses that view's EXACT church-scope + SUCCESSFUL guard
+    (ChurchMeDonationsView.get_queryset) — the single leak surface is defined once —
+    and streams every row with NO paginator.
+
+    Net-Everywhere: the only donation fields that reach the wire are created_at,
+    mpesa_receipt_number, donor_name and net_amount — the same NET-only surface as
+    PortalDonationReportSerializer. Gross amount, platform_fee and phone_number are
+    never read.
+    """
+
+    permission_classes = [IsChurchTreasurer]
+    renderer_classes = [_PassthroughCSVRenderer]
+
+    HEADER = ['Date', 'Receipt', 'Donor', 'Net Amount (KES)']
+
+    def _iter_rows(self, qs):
+        writer = csv.writer(_Echo())
+        yield writer.writerow(self.HEADER)
+        for d in qs.iterator():
+            donor = (d.donor_name or '').strip() or 'Anonymous'
+            date_str = d.created_at.date().isoformat()
+            net = '' if d.net_amount is None else str(d.net_amount)
+            yield writer.writerow([date_str, d.mpesa_receipt_number, donor, net])
+
+    def get(self, request):
+        # Reuse the exact church-scope + SUCCESSFUL guard — do not re-invent it.
+        qs = ChurchMeDonationsView().get_queryset(request).order_by('-created_at')
+
+        filename = f'donations-{timezone.now().date().isoformat()}.csv'
+        response = StreamingHttpResponse(
+            self._iter_rows(qs), content_type='text/csv'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
 
 # ───────────────────── Subscription payment (STK initiate) ────────────────────

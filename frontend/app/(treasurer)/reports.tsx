@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Modal as RNModal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -112,6 +113,8 @@ export default function ReportsScreen() {
   const [selectedGroup, setSelectedGroup] = useState<string>(ALL_GROUPS);
   const [format, setFormat] = useState<ReportFormat>('CSV');
   const [showGroupPicker, setShowGroupPicker] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(false);
 
   const fromValid = dateFrom === '' || isValidYmd(dateFrom);
   const toValid = dateTo === '' || isValidYmd(dateTo);
@@ -144,6 +147,40 @@ export default function ReportsScreen() {
   }, [dateFrom, dateTo]);
 
   const selectedReport = REPORT_OPTIONS.find(r => r.id === reportType)!;
+
+  // ── CSV download ──
+  // WEB only for now (native share-sheet is a later slice). Enabled ONLY for Donation
+  // History — the only report with a server-side export endpoint
+  // (GET /churches/me/donations/export/). The other report types have no exporter yet,
+  // so their button stays disabled rather than shipping one that 404s. The export is
+  // full history (server streams the whole scoped set, un-paginated) — it does NOT honour
+  // the on-screen date range.
+  const isWeb = Platform.OS === 'web';
+  const canDownloadDonations = reportType === 'donation_history' && isWeb;
+
+  // Clear any stale download error when the report type changes.
+  useEffect(() => { setDownloadError(false); }, [reportType]);
+
+  const handleDownload = useCallback(async () => {
+    if (downloading) return;
+    setDownloadError(false);
+    setDownloading(true);
+    try {
+      await churchesService.downloadMyDonationsCsv();
+    } catch {
+      setDownloadError(true);
+    } finally {
+      setDownloading(false);
+    }
+  }, [downloading]);
+
+  const exportHint = canDownloadDonations
+    ? 'Download the full donation history (NET amounts) as CSV.'
+    : reportType === 'donation_history'
+      ? 'CSV download is available on the web app.'
+      : 'Downloadable exports for this report are coming soon.';
+  const disabledDownloadLabel =
+    reportType === 'donation_history' && !isWeb ? 'Download on web' : 'Download — coming soon';
 
   // Group options derived from the campaigns actually present — no mock, no extra fetch.
   // Group filtering applies to Campaign Summary only (donations/payouts carry no group).
@@ -315,14 +352,15 @@ export default function ReportsScreen() {
           )}
         </View>
 
-        {/* ── Export (coming soon) ── */}
+        {/* ── Export ── */}
         <View style={styles.card}>
           <SectionLabel label="Export" />
           <View style={styles.formatRow}>
             <View style={styles.formatInfo}>
               <Text style={styles.formatInfoTitle}>CSV / PDF export</Text>
-              <Text style={styles.formatInfoDesc}>Downloadable exports are coming soon.</Text>
+              <Text style={styles.formatInfoDesc}>{exportHint}</Text>
             </View>
+            {/* CSV/PDF toggle stays disabled — PDF is a separate slice. */}
             <View style={styles.toggleGroup}>
               {(['CSV', 'PDF'] as ReportFormat[]).map(f => (
                 <View key={f} style={[styles.toggleBtn, styles.toggleBtnDisabled]}>
@@ -331,15 +369,44 @@ export default function ReportsScreen() {
               ))}
             </View>
           </View>
-          <View
-            style={[styles.downloadBtn, styles.downloadBtnDisabled]}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: true }}
-            accessibilityLabel="Download report (coming soon)"
-          >
-            <Ionicons name="download-outline" size={20} color={Colors.textMuted} />
-            <Text style={styles.downloadBtnTextDisabled}>Download — coming soon</Text>
-          </View>
+
+          {canDownloadDonations ? (
+            <TouchableOpacity
+              style={[styles.downloadBtn, styles.downloadBtnActive, downloading && styles.downloadBtnBusy]}
+              onPress={handleDownload}
+              disabled={downloading}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Download donation history CSV"
+              accessibilityState={{ disabled: downloading, busy: downloading }}
+            >
+              {downloading ? (
+                <>
+                  <ActivityIndicator color={Colors.white} size="small" />
+                  <Text style={styles.downloadBtnTextActive}>Preparing…</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="download-outline" size={20} color={Colors.white} />
+                  <Text style={styles.downloadBtnTextActive}>Download CSV</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          ) : (
+            <View
+              style={[styles.downloadBtn, styles.downloadBtnDisabled]}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: true }}
+              accessibilityLabel={disabledDownloadLabel}
+            >
+              <Ionicons name="download-outline" size={20} color={Colors.textMuted} />
+              <Text style={styles.downloadBtnTextDisabled}>{disabledDownloadLabel}</Text>
+            </View>
+          )}
+
+          {downloadError && (
+            <Text style={styles.downloadError}>Couldn’t download. Please try again.</Text>
+          )}
         </View>
 
         {/* ── Results ── */}
@@ -695,6 +762,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.lg,
     color: Colors.textMuted,
+  },
+  downloadBtnActive: {
+    backgroundColor: Colors.primary,
+  },
+  downloadBtnBusy: {
+    opacity: 0.7,
+  },
+  downloadBtnTextActive: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.lg,
+    color: Colors.white,
+  },
+  downloadError: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.danger,
+    textAlign: 'center',
+    marginTop: 4,
   },
 
   // Summary

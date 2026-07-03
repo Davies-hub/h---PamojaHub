@@ -79,6 +79,40 @@ export const churchesService = {
     return data.results.map(mapMyDonation);
   },
 
+  // Authed WEB download: GET /churches/me/donations/export/?format=csv — streams this
+  // church's FULL SUCCESSFUL donation history as CSV (server-side, un-paginated, so the
+  // >20-row cap of getMyDonations never truncates it). NET-only: gross / platform_fee /
+  // phone are never emitted (same allowlist as mapMyDonation). The export takes NO date
+  // filter — the backend streams the whole scoped set — so this is always the complete
+  // history, independent of the on-screen date range.
+  //
+  // Uses the shared `api` instance (NOT raw fetch) so the Bearer token + 401
+  // refresh-and-retry + baseURL apply exactly as for every other call; responseType
+  // 'blob' because the body is CSV, not JSON. WEB ONLY: it triggers a browser download
+  // via an object-URL anchor (document/URL are web globals) — the caller gates this off
+  // on native (button disabled) until a native share-sheet slice. Errors PROPAGATE (the
+  // caller shows a retry note). Filename honours the server Content-Disposition when that
+  // header is CORS-exposed, else falls back to donations-<today>.csv.
+  async downloadMyDonationsCsv(): Promise<void> {
+    const response = await api.get('/churches/me/donations/export/', {
+      params: { format: 'csv' },
+      responseType: 'blob',
+    });
+    const blob = response.data as Blob;
+    const disposition = (response.headers?.['content-disposition'] as string | undefined) ?? '';
+    const match = /filename="?([^";]+)"?/i.exec(disposition);
+    const filename = match?.[1] ?? `donations-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  },
+
   // Authed WRITE: POST /churches/me/logo/ (multipart) — upload the treasurer's OWN
   // church logo. Self-scoped server-side (church = request.user.church; no id in the
   // URL/body). The wire field name is 'file' (churches/views.py request.FILES.get('file')).

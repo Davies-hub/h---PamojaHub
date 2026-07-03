@@ -34,6 +34,8 @@ Coverage matrix:
  10. Public list filter (PAUSED/CLOSED + PENDING/SUSPENDED-church campaigns excluded)
 """
 
+import csv
+import io
 from datetime import datetime, timezone as dt_timezone
 from decimal import Decimal
 
@@ -1049,3 +1051,58 @@ class ChurchMeDonationsListTest(BaseTwoChurchSetUp):
         self.client.force_authenticate(user=super_admin)
         resp = self.client.get(reverse('church-me-donations'))
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 13. Treasurer donation CSV export — GET /churches/me/donations/export/?format=csv
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class ChurchMeDonationsCsvExportTest(BaseTwoChurchSetUp):
+    """GET /api/v1/churches/me/donations/export/?format=csv — full, un-paginated,
+    NET-only CSV of this church's SUCCESSFUL donations.
+
+    The paginated sibling (/me/donations/) caps at StandardPagination.page_size=20,
+    so a church with >20 gifts cannot download its complete history there. This
+    export reuses the exact same church-scope + SUCCESSFUL guard but streams EVERY
+    row. This test plants 25 SUCCESSFUL donations to prove the >20 case: the export
+    must return all 25 data rows, not a 20-row page.
+    """
+
+    N_DONATIONS = 25
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        for i in range(cls.N_DONATIONS):
+            Donation.objects.create(
+                campaign=cls.camp_a_active,
+                phone_number='254712345678',
+                donor_name=f'Donor {i:02d}',
+                amount=Decimal('1000.00'),
+                platform_fee=Decimal('25.00'),
+                net_amount=Decimal('975.00'),
+                status=DonationStatus.SUCCESSFUL,
+                mpesa_receipt_number=f'QHXCSV{i:03d}',
+            )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('...-export')) so this URL resolves to a clean 404
+        # while the route is absent — proving RED without a NoReverseMatch error.
+        self.export_url = reverse('church-me-donations') + 'export/'
+
+    def test_export_streams_all_25_rows_not_a_20_row_page(self):
+        resp = self.client.get(self.export_url, {'format': 'csv'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, getattr(resp, 'content', resp))
+        # Content-Type is CSV.
+        self.assertTrue(resp['Content-Type'].startswith('text/csv'), resp['Content-Type'])
+        # Streamed body → parse with the csv module.
+        body = b''.join(resp.streaming_content).decode('utf-8')
+        rows = list(csv.reader(io.StringIO(body)))
+        rows = [r for r in rows if r]  # drop any trailing blank line
+        # Header row present.
+        self.assertEqual(rows[0], ['Date', 'Receipt', 'Donor', 'Net Amount (KES)'])
+        # 25 DATA rows — the whole history, NOT a 20-row page.
+        self.assertEqual(len(rows) - 1, self.N_DONATIONS)
