@@ -39,7 +39,8 @@ interface ReportOption {
 // slice to render (client-side), so switching types is instant with no refetch.
 interface ReportData {
   campaigns: TreasurerCampaign[];
-  donations: MyDonationRow[];   // server-side date-filtered (from/to)
+  donations: MyDonationRow[];   // server-side date-filtered (from/to); max 20 (page 1)
+  donationsTotal: number;       // true total of matching donations across ALL pages
   payouts: Withdrawal[];
 }
 
@@ -127,12 +128,17 @@ export default function ReportsScreen() {
     const donationParams: { from?: string; to?: string } = {};
     if (dateFrom && isValidYmd(dateFrom)) donationParams.from = dateFrom;
     if (dateTo && isValidYmd(dateTo)) donationParams.to = dateTo;
-    const [campaigns, donations, payouts] = await Promise.all([
+    const [campaigns, donationsPage, payouts] = await Promise.all([
       campaignsService.listMine(),
       churchesService.getMyDonations(donationParams),
       withdrawalsService.list(),
     ]);
-    return { campaigns, donations, payouts };
+    return {
+      campaigns,
+      donations: donationsPage.rows,
+      donationsTotal: donationsPage.total,
+      payouts,
+    };
   }, [dateFrom, dateTo]);
 
   const { data, status, refetchError, retry } = useFocusRefetch<ReportData>(fetcher);
@@ -198,7 +204,12 @@ export default function ReportsScreen() {
     return rows;
   }, [data, dateFrom, dateTo, selectedGroup]);
 
-  const donationRows = data?.donations ?? [];   // already date-filtered server-side
+  const donationRows = data?.donations ?? [];   // already date-filtered server-side (max 20)
+  // True total of matching donations across all pages (server-side count). Because the
+  // donations query is filtered ENTIRELY server-side, this is exact — unlike campaigns/
+  // payouts, which are client-filtered over page 1 and so have no trustworthy total.
+  const donationsTotal = data?.donationsTotal ?? 0;
+  const donationsTruncated = donationsTotal > donationRows.length;
 
   const payoutRows = useMemo(
     () => (data?.payouts ?? []).filter(w => inDateRange(w.createdAt, dateFrom, dateTo)),
@@ -240,7 +251,21 @@ export default function ReportsScreen() {
       );
     }
     if (reportType === 'campaign_summary') return <CampaignTable rows={campaignRows} />;
-    if (reportType === 'donation_history') return <DonationTable rows={donationRows} />;
+    if (reportType === 'donation_history') {
+      return (
+        <>
+          {donationsTruncated && (
+            <View style={styles.truncationBanner}>
+              <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
+              <Text style={styles.truncationBannerText}>
+                Showing {donationRows.length} of {donationsTotal}. Download CSV for the full list.
+              </Text>
+            </View>
+          )}
+          <DonationTable rows={donationRows} />
+        </>
+      );
+    }
     return <PayoutTable rows={payoutRows} />;
   }
 
@@ -810,6 +835,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.warning,
+  },
+  truncationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 8,
+    paddingHorizontal: Spacing.sm,
+    marginTop: 4,
+  },
+  truncationBannerText: {
+    flex: 1,
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.primary,
   },
 
   // State boxes (loading / error / empty)

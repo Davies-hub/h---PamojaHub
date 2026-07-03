@@ -68,15 +68,19 @@ export const churchesService = {
   // gross / platform_fee / phone are dropped by the serializer). Optional from/to are
   // YYYY-MM-DD and applied server-side with a date-INCLUSIVE end (a 23:30 donation on `to`
   // is returned); a malformed date → backend 400 (propagates). Optional campaign (UUID)
-  // narrows to one campaign. Paginated; returns the mapped results array. The treasurer
-  // Reports → Donation History source.
+  // narrows to one campaign. The treasurer Reports → Donation History source.
+  //
+  // Paginated (page_size 20). Because the from/to/campaign filters are ALL applied
+  // server-side, the envelope `count` IS the true total of matching rows — so we return
+  // it as `total` alongside the (max-20) mapped `rows`. The screen can then show
+  // "Showing 20 of {total}" when total > rows.length.
   async getMyDonations(params?: { from?: string; to?: string; campaign?: string }):
-    Promise<MyDonationRow[]> {
+    Promise<{ total: number; rows: MyDonationRow[] }> {
     const { data } = await api.get<PaginatedResponse<BackendMyDonation>>(
       '/churches/me/donations/',
       { params },
     );
-    return data.results.map(mapMyDonation);
+    return { total: data.count, rows: data.results.map(mapMyDonation) };
   },
 
   // Authed WEB download: GET /churches/me/donations/export/?format=csv — streams this
