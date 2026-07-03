@@ -30,6 +30,7 @@ from churches.models import Church, ChurchStatus
 
 
 EVIL_URL = 'https://evil.example.com/x.png'
+EVIL_DOC_URL = 'http://evil.example.com/x'
 
 
 class ImageFieldLockTest(TestCase):
@@ -109,6 +110,22 @@ class ImageFieldLockTest(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.campaign.refresh_from_db()
         self.assertIsNone(self.campaign.banner_image_url)
+
+    def test_edit_ignores_client_document_url(self):
+        """T4: PATCH the edit route with a client document_url -> 200, but row stays None.
+
+        Same class of hole as banner_image_url: a treasurer-writable URL rendered on a
+        public campaign is an arbitrary-URL injection vector (phishing / content
+        injection). Locking it read_only makes DRF silently drop the client value.
+        """
+        resp = self.client.patch(
+            reverse('campaign-mine-detail', args=['a-active']),
+            {'document_url': EVIL_DOC_URL},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        self.campaign.refresh_from_db()
+        self.assertIsNone(self.campaign.document_url)
 
     def test_church_patch_ignores_client_logo(self):
         """T3: PATCH /churches/me/ with a client logo_url -> 200, but row logo stays None."""

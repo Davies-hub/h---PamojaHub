@@ -89,6 +89,9 @@ class PublicCampaignSerializerLeakTest(SimpleTestCase):
         'wallet_balance',
         'checkout_request_id',
         'b2c_conversation_id',
+        # document_url: removed from the public output (unused by the FE, and a
+        # public arbitrary-URL surface). Guard a future re-add so it fails loudly.
+        'document_url',
     }
 
     def test_no_forbidden_fields_leak(self):

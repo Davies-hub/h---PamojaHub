@@ -52,7 +52,6 @@ class PublicCampaignSerializer(serializers.ModelSerializer):
             'donor_count',
             'status',
             'banner_image_url',
-            'document_url',
             'category',
             'created_at',
         ]
@@ -126,6 +125,10 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
             'closed_at',
             'created_by',
             'church',
+            # document_url: SERVER-SET-ONLY (same rationale as banner_image_url above).
+            # A treasurer-writable URL rendered on the public campaign page is an
+            # arbitrary-URL injection vector; DRF silently drops any client value.
+            'document_url',
         ]
 
     def get_donor_count(self, obj):
