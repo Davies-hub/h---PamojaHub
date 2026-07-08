@@ -14,6 +14,7 @@ from campaigns.views import (
     CampaignPauseView,
     CampaignResumeView,
     CampaignUpdatesView,
+    ChurchCampaignsExportView,
     PublicCampaignDetailView,
     PublicCampaignListView,
     TreasurerCampaignDetailView,
@@ -28,6 +29,9 @@ urlpatterns = [
     # Treasurer admin surface — under /mine/ to keep separate from public slug
     path('mine/', TreasurerCampaignListView.as_view(), name='campaign-mine-list'),
     path('mine/create/', CampaignCreateView.as_view(), name='campaign-create'),
+    # Full un-paginated CSV of the treasurer's campaigns. MUST precede the
+    # mine/<slug:slug>/ route below — else the slug view swallows 'export' as a slug.
+    path('mine/export/', ChurchCampaignsExportView.as_view(), name='campaign-export'),
     path('mine/<slug:slug>/', TreasurerCampaignDetailView.as_view(), name='campaign-mine-detail'),
     path('mine/<slug:slug>/pause/', CampaignPauseView.as_view(), name='campaign-pause'),
     path('mine/<slug:slug>/resume/', CampaignResumeView.as_view(), name='campaign-resume'),

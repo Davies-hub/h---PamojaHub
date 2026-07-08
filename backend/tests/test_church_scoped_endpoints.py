@@ -53,7 +53,9 @@ from campaigns.models import (
     CampaignUpdate,
     GroupLabel,
 )
+from campaigns.views import ChurchCampaignsExportView
 from churches.models import Church, ChurchStatus
+from churches.views import ChurchMeDonationsExportView
 from donations.models import Donation, DonationStatus
 from notifications.models import Notification, NotificationType
 
@@ -770,6 +772,14 @@ class PublicListFilterTest(BaseTwoChurchSetUp):
         # ACTIVE campaign of PENDING church excluded
         self.assertNotIn('pending-campaign', slugs)
 
+    def test_public_campaign_bad_church_uuid_returns_400_not_500(self):
+        # Regression: ?church=<non-UUID> on the AllowAny public browse must not
+        # reach the queryset (UUIDField.to_python raises ValidationError → 500).
+        # A malformed id is a bad param → 400, mirroring _parse_date_param on a
+        # malformed date; never an uncaught 500 + debug traceback.
+        resp = self.client.get(reverse('campaign-public-list'), {'church': 'abc'})
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_public_church_list_excludes_non_active_churches(self):
         _make_church(name='Pending Church', email='p2@example.org',
                      status_=ChurchStatus.PENDING)
@@ -1106,3 +1116,324 @@ class ChurchMeDonationsCsvExportTest(BaseTwoChurchSetUp):
         self.assertEqual(rows[0], ['Date', 'Receipt', 'Donor', 'Net Amount (KES)'])
         # 25 DATA rows — the whole history, NOT a 20-row page.
         self.assertEqual(len(rows) - 1, self.N_DONATIONS)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Treasurer donation PDF export — GET /churches/me/donations/export/?format=pdf
+# The PDF sibling of the CSV export: same church-scope + SUCCESSFUL guard, same
+# NET-only columns, same PII exclusions (no gross/fee/phone), rendered as
+# application/pdf. Cross-church isolation is already proven by the CSV export's
+# shared get_queryset; this test focuses on the new wire format + PII exclusion
+# proven at the SOURCE (_row), which page compression cannot mask.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class ChurchMeDonationsPdfExportTest(BaseTwoChurchSetUp):
+    """GET /api/v1/churches/me/donations/export/?format=pdf.
+
+    Money-safety proof: a SUCCESSFUL donation carries a KNOWN phone number, a gross
+    amount and a platform fee — all three DISTINCT from the net (and from each
+    other, so no substring collision) — plus a donor name with a comma + double-quote
+    (CSV-injection-shaped). The test asserts:
+      (i)  the response is a valid PDF (200 + application/pdf + .pdf attachment +
+           %PDF magic bytes);
+      (ii) SOURCE-LEVEL PII exclusion — ChurchMeDonationsExportView._row(donation)
+           returns EXACTLY [date, receipt, donor, net] (4 cells) and the phone /
+           gross / fee values appear in NO cell. This is the real guarantee: a byte
+           grep of the PDF is fooled by reportlab's default page compression (a
+           leaked value would sit in a zlib stream and never match), so PII safety
+           is proven where it actually lives — the row builder never READS phone /
+           amount / platform_fee — not by grepping compressed bytes;
+      (iii) the CSV path is unbroken (still text/csv).
+    Authenticated as treasurer_a only.
+    """
+
+    KNOWN_PHONE = '254799112233'          # PII — must NOT reach any cell
+    GROSS = '8888.88'                     # gross amount — distinct, not a net substring
+    FEE = '33.33'                         # platform fee — distinct, not a net substring
+    NET = '1975.00'                       # the ONLY money value that reaches the wire
+    RECEIPT = 'QHXPDF001'
+    TRICKY_DONOR = 'Smith, "Bob" & Co.'   # comma + double-quote: injection-shaped
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        Donation.objects.create(
+            campaign=cls.camp_a_active,
+            phone_number=cls.KNOWN_PHONE,
+            donor_name=cls.TRICKY_DONOR,
+            amount=Decimal(cls.GROSS),
+            platform_fee=Decimal(cls.FEE),
+            net_amount=Decimal(cls.NET),
+            status=DonationStatus.SUCCESSFUL,
+            mpesa_receipt_number=cls.RECEIPT,
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('...-export')) so this URL resolves while the route is
+        # absent — proving RED without a NoReverseMatch error.
+        self.export_url = reverse('church-me-donations') + 'export/'
+
+    def test_pdf_export_valid_no_phone_and_csv_unbroken(self):
+        # (i) PDF branch — 200, application/pdf, .pdf attachment, valid %PDF magic.
+        resp = self.client.get(self.export_url, {'format': 'pdf'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, getattr(resp, 'content', resp))
+        self.assertEqual(resp['Content-Type'], 'application/pdf', resp['Content-Type'])
+        self.assertIn('attachment', resp['Content-Disposition'])
+        self.assertIn('.pdf', resp['Content-Disposition'])
+        body = resp.content
+        self.assertTrue(body.startswith(b'%PDF'), body[:16])
+
+        # (ii) PII exclusion is guaranteed at _row (SOURCE), not by grepping compressed
+        # PDF bytes. Call the shared row builder directly and prove the phone/gross/fee
+        # never enter a cell — this cannot be fooled by reportlab page compression.
+        donation = Donation.objects.get(mpesa_receipt_number=self.RECEIPT)
+        row = ChurchMeDonationsExportView._row(donation)
+        self.assertEqual(len(row), 4, row)   # exactly [date, receipt, donor, net]
+        self.assertEqual(row, [
+            donation.created_at.date().isoformat(),
+            self.RECEIPT,
+            self.TRICKY_DONOR,
+            self.NET,
+        ])
+        joined = '\x1f'.join(str(cell) for cell in row)   # NUL-ish sep: no cross-cell match
+        self.assertNotIn(self.KNOWN_PHONE, joined)   # phone never in a cell
+        self.assertNotIn(self.GROSS, joined)         # gross never in a cell
+        self.assertNotIn(self.FEE, joined)           # fee never in a cell
+
+        # (iii) CSV path unbroken — still text/csv.
+        csv_resp = self.client.get(self.export_url, {'format': 'csv'})
+        self.assertEqual(csv_resp.status_code, status.HTTP_200_OK, getattr(csv_resp, 'content', csv_resp))
+        self.assertTrue(csv_resp['Content-Type'].startswith('text/csv'), csv_resp['Content-Type'])
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Campaign-summary CSV export — GET /api/v1/campaigns/mine/export/?format=csv
+# Full, un-paginated, treasurer-scoped, NET / PII-safe. Mirrors the payout export
+# (tests/test_withdrawals.py::WithdrawalCsvExportTest) and the donations export
+# above. A dedicated two-church fixture (NOT BaseTwoChurchSetUp) so church A's
+# campaign set is exactly the 25 planted here — keeps the "25 rows not a 20-row
+# page" assertion clean, same idiom as CampaignMineDateFilterTests.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class CampaignCsvExportTest(TestCase):
+    """GET /api/v1/campaigns/mine/export/?format=csv — the FULL, un-paginated CSV
+    of this church's campaigns (ALL statuses, NO date/group/status filter).
+
+    The paginated sibling (/campaigns/mine/) caps at StandardPagination.page_size=20,
+    so a church with >20 campaigns cannot download its complete list there. This
+    export reuses the exact church-scope guard (TreasurerCampaignListView.get_queryset)
+    but streams EVERY row. Plants 25 campaigns for church A (proves the >20 case),
+    one with group_label=NULL (proves the '' Group cell) carrying a KNOWN
+    treasurer_phone + treasurer_name (proves neither reaches the wire). Church B
+    gets one campaign whose title must NEVER appear in A's export (cross-church guard).
+    """
+
+    N_CAMPAIGNS = 25
+    KNOWN_PHONE = '254799887766'          # unique to the NULL-group row
+    KNOWN_NAME = 'Secret Treasurer Person'
+    B_TITLE = 'CHURCH-B-SECRET-CAMPAIGN'
+    NULL_GROUP_TITLE = 'Campaign x-a-00'  # title of the group_label=NULL row
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.church_a = _make_church(name='Export Church A', email='xa@example.org')
+        cls.church_b = _make_church(name='Export Church B', email='xb@example.org')
+        cls.treasurer_a = _make_treasurer(cls.church_a, 'xta@example.org')
+        cls.treasurer_b = _make_treasurer(cls.church_b, 'xtb@example.org')
+        cls.label_a = GroupLabel.objects.create(church=cls.church_a, name='Building Fund')
+
+        for i in range(cls.N_CAMPAIGNS):
+            if i == 0:
+                # The proof row: NULL group + KNOWN phone/name.
+                _make_campaign(cls.church_a, cls.treasurer_a, slug=f'x-a-{i:02d}',
+                               group_label=None,
+                               treasurer_phone=cls.KNOWN_PHONE,
+                               treasurer_name=cls.KNOWN_NAME)
+            else:
+                _make_campaign(cls.church_a, cls.treasurer_a, slug=f'x-a-{i:02d}',
+                               group_label=cls.label_a)
+        # Church B — one campaign whose title must never leak into A's export.
+        _make_campaign(cls.church_b, cls.treasurer_b, slug='x-b-00', title=cls.B_TITLE)
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('campaign-export')) so this URL resolves while the
+        # route is absent — proving RED without a NoReverseMatch error.
+        self.export_url = reverse('campaign-mine-list') + 'export/'
+
+    def test_export_streams_all_campaigns_scoped_no_pii(self):
+        resp = self.client.get(self.export_url, {'format': 'csv'})
+        # (i) HTTP 200 + Content-Type text/csv
+        self.assertEqual(resp.status_code, status.HTTP_200_OK,
+                         getattr(resp, 'content', resp))
+        self.assertTrue(resp['Content-Type'].startswith('text/csv'),
+                        resp['Content-Type'])
+        # Streamed body → parse with the csv module.
+        body = b''.join(resp.streaming_content).decode('utf-8')
+        rows = [r for r in csv.reader(io.StringIO(body)) if r]
+        # (ii) header row present with the expected columns.
+        self.assertEqual(rows[0], ['Title', 'Group', 'Goal (KES)', 'Raised (KES)',
+                                   'Wallet Balance (KES)', 'Status', 'Created'])
+        # (iii) exactly 25 DATA rows — the whole scoped set, NOT a 20-row page
+        #       (26 would mean church B leaked in).
+        self.assertEqual(len(rows) - 1, self.N_CAMPAIGNS)
+        # (iv) church B's campaign title is absent (cross-church leak guard holds).
+        self.assertNotIn(self.B_TITLE, body)
+        # (v) the known treasurer_phone digits AND treasurer_name string are absent.
+        self.assertNotIn(self.KNOWN_PHONE, body)
+        self.assertNotIn(self.KNOWN_NAME, body)
+        # (vi) the NULL-group row has an empty Group cell (not "None").
+        null_row = next(r for r in rows[1:] if r[0] == self.NULL_GROUP_TITLE)
+        self.assertEqual(null_row[1], '')
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Campaign-summary PDF export — GET /api/v1/campaigns/mine/export/?format=pdf
+# The PDF sibling of the CSV export: same church-scope guard, same 7 columns, same
+# PII exclusion (treasurer_phone / treasurer_name never reach the wire), same
+# NULL-group -> '' handling, rendered as application/pdf. Cross-church isolation is
+# already proven by the CSV export's shared get_queryset; this test focuses on the
+# new wire format + the exclusions proven at the SOURCE (_row), which reportlab page
+# compression can mask in a byte grep. Mirrors ChurchMeDonationsPdfExportTest /
+# tests.test_withdrawals.WithdrawalPdfExportTest.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class CampaignPdfExportTest(TestCase):
+    """GET /api/v1/campaigns/mine/export/?format=pdf.
+
+    Money/PII-safety proof: church A gets a NULL-group campaign carrying a KNOWN
+    treasurer_phone + treasurer_name, plus a grouped campaign. The test asserts:
+      (i)   the response is a valid PDF (200 + application/pdf + .pdf attachment +
+            %PDF magic bytes);
+      (ii)  SOURCE-LEVEL exclusion — ChurchCampaignsExportView._row(c) returns
+            EXACTLY the 7 columns, the NULL-group cell is '' (not "None"), and the
+            treasurer_phone AND treasurer_name appear in NO cell. Proven at the row
+            builder, not by grepping compressed PDF bytes — reportlab default page
+            compression would fool a byte grep, so PII safety is proven where it
+            lives: the row builder never READS phone/name;
+      (iii) the CSV path is unbroken (still text/csv).
+    Authenticated as treasurer_a only.
+    """
+
+    KNOWN_PHONE = '254799887766'            # PII — must NOT reach any cell
+    KNOWN_NAME = 'Secret Treasurer Person'  # PII — must NOT reach any cell
+    NULL_SLUG = 'pdf-a-null'
+    GROUP_SLUG = 'pdf-a-grouped'
+    GROUP_NAME = 'Building Fund'
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.church_a = _make_church(name='PDF Church A', email='pxa@example.org')
+        cls.treasurer_a = _make_treasurer(cls.church_a, 'pxta@example.org')
+        cls.label_a = GroupLabel.objects.create(church=cls.church_a, name=cls.GROUP_NAME)
+        # NULL-group campaign carrying the KNOWN phone + name (the proof row).
+        _make_campaign(cls.church_a, cls.treasurer_a, slug=cls.NULL_SLUG,
+                       group_label=None,
+                       treasurer_phone=cls.KNOWN_PHONE,
+                       treasurer_name=cls.KNOWN_NAME)
+        # A grouped campaign — proves the Group cell carries the label name.
+        _make_campaign(cls.church_a, cls.treasurer_a, slug=cls.GROUP_SLUG,
+                       group_label=cls.label_a)
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('...-export')) — the URL resolves while the pdf branch
+        # is absent, proving RED without a NoReverseMatch.
+        self.export_url = reverse('campaign-mine-list') + 'export/'
+
+    def test_pdf_export_valid_no_pii_and_csv_unbroken(self):
+        # (i) PDF branch — 200, application/pdf, .pdf attachment, valid %PDF magic.
+        resp = self.client.get(self.export_url, {'format': 'pdf'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK,
+                         getattr(resp, 'content', resp))
+        self.assertEqual(resp['Content-Type'], 'application/pdf', resp['Content-Type'])
+        self.assertIn('attachment', resp['Content-Disposition'])
+        self.assertIn('.pdf', resp['Content-Disposition'])
+        body = resp.content
+        self.assertTrue(body.startswith(b'%PDF'), body[:16])
+
+        # (ii) PII exclusion + NULL-group '' proven at _row (SOURCE), not by grepping
+        # compressed PDF bytes (which reportlab page compression would fool).
+        null_c = Campaign.objects.get(slug=self.NULL_SLUG)
+        null_row = ChurchCampaignsExportView._row(null_c)
+        self.assertEqual(len(null_row), 7, null_row)   # exactly the 7 columns
+        self.assertEqual(null_row, [
+            null_c.title,
+            '',                                         # NULL group -> '' (not "None")
+            str(null_c.goal_amount),
+            str(null_c.raised_amount),
+            str(null_c.wallet_balance),
+            CampaignStatus(null_c.status).label,
+            null_c.created_at.date().isoformat(),
+        ])
+        # treasurer_phone AND treasurer_name never in ANY cell.
+        joined = '\x1f'.join(str(cell) for cell in null_row)   # NUL-ish sep: no cross-cell match
+        self.assertNotIn(self.KNOWN_PHONE, joined)
+        self.assertNotIn(self.KNOWN_NAME, joined)
+
+        # grouped row: the Group cell carries the label name.
+        grouped_c = Campaign.objects.get(slug=self.GROUP_SLUG)
+        grouped_row = ChurchCampaignsExportView._row(grouped_c)
+        self.assertEqual(len(grouped_row), 7, grouped_row)
+        self.assertEqual(grouped_row[1], self.GROUP_NAME)
+
+        # (iii) CSV path unbroken — still text/csv.
+        csv_resp = self.client.get(self.export_url, {'format': 'csv'})
+        self.assertEqual(csv_resp.status_code, status.HTTP_200_OK,
+                         getattr(csv_resp, 'content', csv_resp))
+        self.assertTrue(csv_resp['Content-Type'].startswith('text/csv'),
+                        csv_resp['Content-Type'])
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 13. /campaigns/mine/ list date filter (from/to) — mirrors /withdrawals/ and
+# /churches/me/donations/ (created_at__date, inclusive both ends; malformed →
+# 400). A dedicated single-church fixture (NOT BaseTwoChurchSetUp) so the only
+# campaigns in play are the three planted here — keeps the exact-set assertions
+# clean, exactly like tests/test_withdrawals.py::WithdrawalDateFilterTests.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class CampaignMineDateFilterTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.church = _make_church(name='Date Church', email='date@example.org')
+        cls.treasurer = _make_treasurer(cls.church, 'datetreas@example.org')
+        cls.camp_early = _make_campaign(cls.church, cls.treasurer, slug='d-early')
+        cls.camp_mid = _make_campaign(cls.church, cls.treasurer, slug='d-mid')
+        cls.camp_late = _make_campaign(cls.church, cls.treasurer, slug='d-late')
+        # created_at is auto_now_add — the value passed at create() is ignored, so
+        # stamp three distinct calendar days here (noon UTC to avoid tz-edge slop).
+        Campaign.objects.filter(id=cls.camp_early.id).update(
+            created_at=datetime(2026, 1, 10, 12, 0, tzinfo=dt_timezone.utc))
+        Campaign.objects.filter(id=cls.camp_mid.id).update(
+            created_at=datetime(2026, 1, 20, 12, 0, tzinfo=dt_timezone.utc))
+        Campaign.objects.filter(id=cls.camp_late.id).update(
+            created_at=datetime(2026, 1, 30, 12, 0, tzinfo=dt_timezone.utc))
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.treasurer)
+
+    def test_from_returns_only_on_or_after(self):
+        resp = self.client.get(reverse('campaign-mine-list'), {'from': '2026-01-20'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        slugs = {item['slug'] for item in resp.data['results']}
+        self.assertEqual(slugs, {'d-mid', 'd-late'})
+
+    def test_to_returns_only_on_or_before(self):
+        resp = self.client.get(reverse('campaign-mine-list'), {'to': '2026-01-20'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        slugs = {item['slug'] for item in resp.data['results']}
+        self.assertEqual(slugs, {'d-early', 'd-mid'})
+
+    def test_malformed_from_returns_400_not_500(self):
+        resp = self.client.get(reverse('campaign-mine-list'), {'from': 'notadate'})
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)

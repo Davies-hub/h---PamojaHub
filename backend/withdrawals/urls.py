@@ -5,6 +5,7 @@ from django.urls import path
 
 from withdrawals.views import (
     B2CResultCallbackView,
+    ChurchWithdrawalsExportView,
     WithdrawalApproveView,
     WithdrawalListView,
     WithdrawalRejectView,
@@ -21,6 +22,8 @@ _b2c_result_path = (
 
 urlpatterns = [
     path('', WithdrawalListView.as_view(), name='withdrawal-list'),
+    # Full un-paginated CSV of the treasurer's payouts (reuses list scope guard).
+    path('export/', ChurchWithdrawalsExportView.as_view(), name='withdrawal-export'),
     # Public — Safaricom-called B2C ResultURL (async payout outcome).
     path(_b2c_result_path, B2CResultCallbackView.as_view(), name='withdrawal-b2c-result'),
     path('<uuid:id>/approve/', WithdrawalApproveView.as_view(), name='withdrawal-approve'),

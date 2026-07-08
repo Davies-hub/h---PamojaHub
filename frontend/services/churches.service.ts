@@ -117,6 +117,32 @@ export const churchesService = {
     URL.revokeObjectURL(url);
   },
 
+  // Authed READ: GET /churches/me/donations/export/?format=pdf — the SAME full,
+  // un-paginated, NET-only SUCCESSFUL-donation set as downloadMyDonationsCsv, but
+  // rendered server-side as a PDF (reportlab). Identical mechanics: shared `api`
+  // instance (Bearer + 401 refresh-and-retry + baseURL), responseType 'blob' (the
+  // body is PDF bytes, not JSON), WEB ONLY (object-URL anchor). Errors PROPAGATE.
+  // Filename honours Content-Disposition when CORS-exposed, else donations-<today>.pdf.
+  async downloadMyDonationsPdf(): Promise<void> {
+    const response = await api.get('/churches/me/donations/export/', {
+      params: { format: 'pdf' },
+      responseType: 'blob',
+    });
+    const blob = response.data as Blob;
+    const disposition = (response.headers?.['content-disposition'] as string | undefined) ?? '';
+    const match = /filename="?([^";]+)"?/i.exec(disposition);
+    const filename = match?.[1] ?? `donations-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  },
+
   // Authed WRITE: POST /churches/me/logo/ (multipart) — upload the treasurer's OWN
   // church logo. Self-scoped server-side (church = request.user.church; no id in the
   // URL/body). The wire field name is 'file' (churches/views.py request.FILES.get('file')).

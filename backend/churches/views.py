@@ -37,7 +37,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
@@ -64,6 +64,7 @@ from churches.serializers import (
 )
 from churches.services import set_church_tier
 from common.pagination import StandardPagination
+from common.pdf import render_report_pdf
 from common.permissions import ChurchNotSuspended, IsChurchTreasurer
 from donations.models import Donation, DonationStatus
 from donations.serializers import PortalDonationReportSerializer
@@ -401,6 +402,19 @@ class _PassthroughCSVRenderer(BaseRenderer):
         return data
 
 
+class _PassthroughPDFRenderer(BaseRenderer):
+    """The PDF twin of _PassthroughCSVRenderer — its only job is to make DRF
+    content-negotiation accept `?format=pdf` instead of 404-ing. The export view
+    returns an HttpResponse(pdf_bytes) directly (a Django response, not a DRF
+    Response), so render() is never actually invoked."""
+
+    media_type = 'application/pdf'
+    format = 'pdf'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
 class _Echo:
     """A write-only file-like whose write() returns the value, so csv.writer can be
     driven row-by-row inside a generator for StreamingHttpResponse (Django docs
@@ -424,31 +438,58 @@ class ChurchMeDonationsExportView(APIView):
     Net-Everywhere: the only donation fields that reach the wire are created_at,
     mpesa_receipt_number, donor_name and net_amount — the same NET-only surface as
     PortalDonationReportSerializer. Gross amount, platform_fee and phone_number are
-    never read.
+    never read. This holds for BOTH wire formats: ?format=csv (default) streams the
+    CSV; ?format=pdf renders the SAME rows as a PDF via common.pdf.render_report_pdf.
     """
 
     permission_classes = [IsChurchTreasurer]
-    renderer_classes = [_PassthroughCSVRenderer]
+    renderer_classes = [_PassthroughCSVRenderer, _PassthroughPDFRenderer]
 
     HEADER = ['Date', 'Receipt', 'Donor', 'Net Amount (KES)']
+
+    @staticmethod
+    def _row(d):
+        """The single column definition shared by the CSV and PDF exports — NET-only,
+        never gross/fee/phone. Defining it once means the two wire formats cannot
+        drift apart (and neither can leak a field the other doesn't)."""
+        donor = (d.donor_name or '').strip() or 'Anonymous'
+        date_str = d.created_at.date().isoformat()
+        net = '' if d.net_amount is None else str(d.net_amount)
+        return [date_str, d.mpesa_receipt_number, donor, net]
 
     def _iter_rows(self, qs):
         writer = csv.writer(_Echo())
         yield writer.writerow(self.HEADER)
         for d in qs.iterator():
-            donor = (d.donor_name or '').strip() or 'Anonymous'
-            date_str = d.created_at.date().isoformat()
-            net = '' if d.net_amount is None else str(d.net_amount)
-            yield writer.writerow([date_str, d.mpesa_receipt_number, donor, net])
+            yield writer.writerow(self._row(d))
 
     def get(self, request):
         # Reuse the exact church-scope + SUCCESSFUL guard — do not re-invent it.
         qs = ChurchMeDonationsView().get_queryset(request).order_by('-created_at')
 
+        if request.query_params.get('format') == 'pdf':
+            return self._pdf_response(request, qs)
+
+        # CSV (default / ?format=csv) — byte-identical to before.
         filename = f'donations-{timezone.now().date().isoformat()}.csv'
         response = StreamingHttpResponse(
             self._iter_rows(qs), content_type='text/csv'
         )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    def _pdf_response(self, request, qs):
+        generated = timezone.now().date().isoformat()
+        subtitle = f'{request.user.church.name} · Generated {generated}'
+        rows = [self._row(d) for d in qs.iterator()]
+        pdf_bytes = render_report_pdf(
+            title='Donation History',
+            subtitle=subtitle,
+            header=self.HEADER,
+            rows=rows,
+        )
+        filename = f'donations-{generated}.pdf'
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 

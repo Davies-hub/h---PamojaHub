@@ -46,17 +46,20 @@ collision-resolution is the subscription system's concern, NOT solved here.
 Recorded in memory note project_phase2_step29a.md.
 """
 
+import csv
 import uuid
 from decimal import Decimal
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import Sum
+from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny
+from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -78,6 +81,7 @@ from churches.models import Church, ChurchStatus, TIER_ACTIVE_CAMPAIGN_CAP
 from donations.models import Donation, DonationStatus
 from common.masking import mask_phone
 from common.pagination import StandardPagination
+from common.pdf import render_report_pdf
 from common.permissions import (
     ChurchNotSuspended,
     ChurchScopedPermission,
@@ -88,6 +92,7 @@ from media.models import MediaAsset, MediaKind
 from media.replace import delete_prior_assets
 from media.validation import MAX_UPLOAD_BYTES, validate_and_reencode
 from notifications.models import Notification, NotificationType
+from superadmin.views import _parse_date_param
 from withdrawals.models import BLOCKING_WITHDRAWAL_STATUSES
 
 
@@ -200,6 +205,17 @@ class PublicCampaignListView(APIView):
         if category:
             qs = qs.filter(category=category)
         if church_id:
+            # church_id is a UUID PK — an unparseable value would raise
+            # ValidationError deep in the queryset (a 500 on this AllowAny
+            # endpoint). Validate up-front → clean 400, mirroring how
+            # _parse_date_param rejects a malformed date param.
+            try:
+                uuid.UUID(church_id)
+            except (ValueError, AttributeError, TypeError):
+                return Response(
+                    {'detail': 'Invalid church id.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             qs = qs.filter(church_id=church_id)
         qs = qs.order_by('-created_at')
 
@@ -277,12 +293,147 @@ class TreasurerCampaignListView(APIView):
             qs = qs.filter(status=status_filter)
         if group_label:
             qs = qs.filter(group_label_id=group_label)
+
+        # Date-inclusive bounds; a bad param raises 400 here (see _parse_date_param),
+        # never a 500 reaching the queryset. Applied BEFORE pagination so the page
+        # count stays honest. created_at is NOT indexed on Campaign — a scale
+        # follow-up (matches donations/withdrawals list filters).
+        date_from = _parse_date_param(request.query_params.get('from'), 'from')
+        date_to = _parse_date_param(request.query_params.get('to'), 'to')
+        if date_from is not None:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to is not None:
+            qs = qs.filter(created_at__date__lte=date_to)
+
         qs = qs.order_by('-created_at')
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(qs, request, view=self)
         data = AdminCampaignSerializer(page, many=True).data
         return paginator.get_paginated_response(data)
+
+
+# ─────────────────── Campaign-summary CSV export (full, scoped) ──────────────
+# Mirrors withdrawals.views.ChurchWithdrawalsExportView / churches
+# ChurchMeDonationsExportView: a passthrough renderer so DRF content-negotiation
+# accepts ?format=csv, an _Echo file-like driving csv.writer inside a generator,
+# and a StreamingHttpResponse. Those helpers are private to each view module, so
+# they are re-declared identically here — keep the three in sync.
+
+
+class _PassthroughCSVRenderer(BaseRenderer):
+    """No-op renderer so DRF negotiation accepts ?format=csv instead of 404-ing.
+    The view returns a StreamingHttpResponse (a Django response, not a DRF
+    Response), so render() is never invoked. Mirrors withdrawals/views.py."""
+
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class _PassthroughPDFRenderer(BaseRenderer):
+    """PDF twin of _PassthroughCSVRenderer — its only job is to make DRF negotiation
+    accept ?format=pdf instead of 404-ing. The view returns an HttpResponse(pdf_bytes)
+    (a Django response, not a DRF Response), so render() is never invoked. Mirrors
+    withdrawals/views.py."""
+
+    media_type = 'application/pdf'
+    format = 'pdf'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class _Echo:
+    """Write-only file-like whose write() returns the value, so csv.writer can be
+    driven row-by-row inside a StreamingHttpResponse generator. Mirrors
+    withdrawals/views.py."""
+
+    def write(self, value):
+        return value
+
+
+class ChurchCampaignsExportView(APIView):
+    """GET /api/v1/campaigns/mine/export/?format=csv — the FULL, un-paginated CSV
+    of this church's campaigns (ALL statuses), for the treasurer Reports download.
+
+    The paginated sibling TreasurerCampaignListView caps at
+    StandardPagination.page_size (20), so a church with >20 campaigns can never
+    download its complete list there. This view reuses that view's EXACT
+    church-scope guard (TreasurerCampaignListView.get_queryset — the single leak
+    surface is defined once; it already select_related('group_label') so the
+    per-row group name read is not an N+1) and streams every row with NO paginator
+    and NO date/group/status filter (full scoped export by product decision —
+    matches the donations + payouts exports).
+
+    PII-safety: treasurer_phone / treasurer_name live on the Campaign row but are
+    deliberately NOT emitted here (mirrors the payout export skipping phone). Only
+    title, group name, goal / raised / wallet_balance (all NET, church-facing),
+    status and created date reach the wire. This holds for BOTH wire formats:
+    ?format=csv (default) streams the CSV; ?format=pdf renders the SAME rows as a
+    PDF via common.pdf.render_report_pdf.
+    """
+
+    permission_classes = [IsChurchTreasurer]
+    renderer_classes = [_PassthroughCSVRenderer, _PassthroughPDFRenderer]
+
+    HEADER = ['Title', 'Group', 'Goal (KES)', 'Raised (KES)',
+              'Wallet Balance (KES)', 'Status', 'Created']
+
+    @staticmethod
+    def _row(c):
+        """The single column definition shared by the CSV and PDF exports — never
+        reads treasurer_phone / treasurer_name. Defining it once means the two wire
+        formats cannot drift apart (and neither can leak the PII the other doesn't).
+        group_label is nullable (SET_NULL) — emit '' not "None"."""
+        group = c.group_label.name if c.group_label else ''
+        return [
+            c.title,
+            group,
+            str(c.goal_amount),
+            str(c.raised_amount),
+            str(c.wallet_balance),
+            CampaignStatus(c.status).label,
+            c.created_at.date().isoformat(),
+        ]
+
+    def _iter_rows(self, qs):
+        writer = csv.writer(_Echo())
+        yield writer.writerow(self.HEADER)
+        for c in qs.iterator():
+            yield writer.writerow(self._row(c))
+
+    def get(self, request):
+        # Reuse the exact church-scope guard — do not re-invent the church filter.
+        qs = TreasurerCampaignListView().get_queryset(request).order_by('-created_at')
+
+        if request.query_params.get('format') == 'pdf':
+            return self._pdf_response(request, qs)
+
+        # CSV (default / ?format=csv) — byte-identical to before.
+        filename = f'campaigns-{timezone.now().date().isoformat()}.csv'
+        response = StreamingHttpResponse(
+            self._iter_rows(qs), content_type='text/csv'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    def _pdf_response(self, request, qs):
+        generated = timezone.now().date().isoformat()
+        subtitle = f'{request.user.church.name} · Generated {generated}'
+        rows = [self._row(c) for c in qs.iterator()]
+        pdf_bytes = render_report_pdf(
+            title='Campaign Summary',
+            subtitle=subtitle,
+            header=self.HEADER,
+            rows=rows,
+        )
+        filename = f'campaigns-{generated}.pdf'
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
 
 # ═════════════════════════════════════════════════════════════════════════════

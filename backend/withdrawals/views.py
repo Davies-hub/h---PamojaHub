@@ -61,11 +61,15 @@ PENDING_APPROVAL, return 400 with a clear message. Do NOT auto-reject. The
 treasurer can request a smaller amount or wait for donations to clear.
 """
 
+import csv
 import logging
 
 from django.db import transaction
+from django.http import HttpResponse, StreamingHttpResponse
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
+from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -73,6 +77,7 @@ from audit.models import AuditLog
 from campaigns.models import Campaign
 from common.masking import mask_phone
 from common.pagination import StandardPagination
+from common.pdf import render_report_pdf
 from common.permissions import (
     ChurchNotSuspended,
     ChurchScopedPermission,
@@ -189,6 +194,123 @@ class WithdrawalListView(APIView):
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(qs, request, view=self)
         return paginator.get_paginated_response(WithdrawalSerializer(page, many=True).data)
+
+
+# ─────────────────── Payout-history CSV export (full, scoped) ────────────────
+# Mirrors churches.views.ChurchMeDonationsExportView: a passthrough renderer so
+# DRF content-negotiation accepts ?format=csv, an _Echo file-like driving
+# csv.writer inside a generator, and a StreamingHttpResponse. Those helpers are
+# private to churches/views.py, so they are re-declared identically here — keep
+# the two in sync.
+
+
+class _PassthroughCSVRenderer(BaseRenderer):
+    """No-op renderer so DRF negotiation accepts ?format=csv instead of 404-ing.
+    The view returns a StreamingHttpResponse (a Django response, not a DRF
+    Response), so render() is never invoked. Mirrors churches/views.py."""
+
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class _PassthroughPDFRenderer(BaseRenderer):
+    """PDF twin of _PassthroughCSVRenderer — its only job is to make DRF negotiation
+    accept ?format=pdf instead of 404-ing. The view returns an HttpResponse(pdf_bytes)
+    (a Django response, not a DRF Response), so render() is never invoked. Mirrors
+    churches/views.py."""
+
+    media_type = 'application/pdf'
+    format = 'pdf'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class _Echo:
+    """Write-only file-like whose write() returns the value, so csv.writer can be
+    driven row-by-row inside a StreamingHttpResponse generator. Mirrors
+    churches/views.py."""
+
+    def write(self, value):
+        return value
+
+
+class ChurchWithdrawalsExportView(APIView):
+    """GET /api/v1/withdrawals/export/?format=csv — the FULL, un-paginated CSV of
+    this church's payouts, for the treasurer Reports download button.
+
+    The paginated sibling WithdrawalListView caps at StandardPagination.page_size
+    (20), so a church with >20 payouts can never download its complete history
+    there. This view reuses that view's EXACT church-scope guard
+    (WithdrawalListView.get_queryset — the single leak surface is defined once)
+    and streams every row with NO paginator and NO from/to/status/campaign filter
+    (full scoped export by product decision — matches the donations export).
+
+    Phone-safety: WithdrawalSerializer exposes destination_phone /
+    requested_by_phone in full, so it is deliberately NOT used here. Only
+    created_at, amount, status and payout_reference reach the wire — no phone.
+    This holds for BOTH wire formats: ?format=csv (default) streams the CSV;
+    ?format=pdf renders the SAME rows as a PDF via common.pdf.render_report_pdf.
+    """
+
+    permission_classes = [IsChurchTreasurer]
+    renderer_classes = [_PassthroughCSVRenderer, _PassthroughPDFRenderer]
+
+    HEADER = ['Date', 'Amount (KES)', 'Status', 'Reference']
+
+    @staticmethod
+    def _row(w):
+        """The single column definition shared by the CSV and PDF exports — never
+        reads destination_phone / requested_by_phone. Defining it once means the two
+        wire formats cannot drift apart (and neither can leak the phone the other
+        doesn't). payout_reference is populated only at PAID (finalize_withdrawal_paid),
+        so it is emitted ONLY for PAID rows, else blank."""
+        date_str = w.created_at.date().isoformat()
+        amount = str(w.amount)
+        status_label = WithdrawalStatus(w.status).label
+        reference = w.payout_reference if (
+            w.status == WithdrawalStatus.PAID and w.payout_reference
+        ) else ''
+        return [date_str, amount, status_label, reference]
+
+    def _iter_rows(self, qs):
+        writer = csv.writer(_Echo())
+        yield writer.writerow(self.HEADER)
+        for w in qs.iterator():
+            yield writer.writerow(self._row(w))
+
+    def get(self, request):
+        # Reuse the exact church-scope guard — do not re-invent the church filter.
+        qs = WithdrawalListView().get_queryset(request).order_by('-created_at')
+
+        if request.query_params.get('format') == 'pdf':
+            return self._pdf_response(request, qs)
+
+        # CSV (default / ?format=csv) — byte-identical to before.
+        filename = f'payouts-{timezone.now().date().isoformat()}.csv'
+        response = StreamingHttpResponse(
+            self._iter_rows(qs), content_type='text/csv'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    def _pdf_response(self, request, qs):
+        generated = timezone.now().date().isoformat()
+        subtitle = f'{request.user.church.name} · Generated {generated}'
+        rows = [self._row(w) for w in qs.iterator()]
+        pdf_bytes = render_report_pdf(
+            title='Payout History',
+            subtitle=subtitle,
+            header=self.HEADER,
+            rows=rows,
+        )
+        filename = f'payouts-{generated}.pdf'
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
 
 # ───────────────────── helpers shared by state-change endpoints ──────────────

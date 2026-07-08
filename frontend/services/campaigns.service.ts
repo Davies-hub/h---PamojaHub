@@ -41,9 +41,30 @@ export const campaignsService = {
 
   // Authed: GET /campaigns/mine/ — the treasurer's own campaigns (church-scoped
   // server-side). Paginated; we return the mapped results array.
-  async listMine(): Promise<TreasurerCampaign[]> {
-    const { data } = await api.get<PaginatedResponse<BackendTreasurerCampaign>>('/campaigns/mine/');
+  // PARAMS: from/to are inclusive YYYY-MM-DD created_at bounds (server-side, so
+  // the date filter is correct past page 1). group_label is the GroupLabel FK id
+  // (server-side exact filter) — the caller sources the id from groupsService.list()
+  // ({id,name}); the FE campaign model still doesn't surface the id, so the filter
+  // is driven by the groups list, not the campaign rows.
+  async listMine(params?: { from?: string; to?: string; group_label?: string }): Promise<TreasurerCampaign[]> {
+    const { data } = await api.get<PaginatedResponse<BackendTreasurerCampaign>>(
+      '/campaigns/mine/', { params });
     return data.results.map(mapTreasurerCampaign);
+  },
+
+  // Authed: GET /campaigns/mine/ — same endpoint as listMine(), but returns the
+  // paginated TOTAL alongside the mapped page rows ({ total, rows }), mirroring
+  // withdrawalsService.listWithTotal / churchesService.getMyDonations. `total` is
+  // data.count = the post-filter, church-scoped total: the backend applies from/to
+  // AND group_label (and search/status) to the queryset BEFORE paginating, so the
+  // count is honest for whatever filters are passed. Only the Reports screen needs
+  // the total (for a "Showing N of M" banner); listMine() keeps its bare-array shape
+  // for its three callers (reports list, overview index, campaigns/index).
+  async listMineWithTotal(params?: { from?: string; to?: string; group_label?: string }):
+    Promise<{ total: number; rows: TreasurerCampaign[] }> {
+    const { data } = await api.get<PaginatedResponse<BackendTreasurerCampaign>>(
+      '/campaigns/mine/', { params });
+    return { total: data.count, rows: data.results.map(mapTreasurerCampaign) };
   },
 
   // Authed: GET /campaigns/mine/{slug}/ — the treasurer's own SINGLE campaign,
@@ -80,6 +101,66 @@ export const campaignsService = {
 
     const { data } = await api.post<BackendTreasurerCampaign>('/campaigns/mine/create/', body);
     return mapTreasurerCampaign(data);
+  },
+
+  // Authed WEB download: GET /campaigns/mine/export/?format=csv — streams this
+  // church's FULL campaign list as CSV (server-side, un-paginated, so the 20-row
+  // page cap of listMine() never truncates it). PII-safe: treasurer_phone /
+  // treasurer_name are never emitted; columns are Title / Group / Goal (KES) /
+  // Raised (KES) / Wallet Balance (KES) / Status / Created (all amounts NET). The
+  // export takes NO date/group filter — the backend streams the whole scoped set —
+  // so it is always the complete list, independent of the on-screen filters.
+  //
+  // Mirrors withdrawalsService.downloadPayoutsCsv EXACTLY: uses the shared `api`
+  // instance (Bearer token + 401 refresh-and-retry + baseURL apply), responseType
+  // 'blob' because the body is CSV. WEB ONLY: triggers a browser download via an
+  // object-URL anchor (document/URL are web globals) — the caller gates this off on
+  // native. Errors PROPAGATE. Filename honours the server Content-Disposition when
+  // that header is CORS-exposed, else falls back to campaigns-<today>.csv.
+  async downloadCampaignsCsv(): Promise<void> {
+    const response = await api.get('/campaigns/mine/export/', {
+      params: { format: 'csv' },
+      responseType: 'blob',
+    });
+    const blob = response.data as Blob;
+    const disposition = (response.headers?.['content-disposition'] as string | undefined) ?? '';
+    const match = /filename="?([^";]+)"?/i.exec(disposition);
+    const filename = match?.[1] ?? `campaigns-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  },
+
+  // Authed WEB download: GET /campaigns/mine/export/?format=pdf — the SAME full,
+  // un-paginated, PII-safe campaign set as downloadCampaignsCsv, but rendered
+  // server-side as a PDF (reportlab). Identical mechanics: shared `api` instance
+  // (Bearer + 401 refresh-and-retry + baseURL), responseType 'blob' (the body is PDF
+  // bytes, not JSON), WEB ONLY (object-URL anchor). Errors PROPAGATE. Filename honours
+  // Content-Disposition when CORS-exposed, else falls back to campaigns-<today>.pdf.
+  async downloadCampaignsPdf(): Promise<void> {
+    const response = await api.get('/campaigns/mine/export/', {
+      params: { format: 'pdf' },
+      responseType: 'blob',
+    });
+    const blob = response.data as Blob;
+    const disposition = (response.headers?.['content-disposition'] as string | undefined) ?? '';
+    const match = /filename="?([^";]+)"?/i.exec(disposition);
+    const filename = match?.[1] ?? `campaigns-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   },
 
   async getBySlug(slug: string): Promise<PublicCampaign> {

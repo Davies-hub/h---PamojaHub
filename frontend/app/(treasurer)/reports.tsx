@@ -16,9 +16,10 @@ import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { campaignsService } from '../../services/campaigns.service';
 import { churchesService } from '../../services/churches.service';
+import { groupsService } from '../../services/groups.service';
 import { MyDonationRow } from '../../services/mappers';
 import { withdrawalsService } from '../../services/withdrawals.service';
-import { TreasurerCampaign, Withdrawal, WithdrawalStatus } from '../../types';
+import { GroupLabel, TreasurerCampaign, Withdrawal, WithdrawalStatus } from '../../types';
 import { fmtKes, formatDate } from '../../utils/formatters';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,10 +39,13 @@ interface ReportOption {
 // The combined dataset fetched in one pass; the active report type just selects which
 // slice to render (client-side), so switching types is instant with no refetch.
 interface ReportData {
-  campaigns: TreasurerCampaign[];
+  campaigns: TreasurerCampaign[];   // date + group filtered SERVER-SIDE (from/to/group_label); max 20 (page 1)
+  campaignsTotal: number;       // true total of matching campaigns across ALL pages
   donations: MyDonationRow[];   // server-side date-filtered (from/to); max 20 (page 1)
   donationsTotal: number;       // true total of matching donations across ALL pages
-  payouts: Withdrawal[];
+  payouts: Withdrawal[];        // server-side date-filtered (from/to); max 20 (page 1)
+  payoutsTotal: number;         // true total of matching payouts across ALL pages
+  groups: GroupLabel[];         // active group labels — the id+name source for the picker
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -67,7 +71,10 @@ const REPORT_OPTIONS: ReportOption[] = [
   },
 ];
 
-const ALL_GROUPS = 'All Groups';
+// selectedGroup holds a GroupLabel FK id; this empty-string sentinel means "no group
+// filter" (never sent to the server). ALL_GROUPS_LABEL is only for display.
+const ALL_GROUPS = '';
+const ALL_GROUPS_LABEL = 'All Groups';
 
 const WITHDRAWAL_STATUS_LABEL: Record<WithdrawalStatus, string> = {
   PENDING_APPROVAL: 'Pending',
@@ -87,16 +94,6 @@ function isValidYmd(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + 'T00:00:00Z');
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
-}
-
-// Client-side date filter for campaigns/payouts (those endpoints take NO date param — only
-// the donations endpoint does, server-side). ISO createdAt → YYYY-MM-DD lexical compare,
-// which is chronological. `to` is date-INCLUSIVE (d <= to), matching the donations backend.
-function inDateRange(createdAt: string, from: string, to: string): boolean {
-  const d = createdAt.slice(0, 10);
-  if (from && isValidYmd(from) && d < from) return false;
-  if (to && isValidYmd(to) && d > to) return false;
-  return true;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -121,88 +118,149 @@ export default function ReportsScreen() {
   const toValid = dateTo === '' || isValidYmd(dateTo);
   const datesOk = fromValid && toValid;
 
-  // ── One combined fetch. The donations call carries from/to to the backend (date-INCLUSIVE,
-  //    server-side); campaigns + payouts have no backend date param so they are filtered
-  //    client-side (inDateRange) at render. Only VALID dates are sent to the server. ──
+  // ── One combined fetch. Campaigns, donations AND payouts all carry from/to to the
+  //    backend (date-INCLUSIVE, server-side), so the date filter stays correct past
+  //    page 1. Campaign GROUP filtering is now ALSO server-side: the selected group's
+  //    FK id goes to /campaigns/mine/ as ?group_label, so it too stays correct past
+  //    page 1. Only VALID dates are sent. The groups list (active labels, id+name) is
+  //    fetched here as the picker's source — independent of dates/group but folded into
+  //    the one loading path (idempotent GET). ──
   const fetcher = useCallback(async (): Promise<ReportData> => {
-    const donationParams: { from?: string; to?: string } = {};
-    if (dateFrom && isValidYmd(dateFrom)) donationParams.from = dateFrom;
-    if (dateTo && isValidYmd(dateTo)) donationParams.to = dateTo;
-    const [campaigns, donationsPage, payouts] = await Promise.all([
-      campaignsService.listMine(),
-      churchesService.getMyDonations(donationParams),
-      withdrawalsService.list(),
+    const dateParams: { from?: string; to?: string } = {};
+    if (dateFrom && isValidYmd(dateFrom)) dateParams.from = dateFrom;
+    if (dateTo && isValidYmd(dateTo)) dateParams.to = dateTo;
+    const campaignParams: { from?: string; to?: string; group_label?: string } = { ...dateParams };
+    if (selectedGroup !== ALL_GROUPS) campaignParams.group_label = selectedGroup;
+    const [campaignsPage, donationsPage, payoutsPage, groups] = await Promise.all([
+      campaignsService.listMineWithTotal(campaignParams),
+      churchesService.getMyDonations(dateParams),
+      withdrawalsService.listWithTotal(dateParams),
+      groupsService.list(),
     ]);
     return {
-      campaigns,
+      campaigns: campaignsPage.rows,
+      campaignsTotal: campaignsPage.total,
       donations: donationsPage.rows,
       donationsTotal: donationsPage.total,
-      payouts,
+      payouts: payoutsPage.rows,
+      payoutsTotal: payoutsPage.total,
+      groups,
     };
-  }, [dateFrom, dateTo]);
+  }, [dateFrom, dateTo, selectedGroup]);
 
   const { data, status, refetchError, retry } = useFocusRefetch<ReportData>(fetcher);
 
-  // Refetch when the (valid) date range changes — donations are date-filtered server-side.
-  // Mount-skip so the focus fetch isn't doubled; invalid/partial dates never refetch.
+  // Refetch when the (valid) date range OR the selected group changes — both are now
+  // filtered server-side. Mount-skip so the focus fetch isn't doubled; invalid/partial
+  // dates never refetch (a group change still respects the datesOk guard).
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) { didMountRef.current = true; return; }
     if (datesOk) retry();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateFrom, dateTo]);
+  }, [dateFrom, dateTo, selectedGroup]);
 
   const selectedReport = REPORT_OPTIONS.find(r => r.id === reportType)!;
 
   // ── CSV download ──
-  // WEB only for now (native share-sheet is a later slice). Enabled ONLY for Donation
-  // History — the only report with a server-side export endpoint
-  // (GET /churches/me/donations/export/). The other report types have no exporter yet,
-  // so their button stays disabled rather than shipping one that 404s. The export is
-  // full history (server streams the whole scoped set, un-paginated) — it does NOT honour
-  // the on-screen date range.
+  // WEB only for now (native share-sheet is a later slice). All three report types now
+  // have a server-side export endpoint: Campaign Summary (GET /campaigns/mine/export/),
+  // Donation History (GET /churches/me/donations/export/) and Payout History
+  // (GET /withdrawals/export/). Each streams the whole scoped set un-paginated, so the
+  // exports are FULL history — they do NOT honour the on-screen date/group range.
   const isWeb = Platform.OS === 'web';
-  const canDownloadDonations = reportType === 'donation_history' && isWeb;
+  const isExportable =
+    reportType === 'donation_history' ||
+    reportType === 'payout_history' ||
+    reportType === 'campaign_summary';
+  const canDownload = isExportable && isWeb;
 
-  // Clear any stale download error when the report type changes.
-  useEffect(() => { setDownloadError(false); }, [reportType]);
+  // PDF export now exists for ALL three report types (each has a backend ?format=pdf
+  // endpoint: donations, payouts, campaigns), so the CSV/PDF toggle is enabled everywhere.
+  const pdfAvailable = true;
+  // The format actually used for the download + all labels: force CSV for any type
+  // without a PDF endpoint, so a stale 'PDF' can never route a CSV-only report to a 404.
+  // (Now that every type has a PDF endpoint this collapses to `format`, but the guard
+  // is kept as a defensive no-op in case a future CSV-only report type is added.)
+  const effectiveFormat: ReportFormat = pdfAvailable ? format : 'CSV';
+
+  // Clear the stale download error AND reset the format toggle when the report type
+  // changes — a leftover 'PDF' must not carry into payouts/campaigns (CSV-only).
+  useEffect(() => { setDownloadError(false); setFormat('CSV'); }, [reportType]);
 
   const handleDownload = useCallback(async () => {
     if (downloading) return;
     setDownloadError(false);
     setDownloading(true);
     try {
-      await churchesService.downloadMyDonationsCsv();
+      // Every report type now has both a CSV and a PDF endpoint; route on the toggle.
+      // PDF only when the toggle is on PDF; every other case (incl. a stale format)
+      // falls to CSV.
+      if (reportType === 'payout_history') {
+        if (format === 'PDF') {
+          await withdrawalsService.downloadPayoutsPdf();
+        } else {
+          await withdrawalsService.downloadPayoutsCsv();
+        }
+      } else if (reportType === 'campaign_summary') {
+        if (format === 'PDF') {
+          await campaignsService.downloadCampaignsPdf();
+        } else {
+          await campaignsService.downloadCampaignsCsv();
+        }
+      } else {
+        // donation_history
+        if (format === 'PDF') {
+          await churchesService.downloadMyDonationsPdf();
+        } else {
+          await churchesService.downloadMyDonationsCsv();
+        }
+      }
     } catch {
       setDownloadError(true);
     } finally {
       setDownloading(false);
     }
-  }, [downloading]);
+  }, [downloading, reportType, format]);
 
-  const exportHint = canDownloadDonations
-    ? 'Download the full donation history (NET amounts) as CSV.'
-    : reportType === 'donation_history'
+  const exportHint = canDownload
+    ? reportType === 'payout_history'
+      ? `Download the full payout history (NET amounts) as ${effectiveFormat}.`
+      : reportType === 'campaign_summary'
+        ? `Download the full campaign list (NET amounts) as ${effectiveFormat}.`
+        : `Download the full donation history (NET amounts) as ${effectiveFormat}.`
+    : isExportable
       ? 'CSV download is available on the web app.'
       : 'Downloadable exports for this report are coming soon.';
   const disabledDownloadLabel =
-    reportType === 'donation_history' && !isWeb ? 'Download on web' : 'Download — coming soon';
+    isExportable && !isWeb ? 'Download on web' : 'Download — coming soon';
 
-  // Group options derived from the campaigns actually present — no mock, no extra fetch.
-  // Group filtering applies to Campaign Summary only (donations/payouts carry no group).
-  const groupOptions = useMemo<string[]>(() => {
-    const names = Array.from(
-      new Set((data?.campaigns ?? []).map(c => c.groupLabelName).filter(Boolean) as string[]),
-    ).sort();
-    return [ALL_GROUPS, ...names];
+  // Group options come from the groups list ({id,name}) — NOT the campaign rows — so the
+  // picker lists every active label (including ones with no campaign on page 1) and each
+  // option carries the FK id the server filter needs. Group filtering applies to Campaign
+  // Summary only (donations/payouts carry no group). The ALL sentinel comes first.
+  const groupOptions = useMemo<{ id: string; name: string }[]>(() => {
+    const groups = (data?.groups ?? [])
+      .map(g => ({ id: g.id, name: g.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return [{ id: ALL_GROUPS, name: ALL_GROUPS_LABEL }, ...groups];
   }, [data]);
 
-  // ── Derive the rows for the active report type (client-side date + group filtering). ──
-  const campaignRows = useMemo(() => {
-    let rows = (data?.campaigns ?? []).filter(c => inDateRange(c.createdAt, dateFrom, dateTo));
-    if (selectedGroup !== ALL_GROUPS) rows = rows.filter(c => c.groupLabelName === selectedGroup);
-    return rows;
-  }, [data, dateFrom, dateTo, selectedGroup]);
+  // The current group's display name (the picker stores the id, the field shows the name).
+  const selectedGroupName = useMemo(
+    () => groupOptions.find(o => o.id === selectedGroup)?.name ?? ALL_GROUPS_LABEL,
+    [groupOptions, selectedGroup],
+  );
+
+  // ── Rows for the active report type. Campaigns are now fully server-filtered (date via
+  //    from/to AND group via group_label), so there is NO client-side filtering left —
+  //    the returned page is correct past row 20 for both filters. ──
+  const campaignRows = data?.campaigns ?? [];
+  // True total of matching campaigns across all pages (server-side count). Because the
+  // campaigns query is filtered ENTIRELY server-side (from/to AND group_label applied
+  // before pagination), this count is exact — so the banner honours BOTH filters.
+  const campaignsTotal = data?.campaignsTotal ?? 0;
+  const campaignsTruncated = campaignsTotal > campaignRows.length;
 
   const donationRows = data?.donations ?? [];   // already date-filtered server-side (max 20)
   // True total of matching donations across all pages (server-side count). Because the
@@ -211,10 +269,13 @@ export default function ReportsScreen() {
   const donationsTotal = data?.donationsTotal ?? 0;
   const donationsTruncated = donationsTotal > donationRows.length;
 
-  const payoutRows = useMemo(
-    () => (data?.payouts ?? []).filter(w => inDateRange(w.createdAt, dateFrom, dateTo)),
-    [data, dateFrom, dateTo],
-  );
+  const payoutRows = data?.payouts ?? [];   // already date-filtered server-side (from/to)
+  // True total of matching payouts across all pages (server-side count). Because the
+  // payouts query is filtered ENTIRELY server-side (from/to/status/campaign all applied
+  // before pagination), this count is exact — unlike campaigns, which is client-filtered
+  // over page 1 and so has no trustworthy total.
+  const payoutsTotal = data?.payoutsTotal ?? 0;
+  const payoutsTruncated = payoutsTotal > payoutRows.length;
 
   const rowCount =
     reportType === 'campaign_summary' ? campaignRows.length
@@ -250,7 +311,21 @@ export default function ReportsScreen() {
         </View>
       );
     }
-    if (reportType === 'campaign_summary') return <CampaignTable rows={campaignRows} />;
+    if (reportType === 'campaign_summary') {
+      return (
+        <>
+          {campaignsTruncated && (
+            <View style={styles.truncationBanner}>
+              <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
+              <Text style={styles.truncationBannerText}>
+                Showing {campaignRows.length} of {campaignsTotal}. Download CSV for the full list.
+              </Text>
+            </View>
+          )}
+          <CampaignTable rows={campaignRows} />
+        </>
+      );
+    }
     if (reportType === 'donation_history') {
       return (
         <>
@@ -266,7 +341,19 @@ export default function ReportsScreen() {
         </>
       );
     }
-    return <PayoutTable rows={payoutRows} />;
+    return (
+      <>
+        {payoutsTruncated && (
+          <View style={styles.truncationBanner}>
+            <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
+            <Text style={styles.truncationBannerText}>
+              Showing {payoutRows.length} of {payoutsTotal}. Download CSV for the full list.
+            </Text>
+          </View>
+        )}
+        <PayoutTable rows={payoutRows} />
+      </>
+    );
   }
 
   return (
@@ -370,7 +457,7 @@ export default function ReportsScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Filter by group label"
               >
-                <Text style={styles.pickerFieldText}>{selectedGroup}</Text>
+                <Text style={styles.pickerFieldText}>{selectedGroupName}</Text>
                 <Ionicons name="chevron-down" size={16} color={Colors.textMuted} />
               </TouchableOpacity>
             </View>
@@ -385,24 +472,59 @@ export default function ReportsScreen() {
               <Text style={styles.formatInfoTitle}>CSV / PDF export</Text>
               <Text style={styles.formatInfoDesc}>{exportHint}</Text>
             </View>
-            {/* CSV/PDF toggle stays disabled — PDF is a separate slice. */}
+            {/* CSV/PDF toggle — enabled ONLY for donation_history (the sole type with a
+                PDF endpoint). For payouts/campaigns the PDF option is locked (disabled)
+                and CSV stays selected, so no button ever targets a non-existent PDF. */}
             <View style={styles.toggleGroup}>
-              {(['CSV', 'PDF'] as ReportFormat[]).map(f => (
-                <View key={f} style={[styles.toggleBtn, styles.toggleBtnDisabled]}>
-                  <Text style={styles.toggleBtnTextDisabled}>{f}</Text>
-                </View>
-              ))}
+              {(['CSV', 'PDF'] as ReportFormat[]).map(f => {
+                const optionEnabled = f === 'CSV' || pdfAvailable;
+                const isActive = effectiveFormat === f;
+                return (
+                  <TouchableOpacity
+                    key={f}
+                    style={[
+                      styles.toggleBtn,
+                      isActive && styles.toggleBtnActive,
+                      !optionEnabled && styles.toggleBtnDisabled,
+                    ]}
+                    onPress={() => { if (optionEnabled) setFormat(f); }}
+                    disabled={!optionEnabled}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isActive, disabled: !optionEnabled }}
+                    accessibilityLabel={`${f} format`}
+                  >
+                    <Text
+                      style={
+                        isActive
+                          ? styles.toggleBtnTextActive
+                          : optionEnabled
+                            ? styles.toggleBtnText
+                            : styles.toggleBtnTextDisabled
+                      }
+                    >
+                      {f}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
-          {canDownloadDonations ? (
+          {canDownload ? (
             <TouchableOpacity
               style={[styles.downloadBtn, styles.downloadBtnActive, downloading && styles.downloadBtnBusy]}
               onPress={handleDownload}
               disabled={downloading}
               activeOpacity={0.85}
               accessibilityRole="button"
-              accessibilityLabel="Download donation history CSV"
+              accessibilityLabel={
+                reportType === 'payout_history'
+                  ? `Download payout history ${effectiveFormat}`
+                  : reportType === 'campaign_summary'
+                    ? `Download campaign summary ${effectiveFormat}`
+                    : `Download donation history ${effectiveFormat}`
+              }
               accessibilityState={{ disabled: downloading, busy: downloading }}
             >
               {downloading ? (
@@ -413,7 +535,7 @@ export default function ReportsScreen() {
               ) : (
                 <>
                   <Ionicons name="download-outline" size={20} color={Colors.white} />
-                  <Text style={styles.downloadBtnTextActive}>Download CSV</Text>
+                  <Text style={styles.downloadBtnTextActive}>Download {effectiveFormat}</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -472,17 +594,17 @@ export default function ReportsScreen() {
           <Text style={styles.pickerTitle}>Filter by Group</Text>
           <FlatList
             data={groupOptions}
-            keyExtractor={item => item}
+            keyExtractor={item => item.id || ALL_GROUPS_LABEL}
             renderItem={({ item }) => {
-              const isSelected = item === selectedGroup;
+              const isSelected = item.id === selectedGroup;
               return (
                 <TouchableOpacity
                   style={styles.pickerItem}
-                  onPress={() => { setSelectedGroup(item); setShowGroupPicker(false); }}
+                  onPress={() => { setSelectedGroup(item.id); setShowGroupPicker(false); }}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.pickerItemText, isSelected && styles.pickerItemTextSelected]}>
-                    {item}
+                    {item.name}
                   </Text>
                   {isSelected ? (
                     <Ionicons name="checkmark" size={20} color={Colors.primary} />
@@ -769,6 +891,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.sm,
     color: Colors.textMuted,
+  },
+  toggleBtnActive: {
+    backgroundColor: Colors.primary,
+  },
+  toggleBtnText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.sm,
+    color: Colors.text,
+  },
+  toggleBtnTextActive: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.sm,
+    color: Colors.white,
   },
   downloadBtn: {
     flexDirection: 'row',

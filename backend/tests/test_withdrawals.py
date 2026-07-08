@@ -21,6 +21,8 @@ and unreliable; load testing in a dedicated phase covers that. This suite only
 confirms the lock is invoked and the external call is sequenced AFTER it.
 """
 
+import csv
+import io
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import patch
@@ -45,6 +47,7 @@ from withdrawals.models import (
     WithdrawalDispatchOutcome,
     WithdrawalStatus,
 )
+from withdrawals.views import ChurchWithdrawalsExportView
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -749,6 +752,188 @@ class WithdrawalDateFilterTests(BaseTwoChurchSetUp):
         self.client.force_authenticate(user=self.treasurer_a)
         resp = self.client.get(reverse('withdrawal-list'), {'from': 'notadate'})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Payout-history CSV export — GET /api/v1/withdrawals/export/?format=csv
+# Full, un-paginated, treasurer-scoped, NET/phone-safe. Mirrors the donations
+# export (tests/test_church_scoped_endpoints.py::ChurchMeDonationsCsvExportTest).
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class WithdrawalCsvExportTest(BaseTwoChurchSetUp):
+    """GET /api/v1/withdrawals/export/?format=csv — the FULL, un-paginated CSV of
+    this church's payouts, for the treasurer Reports download button.
+
+    The paginated sibling (/withdrawals/) caps at StandardPagination.page_size=20,
+    so a church with >20 payouts cannot download its complete history there. This
+    export reuses the exact church-scope guard (WithdrawalListView.get_queryset)
+    but streams EVERY row. Plants 25 PAID payouts for church A (proves the >20
+    case) plus one for church B (proves no cross-church leak). The CSV must carry
+    NO phone number — destination_phone / requested_by_phone never reach the wire.
+    """
+
+    N_PAYOUTS = 25
+    PHONE = '254712345678'  # the digits _make_withdrawal stamps on every payout
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.a_refs = []
+        for i in range(cls.N_PAYOUTS):
+            wd = _make_withdrawal(cls.camp_a, amount=Decimal('1000'),
+                                  status_=WithdrawalStatus.PAID)
+            ref = f'PAYREF{i:03d}'
+            cls.a_refs.append(ref)
+            # created_at is auto_now_add (ignored at create) — stamp via update,
+            # same idiom as WithdrawalDateFilterTests. payout_reference is normally
+            # set only at PAID (finalize_withdrawal_paid); set it here so the
+            # Reference column has content to assert on.
+            Withdrawal.objects.filter(id=wd.id).update(
+                payout_reference=ref,
+                created_at=timezone.make_aware(datetime(2026, 1, 1, 12, 0)))
+        # Church B — one PAID payout whose reference must NEVER appear in A's export.
+        cls.b_wd = _make_withdrawal(cls.camp_b, amount=Decimal('4242'),
+                                    status_=WithdrawalStatus.PAID)
+        cls.b_ref = 'BREF999LEAK'
+        Withdrawal.objects.filter(id=cls.b_wd.id).update(payout_reference=cls.b_ref)
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('withdrawal-export')) so the URL resolves to a clean
+        # 404 while the route is absent — proving RED without a NoReverseMatch.
+        self.export_url = reverse('withdrawal-list') + 'export/'
+
+    def test_export_streams_all_payouts_scoped_no_phone(self):
+        resp = self.client.get(self.export_url, {'format': 'csv'})
+        # (i) HTTP 200 + Content-Type text/csv
+        self.assertEqual(resp.status_code, status.HTTP_200_OK,
+                         getattr(resp, 'content', resp))
+        self.assertTrue(resp['Content-Type'].startswith('text/csv'),
+                        resp['Content-Type'])
+        # Streamed body → parse with the csv module.
+        body = b''.join(resp.streaming_content).decode('utf-8')
+        rows = [r for r in csv.reader(io.StringIO(body)) if r]
+        # (ii) header row present with the expected columns.
+        self.assertEqual(rows[0], ['Date', 'Amount (KES)', 'Status', 'Reference'])
+        # (iii) exactly 25 DATA rows — the whole scoped history, NOT a 20-row page
+        #       (26 would mean church B leaked in).
+        self.assertEqual(len(rows) - 1, self.N_PAYOUTS)
+        # (iv) church B's payout reference is absent (cross-church leak guard holds).
+        self.assertNotIn(self.b_ref, body)
+        # (v) NO phone number anywhere in the body.
+        self.assertNotIn(self.PHONE, body)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Payout-history PDF export — GET /api/v1/withdrawals/export/?format=pdf
+# The PDF sibling of the CSV export: same church-scope guard, same columns, same
+# phone exclusion (destination_phone / requested_by_phone never reach the wire),
+# rendered as application/pdf. Cross-church isolation is already proven by the CSV
+# export's shared get_queryset; this test focuses on the new wire format + the PII
+# exclusion proven at the SOURCE (_row), which reportlab page compression can mask
+# in a byte grep. Mirrors ChurchMeDonationsPdfExportTest.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class WithdrawalPdfExportTest(BaseTwoChurchSetUp):
+    """GET /api/v1/withdrawals/export/?format=pdf.
+
+    Money-safety proof: church A gets one PAID payout (with a payout_reference) and
+    one NON-PAID (PENDING_APPROVAL) payout that ALSO carries a stored
+    payout_reference — both stamped with a KNOWN destination phone. The test asserts:
+      (i)   the response is a valid PDF (200 + application/pdf + .pdf attachment +
+            %PDF magic bytes);
+      (ii)  SOURCE-LEVEL exclusion — ChurchWithdrawalsExportView._row(w) returns
+            EXACTLY [date, amount, status, reference] (4 cells), the phone appears in
+            NO cell, and the Reference cell is '' on the NON-PAID row (payout_reference
+            leaks ONLY at PAID). Proven at the row builder, not by grepping compressed
+            PDF bytes — reportlab default page compression would fool a byte grep, so
+            PII safety is proven where it lives: the row builder never READS phone;
+      (iii) the CSV path is unbroken (still text/csv).
+    Authenticated as treasurer_a only.
+    """
+
+    KNOWN_PHONE = '254799112233'   # PII — must NOT reach any cell
+    PAID_REF = 'QHPDFPAID01'       # reference on the PAID row (reaches the wire)
+    NONPAID_REF = 'QHPDFPEND99'    # reference stored on a NON-PAID row — must NOT leak
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # PAID payout — reference reaches the wire.
+        paid = Withdrawal.objects.create(
+            campaign=cls.camp_a,
+            requested_by_phone=cls.KNOWN_PHONE,
+            destination_phone=cls.KNOWN_PHONE,
+            destination_name='Treas Urer',
+            amount=Decimal('1000'),
+            reason='Builders payment',
+            status=WithdrawalStatus.PAID,
+            payout_reference=cls.PAID_REF,
+        )
+        cls.paid_id = paid.id
+        # NON-PAID payout (PENDING_APPROVAL) — even WITH a payout_reference stored,
+        # _row must blank it (reference leaks ONLY at PAID).
+        pending = Withdrawal.objects.create(
+            campaign=cls.camp_a,
+            requested_by_phone=cls.KNOWN_PHONE,
+            destination_phone=cls.KNOWN_PHONE,
+            destination_name='Treas Urer',
+            amount=Decimal('2000'),
+            reason='Builders payment',
+            status=WithdrawalStatus.PENDING_APPROVAL,
+            payout_reference=cls.NONPAID_REF,
+        )
+        cls.pending_id = pending.id
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_authenticate(user=self.treasurer_a)
+        # Concat (not reverse('...-export')) — the URL resolves while the pdf branch
+        # is absent, proving RED without a NoReverseMatch.
+        self.export_url = reverse('withdrawal-list') + 'export/'
+
+    def test_pdf_export_valid_no_phone_and_csv_unbroken(self):
+        # (i) PDF branch — 200, application/pdf, .pdf attachment, valid %PDF magic.
+        resp = self.client.get(self.export_url, {'format': 'pdf'})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK,
+                         getattr(resp, 'content', resp))
+        self.assertEqual(resp['Content-Type'], 'application/pdf', resp['Content-Type'])
+        self.assertIn('attachment', resp['Content-Disposition'])
+        self.assertIn('.pdf', resp['Content-Disposition'])
+        body = resp.content
+        self.assertTrue(body.startswith(b'%PDF'), body[:16])
+
+        # (ii) phone exclusion + PAID-only reference proven at _row (SOURCE), not by
+        # grepping compressed PDF bytes (which reportlab page compression would fool).
+        paid = Withdrawal.objects.get(id=self.paid_id)
+        paid_row = ChurchWithdrawalsExportView._row(paid)
+        self.assertEqual(len(paid_row), 4, paid_row)   # exactly [date, amount, status, reference]
+        self.assertEqual(paid_row, [
+            paid.created_at.date().isoformat(),
+            str(paid.amount),
+            WithdrawalStatus.PAID.label,
+            self.PAID_REF,
+        ])
+        # NON-PAID row: reference blanked even though payout_reference is stored.
+        pending = Withdrawal.objects.get(id=self.pending_id)
+        pending_row = ChurchWithdrawalsExportView._row(pending)
+        self.assertEqual(len(pending_row), 4, pending_row)
+        self.assertEqual(pending_row[3], '')           # reference '' on the NON-PAID row
+        # phone never in ANY cell of EITHER row; NON-PAID reference never leaks.
+        for row in (paid_row, pending_row):
+            joined = '\x1f'.join(str(cell) for cell in row)   # NUL-ish sep: no cross-cell match
+            self.assertNotIn(self.KNOWN_PHONE, joined)
+        self.assertNotIn(self.NONPAID_REF, '\x1f'.join(str(c) for c in pending_row))
+
+        # (iii) CSV path unbroken — still text/csv.
+        csv_resp = self.client.get(self.export_url, {'format': 'csv'})
+        self.assertEqual(csv_resp.status_code, status.HTTP_200_OK,
+                         getattr(csv_resp, 'content', csv_resp))
+        self.assertTrue(csv_resp['Content-Type'].startswith('text/csv'),
+                        csv_resp['Content-Type'])
 
 
 # ═════════════════════════════════════════════════════════════════════════════
