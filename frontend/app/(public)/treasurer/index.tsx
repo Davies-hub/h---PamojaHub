@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
-import { mockTreasurerProfile } from '../../../mock/treasurer.mock';
 import { treasurerPortalService } from '../../../services/treasurer-portal.service';
 import type { PortalDonationRow } from '../../../services/mappers';
 import { PortalCampaign } from '../../../types';
@@ -612,7 +611,7 @@ export default function TreasurerPortalScreen() {
           <>
             <View style={styles.greetingSection}>
               <Text style={styles.greetingText}>
-                {getGreeting()}, {mockTreasurerProfile.firstName}
+                {getGreeting()}
               </Text>
               <Text style={styles.greetingSub}>Select a campaign to view its report</Text>
             </View>

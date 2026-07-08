@@ -1,5 +1,3 @@
-import { mockDonations } from '../mock/donations.mock';
-import { Donation, PaginatedResponse } from '../types';
 import { api } from './api';
 import { BackendDonationStatus, DonorDonationStatus, mapDonorStatus } from './mappers';
 
@@ -46,10 +44,5 @@ export const donationsService = {
   async getDonationStatus(donationId: string): Promise<DonorDonationStatus> {
     const { data } = await api.get<BackendDonationStatus>(`/donations/${donationId}/status/`);
     return mapDonorStatus(data);
-  },
-
-  async listForCampaign(_campaignId: string): Promise<PaginatedResponse<Donation>> {
-    return { count: mockDonations.length, results: mockDonations };
-    // Phase 4: return (await api.get(`/campaigns/${campaignId}/donations/`)).data;
   },
 };

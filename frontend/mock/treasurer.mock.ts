@@ -2,12 +2,6 @@ import { CampaignCategory, CampaignStatus } from '../types';
 import { mockAllCampaigns } from './campaigns.mock';
 import { mockWithdrawals } from './withdrawals.mock';
 
-export const mockTreasurerProfile = {
-  firstName: 'Davies',
-  churchName: 'PCEA Bahati Martyrs',
-  notificationCount: 3,
-};
-
 // ─── Derived summary (PCEA Bahati Martyrs = church-1) ────────────────────────
 
 const _pceaCampaigns = mockAllCampaigns.filter(c => c.churchId === 'church-1');

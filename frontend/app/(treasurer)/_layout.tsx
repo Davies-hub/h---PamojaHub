@@ -20,8 +20,8 @@ function TreasurerTopBar() {
   const { logout, user } = useAuth();
   const insets = useSafeAreaInsets();
   const [showConfirm, setShowConfirm] = useState(false);
-  // Real church name from /auth/me (was mockTreasurerProfile). Fallback keeps the
-  // bar from rendering blank in the brief window before the user is hydrated.
+  // Real church name from /auth/me. Fallback keeps the bar from rendering blank
+  // in the brief window before the user is hydrated.
   const churchName = user?.churchName || 'My Church';
 
   function handleConfirmSignOut() {
