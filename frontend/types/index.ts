@@ -302,4 +302,9 @@ export interface AnalyticsSummary {
   totalPlatformFees: number;
   donationCount: number;
   netTotal: number;
+  // Chart series (money → display Numbers, decimal-string boundary in mapAnalytics).
+  // donationsByMonth: fixed trailing 12 months, oldest→newest, zero-filled (GROSS).
+  // topChurchesByRaised: ≤10, descending by NET raised.
+  donationsByMonth: { month: string; total: number }[];
+  topChurchesByRaised: { churchName: string; totalRaised: number }[];
 }

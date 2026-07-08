@@ -43,9 +43,12 @@ endpoint includes it. Confirmed by tests/test_superadmin.py::FeeExposureConfinem
 from decimal import Decimal
 import logging
 
+from datetime import date
+
 from django.db import transaction
 from django.db.models import Count, Q, Sum
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncMonth
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from rest_framework import serializers as drf_serializers, status
 from rest_framework.response import Response
@@ -298,6 +301,44 @@ class SuperAnalyticsView(APIView):
             fee_total=Sum('platform_fee'),
         )
 
+        # ── Chart 1: donations by month — fixed trailing 12-month GROSS series. ──
+        # Deliberately INDEPENDENT of the from/to params (they scope the headline
+        # totals above; this chart owns its own fixed window). GROSS (amount) to
+        # match the headline "Total Donations" card. The 12-month skeleton is built
+        # in Python and zero-filled — the DB emits only months that HAVE donations,
+        # so relying on it would drop empty months and yield fewer than 12 bars.
+        current_month_idx = timezone.now().year * 12 + (timezone.now().month - 1)
+        oldest_idx = current_month_idx - 11        # 12 buckets incl. current month
+        window_start = date(oldest_idx // 12, oldest_idx % 12 + 1, 1)
+        monthly_rows = (
+            Donation.objects
+            .filter(status=DonationStatus.SUCCESSFUL, created_at__date__gte=window_start)
+            .annotate(m=TruncMonth('created_at'))
+            .values('m')
+            .annotate(gross=Sum('amount'))
+        )
+        monthly_map = {row['m'].strftime('%Y-%m'): row['gross'] for row in monthly_rows}
+        donations_by_month = []
+        for offset in range(12):
+            idx = oldest_idx + offset
+            key = f'{idx // 12:04d}-{idx % 12 + 1:02d}'
+            total = monthly_map.get(key) or Decimal('0.00')
+            donations_by_month.append({'month': key, 'total': str(total)})
+
+        # ── Chart 2: top 10 churches by NET raised. Reuses the churches-list ──
+        # annotation (Coalesce(Sum('campaigns__raised_amount'))). Platform-wide by
+        # design (super-admin analytics) — no per-church scope. church_name only;
+        # NO phone / treasurer / email leaves this surface.
+        top_churches = (
+            Church.objects
+            .annotate(total_raised=Coalesce(Sum('campaigns__raised_amount'), Decimal('0.00')))
+            .order_by('-total_raised', 'name')[:10]
+        )
+        top_churches_by_raised = [
+            {'church_name': c.name, 'total_raised': str(c.total_raised)}
+            for c in top_churches
+        ]
+
         return Response({
             'churches_by_status': {
                 ChurchStatus.PENDING: churches_by_status.get(ChurchStatus.PENDING, 0),
@@ -312,6 +353,8 @@ class SuperAnalyticsView(APIView):
                 'net_total': str(donation_sums['net_total'] or Decimal('0')),
             },
             'platform_fees_collected': str(donation_sums['fee_total'] or Decimal('0')),
+            'donations_by_month': donations_by_month,
+            'top_churches_by_raised': top_churches_by_raised,
         })
 
 

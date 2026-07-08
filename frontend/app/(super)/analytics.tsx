@@ -40,16 +40,104 @@ function StatCard({
   );
 }
 
-// ─── Chart placeholder ────────────────────────────────────────────────────────
+// ─── Chart helpers ────────────────────────────────────────────────────────────
 
-function ChartPlaceholder({ label }: { label: string }) {
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Compact KES for the cramped 12-bar monthly labels (e.g. 3.0k, 1.2M). The full
+// fmtKes is used where there's room (horizontal church bars).
+function fmtCompact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  return String(Math.round(n));
+}
+
+const MONTHLY_MAX_BAR = 120;   // px — the tallest bar; every other scales to it
+
+// ─── Donations by month — vertical bars (pure <View>, no chart lib) ────────────
+
+function MonthlyBarsChart({ data }: { data: { month: string; total: number }[] }) {
+  // reduce-with-0 seed → max is 0 (never NaN) for an empty array; every ratio is
+  // guarded on max > 0 below, so there is no divide-by-zero.
+  const max = data.reduce((m, d) => Math.max(m, d.total), 0);
+  const allZero = max <= 0;
+
   return (
     <View style={styles.chartCard}>
-      <Text style={styles.chartCardLabel}>{label}</Text>
-      <View style={styles.chartBox}>
-        <Ionicons name="bar-chart-outline" size={36} color={Colors.primaryLight} />
-        <Text style={styles.chartBoxText}>Chart available after backend connection</Text>
-      </View>
+      <Text style={styles.chartCardLabel}>Donations by Month</Text>
+      {data.length === 0 ? (
+        <View style={styles.chartEmpty}>
+          <Text style={styles.chartEmptyText}>No donations yet</Text>
+        </View>
+      ) : (
+        <View style={styles.chartBody}>
+          <View style={styles.monthlyRow}>
+            {data.map(d => {
+              // Zero-total months sit flat on the baseline (height 0); non-zero
+              // bars get at least 3px so a tiny value is still visible.
+              const h = d.total > 0 && max > 0
+                ? Math.max(3, Math.round((d.total / max) * MONTHLY_MAX_BAR))
+                : 0;
+              const mIdx = Number(d.month.slice(5, 7)) - 1;
+              const label = MONTH_ABBR[mIdx] ?? d.month;
+              return (
+                <View key={d.month} style={styles.monthlyCol}>
+                  <Text style={styles.monthlyValue} numberOfLines={1}>
+                    {d.total > 0 ? fmtCompact(d.total) : ''}
+                  </Text>
+                  <View style={styles.monthlyTrack}>
+                    <View style={[styles.monthlyBar, { height: h }]} />
+                  </View>
+                  <Text style={styles.monthlyLabel} numberOfLines={1}>{label}</Text>
+                </View>
+              );
+            })}
+          </View>
+          {allZero && <Text style={styles.chartCaption}>No donations yet</Text>}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ─── Top 10 churches by raised — horizontal bars (pure <View>, no chart lib) ───
+
+function TopChurchesBarsChart({ data }: { data: { churchName: string; totalRaised: number }[] }) {
+  const max = data.reduce((m, d) => Math.max(m, d.totalRaised), 0);
+  const allZero = max <= 0;
+
+  return (
+    <View style={styles.chartCard}>
+      <Text style={styles.chartCardLabel}>Top 10 Churches by Raised</Text>
+      {data.length === 0 ? (
+        <View style={styles.chartEmpty}>
+          <Text style={styles.chartEmptyText}>No church data yet</Text>
+        </View>
+      ) : (
+        <View style={styles.chartBody}>
+          {data.map((d, i) => {
+            // Flex ratios (not %-width strings) → no NaN, no divide-by-zero, and a
+            // single-item array fills the track (pct 100). Guarded on max > 0.
+            const pct = d.totalRaised > 0 && max > 0
+              ? Math.max(2, Math.round((d.totalRaised / max) * 100))
+              : 0;
+            return (
+              <View key={`${d.churchName}-${i}`} style={styles.churchRow}>
+                <View style={styles.churchHeader}>
+                  <Text style={styles.churchName} numberOfLines={1}>{d.churchName}</Text>
+                  <Text style={styles.churchValue}>{fmtKes(d.totalRaised)}</Text>
+                </View>
+                <View style={styles.churchTrack}>
+                  <View style={[styles.churchBar, { flex: pct }]} />
+                  {pct < 100 && <View style={{ flex: 100 - pct }} />}
+                </View>
+              </View>
+            );
+          })}
+          {allZero && <Text style={styles.chartCaption}>No church data yet</Text>}
+        </View>
+      )}
     </View>
   );
 }
@@ -150,9 +238,9 @@ export default function SuperAnalyticsScreen() {
               />
             </View>
 
-            {/* Chart placeholders */}
-            <ChartPlaceholder label="Donations by Month" />
-            <ChartPlaceholder label="Top 10 Churches by Raised" />
+            {/* Charts — pure <View> bars from the server aggregates */}
+            <MonthlyBarsChart data={data.donationsByMonth} />
+            <TopChurchesBarsChart data={data.topChurchesByRaised} />
           </>
         ) : null}
       </ScrollView>
@@ -261,17 +349,96 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.primaryLight,
   },
-  chartBox: {
-    height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
+
+  // Shared chart body + empty/caption states
+  chartBody: {
+    padding: Spacing.md,
     gap: Spacing.sm,
   },
-  chartBoxText: {
+  chartEmpty: {
+    height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chartEmptyText: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
     color: Colors.textMuted,
+  },
+  chartCaption: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
     textAlign: 'center',
-    paddingHorizontal: Spacing.xl,
+    marginTop: 4,
+  },
+
+  // Donations by month — vertical bars
+  monthlyRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  monthlyCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  monthlyValue: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 8,
+    color: Colors.textSecondary,
+    height: 12,
+  },
+  monthlyTrack: {
+    height: MONTHLY_MAX_BAR,
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  monthlyBar: {
+    width: '62%',
+    minWidth: 6,
+    backgroundColor: Colors.accent,
+    borderTopLeftRadius: BorderRadius.sm,
+    borderTopRightRadius: BorderRadius.sm,
+  },
+  monthlyLabel: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 9,
+    color: Colors.textMuted,
+  },
+
+  // Top churches — horizontal bars
+  churchRow: {
+    gap: 4,
+  },
+  churchHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  churchName: {
+    flex: 1,
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.text,
+  },
+  churchValue: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+  },
+  churchTrack: {
+    flexDirection: 'row',
+    height: 10,
+    backgroundColor: Colors.progressTrack,
+    borderRadius: BorderRadius.sm,
+    overflow: 'hidden',
+  },
+  churchBar: {
+    backgroundColor: Colors.accent,
+    borderRadius: BorderRadius.sm,
   },
 });

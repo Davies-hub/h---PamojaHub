@@ -29,6 +29,7 @@ import requests
 from django.core.cache import cache
 from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -139,6 +140,12 @@ def _make_withdrawal(campaign, *, status_=WithdrawalStatus.PENDING_APPROVAL,
         amount=amount, reason='reason',
         status=status_, retry_count=retry_count,
     )
+
+
+def _shift_ym(year, month, delta):
+    """Shift a (year, month) by delta months. Mirrors the view's skeleton math."""
+    idx = year * 12 + (month - 1) + delta
+    return idx // 12, idx % 12 + 1
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1187,6 +1194,152 @@ class AnalyticsDateBoundaryTest(TestCase):
         resp = self.client.get(reverse('super-analytics'), {'from': '2026-13-99'})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST, resp.content)
         self.assertIn('from', resp.data)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 9b. Analytics chart aggregations — donations_by_month + top_churches_by_raised
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class DonationsByMonthChartTest(TestCase):
+    """SuperAnalyticsView.donations_by_month — trailing 12-month GROSS series.
+
+    Proves: exactly 12 entries oldest→newest; the empty month is zero-filled
+    ("0.00"); populated months equal the seeded GROSS (amount) sums and EXCLUDE
+    non-SUCCESSFUL rows; a donation older than the 12-month window is dropped;
+    every total is a STRING (rule #11). Uses a fixed trailing window relative to
+    now(), so it computes the expected month keys the same way the view does.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.super_admin = _make_super_admin()
+        cls.church = _make_church()
+        cls.treasurer = _make_treasurer(cls.church, 't@example.org')
+        cls.campaign = _make_campaign(cls.church, cls.treasurer, slug='dbm')
+
+        now = timezone.now()
+        ty, tm = now.year, now.month
+        cls.this_key = f'{ty:04d}-{tm:02d}'
+        y1, m1 = _shift_ym(ty, tm, -1)
+        cls.one_ago_key = f'{y1:04d}-{m1:02d}'
+        y2, m2 = _shift_ym(ty, tm, -2)
+        cls.two_ago_key = f'{y2:04d}-{m2:02d}'
+        y13, m13 = _shift_ym(ty, tm, -13)
+        cls.old_key = f'{y13:04d}-{m13:02d}'
+
+        def _seed(year, month, amount, receipt, status_=DonationStatus.SUCCESSFUL):
+            d = Donation.objects.create(
+                campaign=cls.campaign, phone_number='254712345678',
+                amount=Decimal(amount), platform_fee=Decimal('0.00'),
+                net_amount=Decimal(amount), status=status_,
+                mpesa_receipt_number=receipt,
+            )
+            # created_at is auto_now_add → override to the target month via .update().
+            Donation.objects.filter(id=d.id).update(
+                created_at=datetime(year, month, 15, 12, 0, 0, tzinfo=dt_timezone.utc)
+            )
+
+        # This month: two SUCCESSFUL (gross 3000) + one PENDING (must be excluded).
+        _seed(ty, tm, '1000.00', 'DBMTHIS01')
+        _seed(ty, tm, '2000.00', 'DBMTHIS02')
+        _seed(ty, tm, '500.00', 'DBMPEND01', status_=DonationStatus.PENDING)
+        # Two months ago: one SUCCESSFUL (gross 500).
+        _seed(y2, m2, '500.00', 'DBMTWO001')
+        # One month ago: NOTHING seeded → zero-fill proof.
+        # Thirteen months ago: OUT OF the 12-month window → must be excluded.
+        _seed(y13, m13, '9999.00', 'DBMOLD001')
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.super_admin)
+
+    def test_donations_by_month_shape_and_values(self):
+        resp = self.client.get(reverse('super-analytics'))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        buckets = resp.data['donations_by_month']
+
+        # Exactly 12 entries, oldest → newest.
+        self.assertEqual(len(buckets), 12)
+        months = [b['month'] for b in buckets]
+        self.assertEqual(months, sorted(months))
+        self.assertEqual(months[-1], self.this_key)          # newest bucket = this month
+        # The out-of-window (13-months-ago) month is NOT a bucket.
+        self.assertNotIn(self.old_key, months)
+
+        by = {b['month']: b for b in buckets}
+        # Populated months = seeded GROSS sums; PENDING excluded from this month.
+        self.assertEqual(Decimal(by[self.this_key]['total']), Decimal('3000.00'))
+        self.assertEqual(Decimal(by[self.two_ago_key]['total']), Decimal('500.00'))
+        # The empty month is zero-filled, exactly "0.00".
+        self.assertEqual(by[self.one_ago_key]['total'], '0.00')
+
+        # Every field is a STRING on the wire (rule #11).
+        for b in buckets:
+            self.assertIsInstance(b['total'], str)
+            self.assertIsInstance(b['month'], str)
+
+
+class TopChurchesByRaisedChartTest(TestCase):
+    """SuperAnalyticsView.top_churches_by_raised — platform-wide top 10 by NET
+    raised (Sum of campaigns.raised_amount, reusing the churches-list annotation).
+
+    Proves: descending order; capped at 10 (11 funded churches → the lowest is
+    dropped, and an unfunded church never crowds in); totals are STRINGS; ONLY
+    church_name + total_raised are exposed (NO phone / treasurer / email PII).
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.super_admin = _make_super_admin()
+        # A creator church with NO campaign → total_raised 0.00 (Coalesce), so it
+        # can never crowd the top-10; its treasurer authors every campaign below.
+        cls.creator_church = _make_church(name='Creator Church', email='creator@example.org')
+        cls.creator = _make_treasurer(cls.creator_church, 'creator-t@example.org')
+
+        # 11 churches with DISTINCT raised totals 1100, 1000, … 100 (descending).
+        for i in range(11):
+            raised = Decimal((11 - i) * 100)         # i=0 → 1100 … i=10 → 100
+            ch = _make_church(name=f'Raise Church {11 - i:02d}',
+                              email=f'raise{i}@example.org')
+            Campaign.objects.create(
+                slug=f'raise-{i}', church=ch, created_by=cls.creator,
+                title=f'RC {i}', description='desc',
+                goal_amount=Decimal('100000'), raised_amount=raised,
+                wallet_balance=Decimal('0'),
+                banner_image_url='https://example.org/x.png',
+                category=CampaignCategory.BUILDING,
+                treasurer_phone='254712345678', treasurer_name='T',
+                status=CampaignStatus.ACTIVE,
+            )
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.super_admin)
+
+    def test_top_churches_by_raised(self):
+        resp = self.client.get(reverse('super-analytics'))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        top = resp.data['top_churches_by_raised']
+
+        # Capped at 10 even though 11 churches are funded (+ 1 unfunded creator).
+        self.assertEqual(len(top), 10)
+
+        # Descending by total_raised; the 1100 church leads.
+        totals = [Decimal(r['total_raised']) for r in top]
+        self.assertEqual(totals, sorted(totals, reverse=True))
+        self.assertEqual(top[0]['church_name'], 'Raise Church 11')
+        self.assertEqual(Decimal(top[0]['total_raised']), Decimal('1100.00'))
+
+        # The lowest-funded church (100) is sliced OFF; the unfunded creator too.
+        names = [r['church_name'] for r in top]
+        self.assertNotIn('Raise Church 01', names)      # raised 100 → dropped by [:10]
+        self.assertNotIn('Creator Church', names)       # 0.00 → dropped
+
+        # Money is a STRING; ONLY church_name + total_raised — no PII leak.
+        for r in top:
+            self.assertIsInstance(r['total_raised'], str)
+            self.assertEqual(set(r.keys()), {'church_name', 'total_raised'})
 
 
 # ═════════════════════════════════════════════════════════════════════════════
