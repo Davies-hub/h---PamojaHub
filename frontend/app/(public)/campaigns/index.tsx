@@ -88,6 +88,7 @@ function CategoryChips({
       horizontal
       showsHorizontalScrollIndicator={false}
       keyExtractor={item => item}
+      style={styles.chipListOuter}
       contentContainerStyle={styles.chipList}
       renderItem={({ item }) => {
         const active = item === selected;
@@ -281,10 +282,17 @@ const styles = StyleSheet.create({
   },
 
   // Category chips
+  // flexGrow:0 stops the horizontal list from stretching to fill the flex:1
+  // content column (RN-Web's ScrollView base is flexGrow:1) — which was
+  // inflating the row and stretching each pill into a tall oval.
+  chipListOuter: {
+    flexGrow: 0,
+  },
   chipList: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     gap: Spacing.sm,
+    alignItems: 'center',
   },
   chip: {
     paddingHorizontal: 14,
