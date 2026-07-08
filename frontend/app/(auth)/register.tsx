@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CountyPicker from '../../components/ui/CountyPicker';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
 
@@ -126,6 +127,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [county, setCounty] = useState('');   // optional — blank submits fine
   const [denomination, setDenomination] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -179,6 +181,7 @@ export default function RegisterScreen() {
         email: email.trim(),
         phone: phone.replace(/\s/g, ''),   // 0712… as typed; backend normalizes to 254…
         address: address.trim(),
+        county: county.trim(),             // optional — mapper omits it when blank
         denomination: denomination.trim(),
         password,
       });
@@ -306,6 +309,11 @@ export default function RegisterScreen() {
               returnKeyType="next"
               accessibilityLabel="Physical address"
             />
+          </Field>
+
+          {/* County (optional) */}
+          <Field label="County (optional)">
+            <CountyPicker value={county} onChange={setCounty} />
           </Field>
 
           {/* Denomination */}

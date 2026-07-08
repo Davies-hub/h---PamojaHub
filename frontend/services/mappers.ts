@@ -60,8 +60,10 @@ export function mapUser(b: BackendUser, churchStatus?: ChurchStatus | null): Aut
 // ── SEND mapper (camelCase → snake_case) — the inverse of mapUser's RECEIVE. ──
 // Registration SENDS the form to the backend, so the request body must use the
 // backend's field names. Explicit per-field (same discipline as mapUser).
-// county / first_name / last_name are intentionally NOT sent (B3 — not collected;
-// the backend treats them as optional). phone is sent AS TYPED (0712…) — the
+// county is now COLLECTED at registration (optional CountyPicker) and sent ONLY
+// when non-empty — a blank county is omitted from the body, so the backend stores
+// NULL (ChurchRegistrationSerializer treats it as optional). first_name / last_name
+// are still intentionally NOT sent (B3). phone is sent AS TYPED (0712…) — the
 // backend canonicalizes it to 254… (validate_safaricom_phone); we do not
 // double-normalize here.
 export interface RegisterForm {
@@ -71,6 +73,7 @@ export interface RegisterForm {
   address: string;
   denomination: string;
   password: string;
+  county?: string;
 }
 export interface BackendRegisterBody {
   name: string;
@@ -79,9 +82,10 @@ export interface BackendRegisterBody {
   address: string;
   denomination: string;
   password: string;
+  county?: string;
 }
 export function mapRegisterPayload(f: RegisterForm): BackendRegisterBody {
-  return {
+  const body: BackendRegisterBody = {
     name: f.churchName,        // churchName → name
     official_email: f.email,   // email → official_email
     phone: f.phone,            // sent as typed; backend normalizes to 254…
@@ -89,6 +93,11 @@ export function mapRegisterPayload(f: RegisterForm): BackendRegisterBody {
     denomination: f.denomination,
     password: f.password,
   };
+  // Optional — send county only when the treasurer picked one; a blank value is
+  // omitted so the backend stores NULL (no leading-dot location artifact).
+  const county = f.county?.trim();
+  if (county) body.county = county;
+  return body;
 }
 
 // ── PUBLIC READ mappers (RECEIVE, snake → camel) — public campaign/church lists. ──
@@ -653,6 +662,12 @@ export interface BackendAnalytics {
   active_campaigns: number;
   donations: { count: number; gross_total: string; net_total: string };
   platform_fees_collected: string;
+  // Chart series (added with the two analytics aggregations). Money = decimal
+  // STRINGS on the wire → Number() below. donations_by_month is the fixed
+  // trailing-12-month GROSS series (zero-filled server-side); top_churches_by_raised
+  // is ≤10, descending by NET raised. church_name only — no PII on this surface.
+  donations_by_month: { month: string; total: string }[];
+  top_churches_by_raised: { church_name: string; total_raised: string }[];
 }
 
 export function mapAnalytics(b: BackendAnalytics): AnalyticsSummary {
@@ -663,6 +678,16 @@ export function mapAnalytics(b: BackendAnalytics): AnalyticsSummary {
     totalPlatformFees: toMoneyNumber('analytics.platform_fees_collected', b.platform_fees_collected),
     donationCount: b.donations.count,
     netTotal: toMoneyNumber('analytics.net_total', b.donations.net_total),
+    // Per-field, decimal-string → Number at the boundary (rule #11). month/church_name
+    // are already plain strings; only the money fields cross toMoneyNumber.
+    donationsByMonth: b.donations_by_month.map((m, i) => ({
+      month: m.month,
+      total: toMoneyNumber(`analytics.donations_by_month[${i}].total`, m.total),
+    })),
+    topChurchesByRaised: b.top_churches_by_raised.map((c, i) => ({
+      churchName: c.church_name,
+      totalRaised: toMoneyNumber(`analytics.top_churches_by_raised[${i}].total_raised`, c.total_raised),
+    })),
   };
 }
 

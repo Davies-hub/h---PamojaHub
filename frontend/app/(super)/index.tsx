@@ -48,9 +48,12 @@ function ApplicationCard({ item, onApprove, onReject }: CardProps) {
 
       <View style={styles.cardMeta}>
         <Ionicons name="location-outline" size={13} color={Colors.textMuted} />
-        <Text style={styles.cardMetaText}>{item.county}</Text>
-        <Text style={styles.cardMetaDot}>·</Text>
-        <Text style={styles.cardMetaText}>{item.denomination}</Text>
+        {/* Render county + separator ONLY when a county is present — a county-less
+            church shows just the denomination ("ACK"), never an orphan "· ACK".
+            The dot appears only when BOTH sides exist. */}
+        {item.county ? <Text style={styles.cardMetaText}>{item.county}</Text> : null}
+        {item.county && item.denomination ? <Text style={styles.cardMetaDot}>·</Text> : null}
+        {item.denomination ? <Text style={styles.cardMetaText}>{item.denomination}</Text> : null}
       </View>
 
       <Text style={styles.cardDate}>Submitted {timeAgo(item.createdAt)}</Text>
