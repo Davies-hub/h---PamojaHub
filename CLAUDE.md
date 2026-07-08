@@ -26,7 +26,7 @@ Backend: `j:\Pamoja_Hub\backend\` — Django 5 + DRF + PostgreSQL (Phase 2 compl
 7. **Net-Everywhere**: all church-facing amounts are NET (post 2.5% fee). Exception: donor post-donation success screen shows gross to match M-Pesa SMS; Super Admin Donations table shows gross/fee/net.
 8. **walletBalance is derived** — always `raisedAmount − Σ(PAID withdrawals)`; never hardcode it
 9. **UI strings use "Payout" not "Disbursement"** — backend `Withdrawal` model name is unchanged
-10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 483** (this number is the live `manage.py test tests` count — last run 2026-07-03, 483/483 OK; update it whenever the count changes).
+10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 499** (this number is the live `manage.py test tests` count — last run 2026-07-08, 499/499 OK; update it whenever the count changes).
 11. **Decimals are STRINGS on the wire** — DRF serializes `DecimalField` as a string (`"80000.00"`); the frontend converts via `Number()` in `services/mappers.ts`. Mappers are explicit per-field (snake→camel), never a generic deep-convert.
 12. **Multi-tenant isolation** — treasurer read endpoints filter by `request.user.church`; every `/super/` endpoint is `[IsSuperAdmin]` (treasurer → 403). Never omit; never relax the money-safety invariants (lock-then-call: B2C/STK HTTP happens OUTSIDE the DB lock; idempotent callbacks keyed on the unique id).
 13. **Phase 4 slice discipline** — per slice: READ-ONLY contract trace (quote file:line, NO edits) → BUILD (restart backend `--noreload` on current code, ONE live checkpoint) → STOP for review. READS are wired before WRITES; money-write actions are their own later slices.
@@ -95,7 +95,7 @@ Route groups are transparent — `(public)` is not in the URL. `/campaigns` maps
 
 **Frontend Phase 1:** ✅ complete (screen inventory in the next section). `npx tsc --noEmit` = 0 errors; `npm test` (vitest) = **60/60** (mock-consistency + reducer suites).
 
-**Backend Phase 2:** ✅ complete. Django apps: `audit, accounts, churches, campaigns, donations, withdrawals, notifications, treasurer_portal, superadmin, integrations, common`. Steps 2.1 → 2.12b. **Suite: 483 tests** (live `manage.py test tests` count, 2026-07-03 — run command in critical rule #10).
+**Backend Phase 2:** ✅ complete. Django apps: `audit, accounts, churches, campaigns, donations, withdrawals, notifications, treasurer_portal, superadmin, integrations, common`. Steps 2.1 → 2.12b. **Suite: 499 tests** (live `manage.py test tests` count, 2026-07-08 — run command in critical rule #10).
 
 **Phase 3 (DB hardening):** partial — indexes/constraints + AuditLog `REVOKE UPDATE/DELETE` applied to the **dev** DB only. The prod REVOKE is NOT a migration — run manually before go-live (`backend/docs/production_db_hardening.md`).
 
