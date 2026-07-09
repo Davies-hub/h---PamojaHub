@@ -52,14 +52,14 @@ The principle: **do the highest-uncertainty, most-downstream-invalidating thing 
 
 ## TIER 1 — Blocks go-live. NOT closeable by building.
 
-### 1.1 — Real STK SUCCESS callback parse [LIVE] — **THE named pre-deployment gate**
-- The success-path parser is **shared by donation + subscription** and has never run against a real success (sandbox MSISDN self-times-out, no handset/PIN).
-- Closes on the **first real STK success in staging** with a real handset + PIN.
-- Until then: the success branch of *every payment in the product* is unproven on the live wire.
-- **Risk:** §14.1 history shows live-only breaks are the norm. Budget this to create follow-up slices.
+### 1.1 — Real STK SUCCESS callback parse [LIVE] — ✅ **CLOSED 2026-07-09**
+- Closed on the sandbox itself: a **real-SIM** donation (KES 5, real PIN prompt) produced a genuine `ResultCode: 0` Safaricom callback (receipt `UG9KTAG8ZR`), processed by the real shared donation/subscription parser — credited exactly once, NET of fee. (§14.1 record 2026-07-09/10.)
+- The gate had a hidden second half: **the `.env` callback URLs were missing the `MPESA_CALLBACK_SECRET` path segment**, so every real callback 404'd at the router since PH2-01. Fixed in `backend/.env`. **Carry-forward to go-live: the production URLs registered with Safaricom MUST include the production secret segment.**
+- Facts learned: sandbox STK charges REAL money (M-Pesa auto-reverses); real payload confirms numeric `Amount`/`TransactionDate`/`PhoneNumber` and a `Balance` item with no `Value` — the parser handles all of it.
 
 ### 1.2 — Production Daraja go-live [OPS] — *likely the long pole*
 - Everything today is **sandbox** (app 600992: OAuth + STK 174379 + B2C 600992).
+- **Sandbox ceiling reached (2026-07-10):** money-IN is fully provable/demoable on sandbox with a real SIM; money-OUT to a real phone is a hard sandbox wall (ResultCode 2040, CommandID-independent — §14.1). Real-destination payouts can only be tested via production B2C or an aggregator disbursement API (interim option: IntaSend).
 - Production needs: production consumer key/secret, production STK shortcode + passkey, production B2C shortcode + initiator + SecurityCredential (encrypted with the **production** cert), Safaricom go-live approval, and `ALLOWED_HOSTS` / public HTTPS callback URLs Safaricom can actually reach.
 - *[Guessing on exact current steps — Safaricom's go-live process changes; verify before starting.]*
 
