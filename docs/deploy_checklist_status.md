@@ -10,6 +10,8 @@
 
 ## ⬛ CURRENT STATUS — ALL BUILDABLE CODE COMPLETE
 
+CURRENT VERIFIED BASELINE: 499 tests — `manage.py test tests`, all pass — reconciled 2026-07-09.
+
 Every [CODE] item that can be built **without a deployed environment is done and live-verified.** Tier 2 (resolve-paid, request-disbursement request-half), all of Tier 3, all of Tier 5 polish — closed. Three items the §0 list called "unbuilt" turned out already built (resolve-paid, billing tier-prices, church-tier-set).
 
 **There is no more code to write ahead of the deploy environment.** Everything remaining (below) is **Tier 1 — [LIVE] / [OPS], not code.** It needs a domain + Safaricom approval + a real handset, none of which exist yet.
@@ -101,7 +103,7 @@ Both built backend-guard-first, seen-failing-first, live-gated. Each splits clea
 
 Lower risk; build once the money spine is proven live.
 
-### 3.1 — Treasurer screens still mock: campaign **detail / reports / settings / groups**
+### 3.1 — Treasurer screens still mock: campaign **detail / reports / settings / groups** — **✅ SUPERSEDED: all four DONE; reports CSV+PDF export BUILT (see "Treasurer screens — ✅ ALL DONE" below)**
 ### 3.2 — Super-admin **subscription tier-edit** write (not wired)
 ### 3.3 — Super-admin **billing growth/parish tier-price** writes (currently local-only edits)
 ### 3.4 — **groups** + **treasurer-portal** services (still Phase-4 stubs)
@@ -144,7 +146,7 @@ Ship without these. Listed so they're not forgotten.
 - Flagged long ago, never chased. Confirm it's harmless before launch.
 
 ### 5.5 — Context-file hygiene
-- Test baseline drift: docs say 299, real is 385. Update so the next "tests pass" isn't measured against a stale floor.
+- Test baseline drift: docs said 299, then 385/422. **✅ RECONCILED 2026-07-09 — see CURRENT VERIFIED BASELINE above.** Older 299/385/422 figures were historical floors.
 
 ---
 
@@ -164,7 +166,7 @@ Ship without these. Listed so they're not forgotten.
 
 ## Tier 3 progress (updated)
 
-**Treasurer screens — ✅ ALL DONE** (groups, settings, campaign-detail, reports), each live-verified on the `churches.tsx` template (real service + mapper + useFocusRefetch + web-safe confirm + 400-surfacing). New JWT backend added where needed: `validate_phone` on profile PATCH, `GET /churches/me/donations/` (NET-only). audit_log report type dropped (no JWT source by design); CSV/PDF export deferred (501 backend + disabled FE).
+**Treasurer screens — ✅ ALL DONE** (groups, settings, campaign-detail, reports), each live-verified on the `churches.tsx` template (real service + mapper + useFocusRefetch + web-safe confirm + 400-surfacing). New JWT backend added where needed: `validate_phone` on profile PATCH, `GET /churches/me/donations/` (NET-only). audit_log report type dropped (no JWT source by design); CSV/PDF export **✅ BUILT** — real CSV (`StreamingHttpResponse`) + PDF (`reportlab`) for all THREE report types: donations (`churches/views.py:466-494`), payouts (`withdrawals/views.py:285-313`), campaign-summary (`campaigns/views.py:412-434`); shared builder `common/pdf.py:43-107`. No 501/stub anywhere — `_Passthrough*Renderer` exists only for DRF content-negotiation.
 
 **Remaining Tier 3:** super-admin tier-edit (3.2) + growth/parish tier-price writes (3.3, local-only "lying toast" today), landing active-campaigns preview (3.5), NotificationType union remainder (3.6 — DONATION_NEEDS_REVIEW, RECONCILIATION_PAYMENT_CONFIRMED, CAMPAIGN_DESTINATION_CHANGED still FE-missing, fallback icon, non-breaking).
 
@@ -172,7 +174,7 @@ Ship without these. Listed so they're not forgotten.
 
 **3.2 + 3.3 — ✅ ALREADY DONE (trace-confirmed, premise was stale).** Super-admin church-tier-set (`/super/churches/{id}/set-tier/`) and tier-price writes (`growth_price`/`parish_price` on `/super/billing/`) are both fully wired FE↔BE with field-error handling, in-flight guards, server-truth re-seed, and a `PLATFORM_SETTINGS_CHANGED` audit. Tier-prices are forward-only (read live at initiate, never rewrite existing subscriptions) — same semantics as `fee_percent`. No money-correctness gap.
 
-**⚠️ Context-file drift:** the §0 "still mock / not wired" list has now overstated remaining work 3× (resolve-paid, request-disbursement form, billing tier-prices all turned out built). Recommend a reconciliation pass of §0 against reality before it sends future slices chasing phantom work.
+**⚠️ Context-file drift:** the §0 "still mock / not wired" list has now overstated remaining work 3× (resolve-paid, request-disbursement form, billing tier-prices all turned out built). Recommend a reconciliation pass of §0 against reality before it sends future slices chasing phantom work. **✅ DONE 2026-07-09:** reconciliation pass complete — baseline set to 499 (see CURRENT VERIFIED BASELINE above); reports-export (BUILT), document_url (LOCKED) and PH2-02 (CLOSED) phantom-open items corrected; dead-code cluster marked partially closed (FE deletions done; `dayjs` + `/updates/` deferred).
 
 **Tier 3 remaining (only 2):** landing active-campaigns preview (3.5, public/no-auth/no-money), NotificationType union remainder (3.6, cosmetic).
 
@@ -192,9 +194,9 @@ Ship without these. Listed so they're not forgotten.
 
 ### Audit remaining work (post-PH2-01), by triage bucket
 - **Faked FE features (MEDIUM, launch-blockers — real slices):** PH4-04 campaign-create is entirely mock (fakes success, persists nothing — biggest, an unwired feature); PH4-05 password-reset is a no-op stub; PH4-01 super "Approve Payout" is a dead button faking success on a money surface (likely just remove it — approval is treasurer-only).
-- **Prod-hardening cluster (MEDIUM/LOW — fold into go-live ops, overlaps existing Tier-1):** PH1-05 per-process rate-limit + REMOTE_ADDR-only IP (throttles + portal IP-binding collapse behind a proxy — also gates the source-IP allowlist above); PH1-03 audit-REVOKE-as-migration (already a Tier-1 item); PH2-03 transport headers (HSTS/SSL-redirect/secure cookies); PH1-06 donation-initiate per-IP throttle; PH2-02 HTML-escape user data in transactional emails; PH1-01/04/07/08 token-lifetime/login-lockout/register+refresh throttle/reset-timing.
+- **Prod-hardening cluster (MEDIUM/LOW — fold into go-live ops, overlaps existing Tier-1):** PH1-05 per-process rate-limit + REMOTE_ADDR-only IP (throttles + portal IP-binding collapse behind a proxy — also gates the source-IP allowlist above); PH1-03 audit-REVOKE-as-migration (already a Tier-1 item); PH2-03 transport headers (HSTS/SSL-redirect/secure cookies); PH1-06 donation-initiate per-IP throttle; PH2-02 HTML-escape user data in transactional emails **(✅ CLOSED 2026-07-02 (commit 755cb9f) — `integrations/resend_email.py` `html.escape()`s church_name/reason/donor_name/campaign_title/receipt; server-gen otp/amount safe)**; PH1-01/04/07/08 token-lifetime/login-lockout/register+refresh throttle/reset-timing.
 - **FE↔BE (LOW):** PH4-03 admin-granted paid tier (null expiry) renders as "FREE/Upgrade" to the treasurer; PH4-02 hardcoded landing hero stats on a "transparency" homepage.
-- **Dead code (INFO — triage to delete):** empty `DisbursementRequestForm.tsx`, unused `CampaignCreationForm.tsx`, dead `donationsService.listForCampaign`, orphaned `auditlog.mock`/`notifications.mock`, unused `dayjs` dep, routed-but-unused `/campaigns/{slug}/updates/`.
+- **Dead code (mostly CLOSED 2026-07-08, commit `4709e88`):** ✅ DELETED — `DisbursementRequestForm.tsx`, `CampaignCreationForm.tsx`, `donationsService.listForCampaign`, orphaned `auditlog.mock`/`notifications.mock` (+ `groups.mock`/`donations.mock`). ⬜ STILL PRESENT (deferred, not re-confirmed unused this pass): `dayjs` dep (`frontend/package.json:18`), routed-but-unused `/campaigns/{slug}/updates/` (`campaigns/urls.py:42`).
 
 **Verified-clean under active attack (coverage, not just problems):** JWT forgery/claim-injection/refresh-replay, cross-tenant IDOR sweep, mass-assignment on every serializer, portal OTP/token guards, audit actor integrity, money exactly-once (STK/B2C/resolve-paid replay), Net-Everywhere leak-free, no SQLi/XSS sink, state machines 51/51, E2E money journeys 27/27.
 
@@ -238,14 +240,14 @@ Remaining buildable slices (pre-deploy):
 - **Slice 3 — church logo upload** (self-scoped to `request.user.church`; near-copy of the banner endpoint; reuses validator + storage client + MediaAsset `kind=LOGO`).
 - **Slice 4 — FE render** (watch the real banner/logo load; FE already receives the URLs, just doesn't render them yet).
 - **Cleanup slice** — replace/dedup (each upload currently orphans the prior object), orphan sweep, and the deferred `object_key` DB unique index.
-- **`document_url` (Campaign) is STILL client-writable free-text** — same arbitrary-URL hole class Slice 1 closed for banner/logo. Out of scope (not rendered, different sensitivity); flip it when the document feature is built.
+- **`document_url` (Campaign) — ✅ LOCKED read-only at the serializer layer.** Listed in `AdminCampaignSerializer.Meta.read_only_fields` (`campaigns/serializers.py:131`, rationale :128-131), so DRF silently drops any client value; regression-guarded by `test_image_field_lock.py:114`. The model field stays a plain `URLField` (`campaigns/models.py:70`) — the lock is serializer-layer by design (same pattern Slice 1 used for banner/logo).
 
 ## Status after the audit-remediation pass
 
 **Buildable-now scope (as of the audit pass) was nearly exhausted — then the IMAGE UPLOAD feature was built as a security surface (see below); its logo + FE-render + cleanup slices remain buildable pre-deploy.** Slice-by-slice build (Tiers 2/3/5) + audit remediation (PH2-01 critical fix + 3 FE-fakes) are done and verified. What remains needs the deploy environment:
-- **Prod-hardening cluster** (go-live ops): PH1-05 proxy-IP/rate-limit-cache, PH2-01's source-IP allowlist, PH2-03 transport headers, PH2-02 email HTML-escape, PH1-06 donation throttle, PH1-01/04/07/08 token/lockout/throttle items, PH1-03 audit-REVOKE-as-migration.
+- **Prod-hardening cluster** (go-live ops): PH1-05 proxy-IP/rate-limit-cache, PH2-01's source-IP allowlist, PH2-03 transport headers, PH2-02 email HTML-escape **(✅ CLOSED — `resend_email.py` `html.escape`)**, PH1-06 donation throttle, PH1-01/04/07/08 token/lockout/throttle items, PH1-03 audit-REVOKE-as-migration.
 - **The original Tier-1 live gates**: STK success round-trip, OTP-over-real-SMS, production Daraja, prod DB REVOKE, sweep cron, the missing `b2c-queue/` route.
-- **Dead-code triage** (audit Appendix A): empty `DisbursementRequestForm.tsx`, unused `CampaignCreationForm.tsx`, dead `donationsService.listForCampaign`, orphaned mock files, unused `dayjs`, routed-but-unused `/campaigns/{slug}/updates/`. Low-risk; delete-after-confirm.
+- **Dead-code triage** (audit Appendix A): ✅ DELETED 2026-07-08 (commit `4709e88`) — `DisbursementRequestForm.tsx`, `CampaignCreationForm.tsx`, `donationsService.listForCampaign`, orphaned mock files. ⬜ STILL PRESENT (deferred, unused-status not re-confirmed this pass): `dayjs`, routed-but-unused `/campaigns/{slug}/updates/`.
 
-## ⚠️ HIGH-VALUE non-code task before next session: reconcile the context files
-The §0 "still mock / not wired" list overstated remaining work **4× this session** (resolve-paid, request-disbursement form, billing tier-prices were all already built; PH2-01 was rated MEDIUM when it was CRITICAL). A future session trusting a stale §0/severity will chase phantom slices or under-rate a real hole. Also: the test baseline is now **422** (docs variously say 299 / 406). Reconcile §0, the wired/mock status of every screen, and the 422 baseline against reality so the next session starts from truth, not drift.
+## ✅ HIGH-VALUE non-code task — DONE 2026-07-09: context files reconciled
+The §0 "still mock / not wired" list overstated remaining work **4× this session** (resolve-paid, request-disbursement form, billing tier-prices were all already built; PH2-01 was rated MEDIUM when it was CRITICAL). A future session trusting a stale §0/severity will chase phantom slices or under-rate a real hole. Also: at the time this to-do was written the test baseline had drifted to **422** (docs variously said 299 / 406) — reconcile §0, the wired/mock status of every screen, and that baseline against reality so the next session starts from truth, not drift. **✅ DONE 2026-07-09:** §0/status reconciled — set to the **499** baseline (see CURRENT VERIFIED BASELINE above); C2 reports-export (BUILT), C3 document_url (LOCKED) and C4 PH2-02 (CLOSED) phantom-open items corrected; dead-code cluster partially closed (FE deletions done; `dayjs` + `/campaigns/{slug}/updates/` deferred).
