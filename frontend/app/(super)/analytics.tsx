@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { superadminService } from '../../services/superadmin.service';
@@ -21,14 +22,16 @@ function StatCard({
   value,
   icon,
   iconColor,
+  wide,
 }: {
   label: string;
   value: string;
   icon: React.ComponentProps<typeof Ionicons>['name'];
   iconColor: string;
+  wide?: boolean;
 }) {
   return (
-    <View style={styles.statCard}>
+    <View style={[styles.statCard, wide && styles.statCardWide]}>
       <View style={[styles.statIconWrap, { backgroundColor: iconColor + '20' }]}>
         <Ionicons name={icon} size={22} color={iconColor} />
       </View>
@@ -153,6 +156,7 @@ export default function SuperAnalyticsScreen() {
   // timeRange stays INERT this slice — the endpoint accepts from/to params but
   // wiring date-filtering is its own later slice. Cosmetic UI only.
   const [timeRange, setTimeRange] = useState<TimeRange>('All Time');
+  const isWideWeb = useIsWideWeb();
 
   // R2: background refetch-on-focus (shared hook). First focus shows the spinner;
   // every revisit refetches in the BACKGROUND (cards stay, no blank/flash). DISPLAY-
@@ -165,7 +169,7 @@ export default function SuperAnalyticsScreen() {
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, isWideWeb && styles.wideContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* Time range filter */}
@@ -217,24 +221,28 @@ export default function SuperAnalyticsScreen() {
                 value={String(data.totalChurches)}
                 icon="business-outline"
                 iconColor={Colors.primary}
+                wide={isWideWeb}
               />
               <StatCard
                 label="Active Campaigns"
                 value={String(data.totalActiveCampaigns)}
                 icon="grid-outline"
                 iconColor={Colors.success}
+                wide={isWideWeb}
               />
               <StatCard
                 label="Total Donations"
                 value={fmtKes(data.totalDonations)}
                 icon="cash-outline"
                 iconColor={Colors.accent}
+                wide={isWideWeb}
               />
               <StatCard
                 label="Platform Fees"
                 value={fmtKes(data.totalPlatformFees)}
                 icon="trending-up-outline"
                 iconColor={Colors.primary}
+                wide={isWideWeb}
               />
             </View>
 
@@ -256,6 +264,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     paddingBottom: Spacing.xl,
     gap: Spacing.md,
+  },
+  wideContent: {
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   // Loading / error (same pattern as S1–S5)
@@ -308,6 +321,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 2,
     elevation: 1,
+  },
+  statCardWide: {
+    width: undefined,
+    flexBasis: '23%',
   },
   statIconWrap: {
     width: 40,
