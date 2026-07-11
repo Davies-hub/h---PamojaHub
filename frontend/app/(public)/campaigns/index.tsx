@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CampaignCard from '../../../components/campaign/CampaignCard';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignCategory, PublicCampaign } from '../../../types';
@@ -148,6 +149,8 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 
 export default function BrowseCampaignsScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
+  const numColumns = isWideWeb ? 3 : 1;
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<CampaignCategory | 'All'>('All');
   const [campaigns, setCampaigns] = useState<PublicCampaign[]>([]);
@@ -187,14 +190,18 @@ export default function BrowseCampaignsScreen() {
     <SafeAreaView edges={['top']} style={styles.root}>
       {/* Sticky header: nav + search */}
       <View style={styles.stickyHeader}>
-        <NavBar onBack={() => router.back()} />
-        <View style={styles.searchWrapper}>
-          <SearchBar value={search} onChange={setSearch} />
+        <View style={isWideWeb && styles.wideCap}>
+          <NavBar onBack={() => router.back()} />
+          <View style={styles.searchWrapper}>
+            <SearchBar value={search} onChange={setSearch} />
+          </View>
         </View>
       </View>
 
       <View style={styles.content}>
-        <CategoryChips selected={category} onSelect={setCategory} />
+        <View style={isWideWeb && styles.wideCap}>
+          <CategoryChips selected={category} onSelect={setCategory} />
+        </View>
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={Colors.primary} />
@@ -204,16 +211,21 @@ export default function BrowseCampaignsScreen() {
         ) : (
           <FlatList
             data={campaigns}
+            numColumns={numColumns}
+            key={numColumns}
+            columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
             style={{ flex: 1, backgroundColor: Colors.background }}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <CampaignCard
-                campaign={item}
-                onDonate={() => router.push(`/campaigns/${item.slug}` as any)}
-              />
+              <View style={isWideWeb && styles.gridItem}>
+                <CampaignCard
+                  campaign={item}
+                  onDonate={() => router.push(`/campaigns/${item.slug}` as any)}
+                />
+              </View>
             )}
             ListEmptyComponent={<EmptyState hasFilters={hasFilters} />}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideCap]}
             showsVerticalScrollIndicator={false}
           />
         )}
@@ -330,10 +342,24 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
 
+  // Wide-web content cap (nav/search/chips/list all align to it)
+  wideCap: {
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
+  },
+
   // List
   listContent: {
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  gridRow: {
+    gap: Spacing.md,
+  },
+  gridItem: {
+    flex: 1,
+    maxWidth: '32%',
   },
 
   // Empty state
