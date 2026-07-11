@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { churchesService } from '../../../services/churches.service';
 import { PublicChurch } from '../../../types';
@@ -155,6 +156,8 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 
 export default function BrowseChurchesScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
+  const numColumns = isWideWeb ? 3 : 1;
   const [search, setSearch] = useState('');
   const [churches, setChurches] = useState<PublicChurch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,9 +193,11 @@ export default function BrowseChurchesScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.root}>
       <View style={styles.stickyHeader}>
-        <NavBar onBack={() => router.back()} />
-        <View style={styles.searchWrapper}>
-          <SearchBar value={search} onChange={setSearch} />
+        <View style={isWideWeb && styles.wideCap}>
+          <NavBar onBack={() => router.back()} />
+          <View style={styles.searchWrapper}>
+            <SearchBar value={search} onChange={setSearch} />
+          </View>
         </View>
       </View>
 
@@ -206,16 +211,21 @@ export default function BrowseChurchesScreen() {
         ) : (
           <FlatList
             data={churches}
+            numColumns={numColumns}
+            key={numColumns}
+            columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
             style={{ flex: 1, backgroundColor: Colors.background }}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <ChurchCard
-                church={item}
-                onPress={() => router.push(`/churches/${item.id}` as any)}
-              />
+              <View style={isWideWeb && styles.gridItem}>
+                <ChurchCard
+                  church={item}
+                  onPress={() => router.push(`/churches/${item.id}` as any)}
+                />
+              </View>
             )}
             ListEmptyComponent={<EmptyState hasFilters={hasFilters} />}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideCap]}
             showsVerticalScrollIndicator={false}
           />
         )}
@@ -295,11 +305,25 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
 
+  // Wide-web content cap (nav/search/list all align to it)
+  wideCap: {
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
+  },
+
   // Church card
   listContent: {
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  gridRow: {
+    gap: Spacing.md,
+  },
+  gridItem: {
+    flex: 1,
+    maxWidth: '32%',
   },
   card: {
     flexDirection: 'row',
