@@ -12,14 +12,18 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DonationForm from '../../../components/campaign/DonationForm';
 import WhatsAppShareButton from '../../../components/campaign/WhatsAppShareButton';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+
+const CONTENT_CAP = 760;
 import { campaignsService } from '../../../services/campaigns.service';
 import { PublicCampaign } from '../../../types';
 
@@ -34,6 +38,11 @@ export default function CampaignDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
+  const isWideWeb = useIsWideWeb();
+  const { width: windowWidth } = useWindowDimensions();
+  const backLeft = isWideWeb
+    ? Math.max(Spacing.md, (windowWidth - CONTENT_CAP) / 2 + Spacing.md)
+    : Spacing.md;
 
   const [campaign, setCampaign] = useState<PublicCampaign | null>(null);
   const [state, setState] = useState<LoadState>('loading');
@@ -67,7 +76,7 @@ export default function CampaignDetailScreen() {
 
       {/* Back button — absolute overlay above content, present in every state */}
       <TouchableOpacity
-        style={[styles.backBtn, { top: statusBarHeight + 8 }]}
+        style={[styles.backBtn, { top: statusBarHeight + 8, left: backLeft }]}
         onPress={() => router.back()}
         activeOpacity={0.7}
         accessibilityRole="button"
@@ -117,7 +126,10 @@ export default function CampaignDetailScreen() {
             >
               <ScrollView
                 style={styles.flex}
-                contentContainerStyle={{ paddingBottom: (insets.bottom || 16) + Spacing.xl }}
+                contentContainerStyle={[
+                  { paddingBottom: (insets.bottom || 16) + Spacing.xl },
+                  isWideWeb && styles.wideContent,
+                ]}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
               >
@@ -222,7 +234,6 @@ const styles = StyleSheet.create({
 
   backBtn: {
     position: 'absolute',
-    left: Spacing.md,
     zIndex: 50,
     width: 40,
     height: 40,
@@ -235,6 +246,12 @@ const styles = StyleSheet.create({
   banner: {
     height: 220,
     width: '100%',
+  },
+
+  wideContent: {
+    maxWidth: CONTENT_CAP,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   infoSection: {

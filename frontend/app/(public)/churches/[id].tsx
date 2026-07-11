@@ -10,12 +10,16 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CampaignCard from '../../../components/campaign/CampaignCard';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+
+const CONTENT_CAP = 760;
 import { campaignsService } from '../../../services/campaigns.service';
 import { churchesService } from '../../../services/churches.service';
 import { PublicCampaign, PublicChurch } from '../../../types';
@@ -111,6 +115,11 @@ export default function ChurchProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
+  const isWideWeb = useIsWideWeb();
+  const { width: windowWidth } = useWindowDimensions();
+  const backLeft = isWideWeb
+    ? Math.max(Spacing.md, (windowWidth - CONTENT_CAP) / 2 + Spacing.md)
+    : Spacing.md;
 
   const [church, setChurch] = useState<PublicChurch | null>(null);
   const [churchState, setChurchState] = useState<LoadState>('loading');
@@ -167,7 +176,7 @@ export default function ChurchProfileScreen() {
 
   const BackButton = (
     <TouchableOpacity
-      style={[styles.backBtn, { top: statusBarHeight + 8 }]}
+      style={[styles.backBtn, { top: statusBarHeight + 8, left: backLeft }]}
       onPress={() => router.back()}
       activeOpacity={0.7}
       accessibilityRole="button"
@@ -250,7 +259,10 @@ export default function ChurchProfileScreen() {
           </>
         }
         ListEmptyComponent={campaignsEmpty}
-        contentContainerStyle={{ paddingBottom: (insets.bottom || 16) + Spacing.xl }}
+        contentContainerStyle={[
+          { paddingBottom: (insets.bottom || 16) + Spacing.xl },
+          isWideWeb && styles.wideContent,
+        ]}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -303,7 +315,6 @@ const styles = StyleSheet.create({
 
   backBtn: {
     position: 'absolute',
-    left: Spacing.md,
     zIndex: 50,
     width: 40,
     height: 40,
@@ -316,6 +327,12 @@ const styles = StyleSheet.create({
   banner: {
     height: 160,
     width: '100%',
+  },
+
+  wideContent: {
+    maxWidth: CONTENT_CAP,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   // Profile info
