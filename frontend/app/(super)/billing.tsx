@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import Card from '../../components/ui/Card';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -262,6 +263,8 @@ export default function SuperBillingScreen() {
     }
   }
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {toast ? (
@@ -271,11 +274,11 @@ export default function SuperBillingScreen() {
       ) : null}
 
       {billingState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : billingState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load billing settings.</Text>
           <TouchableOpacity
@@ -291,7 +294,7 @@ export default function SuperBillingScreen() {
       ) : (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, isWideWeb && styles.wideColumn]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -359,6 +362,14 @@ export default function SuperBillingScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — scroll content and loading/error blocks share one
+  // centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
   toastWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },
   content: {
     padding: Spacing.md,

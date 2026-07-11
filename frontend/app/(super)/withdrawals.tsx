@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import Modal from '../../components/ui/Modal';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -508,6 +509,8 @@ export default function SuperWithdrawalsScreen() {
     }
   }
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {toast ? (
@@ -517,7 +520,7 @@ export default function SuperWithdrawalsScreen() {
       ) : null}
 
       {/* Filter bar */}
-      <View style={styles.filterBar}>
+      <View style={[styles.filterBar, isWideWeb && styles.wideColumn]}>
         <View style={styles.churchSearchRow}>
           <Ionicons name="business-outline" size={14} color={Colors.textMuted} />
           <TextInput
@@ -546,11 +549,11 @@ export default function SuperWithdrawalsScreen() {
       </View>
 
       {wState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : wState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load payouts.</Text>
           <TouchableOpacity
@@ -566,7 +569,7 @@ export default function SuperWithdrawalsScreen() {
       ) : (
         <>
           {truncated ? (
-            <View style={styles.truncBanner}>
+            <View style={[styles.truncBanner, isWideWeb && styles.wideColumn]}>
               <Ionicons name="information-circle-outline" size={15} color={Colors.warning} />
               <Text style={styles.truncText}>Showing first {withdrawals.length} of {total}.</Text>
             </View>
@@ -583,7 +586,7 @@ export default function SuperWithdrawalsScreen() {
                 stillConfirming={confirmingIds.has(item.id)}
               />
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -724,6 +727,14 @@ export default function SuperWithdrawalsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — list content and its outside-the-list siblings share
+  // one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
   toastWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },
 
   // Loading / error (same pattern as S1 billing + the wired treasurer reads)

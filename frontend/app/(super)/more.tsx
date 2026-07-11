@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -30,14 +31,15 @@ const ITEMS: { label: string; subtitle: string; icon: IoniconsName; route: strin
 
 export default function MoreScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
-      <View style={styles.header}>
+      <View style={[styles.header, isWideWeb && styles.wideColumn]}>
         <Text style={styles.headerTitle}>More</Text>
       </View>
 
-      <View style={styles.list}>
+      <View style={[styles.list, isWideWeb && styles.wideColumn]}>
         {ITEMS.map((item, idx) => (
           <React.Fragment key={item.route}>
             <TouchableOpacity
@@ -69,6 +71,13 @@ export default function MoreScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — header + menu card share one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   header: {
     paddingHorizontal: Spacing.md,

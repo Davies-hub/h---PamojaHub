@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import DisbursementApprovalDialog from '../../components/disbursement/DisbursementApprovalDialog';
 import Modal from '../../components/ui/Modal';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -470,10 +471,12 @@ export default function PayoutsScreen() {
     }
   }
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <View style={styles.root}>
       {/* ── Filter bar ── */}
-      <View style={styles.filterBar}>
+      <View style={[styles.filterBar, isWideWeb && styles.wideColumn]}>
         {pendingCount > 0 ? (
           <View style={styles.pendingBanner}>
             <Ionicons name="time-outline" size={16} color={Colors.warning} />
@@ -500,11 +503,11 @@ export default function PayoutsScreen() {
 
       {/* ── Payouts list ── */}
       {loading ? (
-        <View style={styles.centerState}>
+        <View style={[styles.centerState, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : error ? (
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
           <Text style={styles.emptyTitle}>Couldn’t load payouts</Text>
           <Text style={styles.emptySubtitle}>Please check your connection and try again.</Text>
@@ -531,7 +534,7 @@ export default function PayoutsScreen() {
               stillConfirming={confirmingIds.has(item.id)}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
@@ -681,6 +684,14 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: Colors.grey,
+  },
+
+  // Wide-web (≥768) only — filter bar, states, and list content share one
+  // centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   filterBar: {

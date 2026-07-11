@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import Badge from '../../components/ui/Badge';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -414,6 +415,8 @@ export default function SuperChurchesScreen() {
     );
   }
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {toast ? (
@@ -423,7 +426,7 @@ export default function SuperChurchesScreen() {
       ) : null}
 
       {/* Filter bar */}
-      <View style={styles.filterBar}>
+      <View style={[styles.filterBar, isWideWeb && styles.wideColumn]}>
         <View style={styles.searchRow}>
           <Ionicons name="search-outline" size={16} color={Colors.textMuted} />
           <TextInput
@@ -460,11 +463,11 @@ export default function SuperChurchesScreen() {
       </View>
 
       {chState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : chState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load churches.</Text>
           <TouchableOpacity
@@ -480,7 +483,7 @@ export default function SuperChurchesScreen() {
       ) : (
         <>
           {truncated ? (
-            <View style={styles.truncBanner}>
+            <View style={[styles.truncBanner, isWideWeb && styles.wideColumn]}>
               <Ionicons name="information-circle-outline" size={15} color={Colors.warning} />
               <Text style={styles.truncText}>Showing first {churches.length} of {total}.</Text>
             </View>
@@ -491,7 +494,7 @@ export default function SuperChurchesScreen() {
             renderItem={({ item }) => (
               <ChurchRow item={item} onPress={() => setSelected(item)} />
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -535,6 +538,14 @@ export default function SuperChurchesScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — list content and its outside-the-list siblings share
+  // one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   toastWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },
 

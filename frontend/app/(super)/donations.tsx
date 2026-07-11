@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { superadminService } from '../../services/superadmin.service';
@@ -175,10 +176,12 @@ export default function SuperDonationsScreen() {
     });
   }, [donations, statusFilter, dateFilter, search]);
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {/* Back bar */}
-      <View style={styles.backBar}>
+      <View style={[styles.backBar, isWideWeb && styles.wideColumn]}>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => router.navigate('/(super)/more' as any)}
@@ -192,7 +195,7 @@ export default function SuperDonationsScreen() {
         <Text style={styles.backBarTitle}>Donations</Text>
         <View style={styles.backBarSpacer} />
       </View>
-      <View style={styles.filterBar}>
+      <View style={[styles.filterBar, isWideWeb && styles.wideColumn]}>
         <View style={styles.searchRow}>
           <Ionicons name="search-outline" size={14} color={Colors.textMuted} />
           <TextInput
@@ -228,11 +231,11 @@ export default function SuperDonationsScreen() {
       </View>
 
       {dState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : dState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load donations.</Text>
           <TouchableOpacity
@@ -248,7 +251,7 @@ export default function SuperDonationsScreen() {
       ) : (
         <>
           {truncated ? (
-            <View style={styles.truncBanner}>
+            <View style={[styles.truncBanner, isWideWeb && styles.wideColumn]}>
               <Ionicons name="information-circle-outline" size={15} color={Colors.warning} />
               <Text style={styles.truncText}>Showing first {donations.length} of {total}.</Text>
             </View>
@@ -257,7 +260,7 @@ export default function SuperDonationsScreen() {
             data={filtered}
             keyExtractor={item => item.id}
             renderItem={({ item }) => <DonationRow item={item} />}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -276,6 +279,14 @@ export default function SuperDonationsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — list content and its outside-the-list siblings share
+  // one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   // Loading / error (same pattern as S1 billing + the wired treasurer reads)
   centerBlock: { paddingVertical: 48, alignItems: 'center', justifyContent: 'center' },

@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import Modal from '../../components/ui/Modal';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -361,6 +362,8 @@ export default function GroupLabelsScreen() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const isWideWeb = useIsWideWeb();
+
   return (
     <View style={styles.root}>
       {toast ? (
@@ -370,7 +373,7 @@ export default function GroupLabelsScreen() {
       ) : null}
 
       {/* ── Page header ── */}
-      <View style={styles.pageHeader}>
+      <View style={[styles.pageHeader, isWideWeb && styles.wideColumn]}>
         <TouchableOpacity
           style={styles.backIconBtn}
           onPress={() => router.navigate('/(treasurer)/settings' as any)}
@@ -400,7 +403,7 @@ export default function GroupLabelsScreen() {
       </View>
 
       {/* ── Active / Archived view toggle ── */}
-      <View style={styles.viewToggleBar}>
+      <View style={[styles.viewToggleBar, isWideWeb && styles.wideColumn]}>
         <TouchableOpacity
           style={[styles.viewChip, !showArchived && styles.viewChipActive]}
           onPress={() => setShowArchived(false)}
@@ -423,7 +426,7 @@ export default function GroupLabelsScreen() {
 
       {/* ── Inline add form (active view only) ── */}
       {showAddForm && !showArchived ? (
-        <View style={styles.addForm}>
+        <View style={[styles.addForm, isWideWeb && styles.wideColumn]}>
           <TextInput
             style={styles.addInput}
             placeholder="Group name"
@@ -514,11 +517,11 @@ export default function GroupLabelsScreen() {
 
       {/* ── Body: loading / error / list ── */}
       {fetchState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : fetchState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load group labels.</Text>
           <TouchableOpacity
@@ -536,7 +539,7 @@ export default function GroupLabelsScreen() {
           data={labels}
           keyExtractor={item => item.id}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
@@ -585,6 +588,14 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: Colors.grey,
+  },
+
+  // Wide-web (≥768) only — header, toggle, add-form, and list content share one
+  // centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   toastWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },

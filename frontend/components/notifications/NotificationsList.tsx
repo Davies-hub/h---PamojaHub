@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { useIsWideWeb } from '../layout/Screen';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { notificationsService } from '../../services/notifications.service';
 import { useNotifications } from '../../stores/notifications.store';
@@ -93,6 +94,7 @@ export function NotificationsList({
 }) {
   const router = useRouter();
   const { clearUnread } = useNotifications();
+  const isWideWeb = useIsWideWeb();
 
   // Live read: fetch on every screen focus (background refetch on revisit keeps
   // last-good). `data` is the PaginatedResponse — we read `.results` into a local
@@ -155,7 +157,7 @@ export function NotificationsList({
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {/* Back bar */}
-      <View style={styles.backBar}>
+      <View style={[styles.backBar, isWideWeb && styles.wideColumn]}>
         <TouchableOpacity
           style={styles.backBtn}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -172,11 +174,11 @@ export function NotificationsList({
       </View>
 
       {status === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : status === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load notifications.</Text>
           <TouchableOpacity
@@ -193,7 +195,7 @@ export function NotificationsList({
         <>
           {/* Header bar */}
           {unreadCount > 0 ? (
-            <View style={styles.headerBar}>
+            <View style={[styles.headerBar, isWideWeb && styles.wideColumn]}>
               <Text style={styles.headerBarText}>
                 {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
               </Text>
@@ -212,7 +214,7 @@ export function NotificationsList({
               non-blocking sync warning (the optimistic mark-read may not have persisted).
               Driven by the hook's refetchError; auto-clears when a refetch next succeeds. */}
           {refetchError ? (
-            <View style={styles.syncBar}>
+            <View style={[styles.syncBar, isWideWeb && styles.wideColumn]}>
               <Ionicons name="cloud-offline-outline" size={15} color={Colors.warning} />
               <Text style={styles.syncBarText}>
                 Couldn’t sync — your last action may not have saved. Pull down or reopen to retry.
@@ -226,7 +228,7 @@ export function NotificationsList({
             renderItem={({ item }) => (
               <NotifItem item={item} onMarkRead={markRead} />
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -246,6 +248,14 @@ export function NotificationsList({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — list content and its outside-the-list siblings share
+  // one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   backBar: {
     flexDirection: 'row',
