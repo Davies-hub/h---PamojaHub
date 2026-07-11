@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
@@ -316,145 +316,128 @@ export default function RegistrationQueueScreen() {
       )}
 
       {/* Reject bottom sheet */}
-      <Modal
+      <ResponsiveSheet
         visible={rejectTarget !== null}
-        transparent
-        animationType="slide"
-        onRequestClose={() => { if (!rejectSubmitting) closeRejectSheet(); }}
+        onRequestClose={closeRejectSheet}
+        dismissable={!rejectSubmitting}
+        keyboardOffset={kbOffset}
       >
-        <View style={styles.kavContainer}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          onPress={() => { if (!rejectSubmitting) closeRejectSheet(); }}
-          activeOpacity={1}
+        <View style={styles.sheetHandle} />
+        <Text style={styles.sheetTitle}>Reject Application</Text>
+        {rejectTarget ? (
+          <Text style={styles.sheetMeta}>{rejectTarget.name}</Text>
+        ) : null}
+
+        <Text style={styles.inputLabel}>
+          Reason for rejection <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput
+          style={[
+            styles.reasonInput,
+            rejectAttempted && styles.reasonInputError,
+          ]}
+          value={rejectReason}
+          onChangeText={t => {
+            setRejectReason(t);
+            if (rejectAttempted) setRejectAttempted(false);
+          }}
+          placeholder="Explain why this application is being rejected (min 10 characters)…"
+          placeholderTextColor={Colors.textMuted}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+          accessibilityLabel="Rejection reason"
         />
-        <View style={[styles.rejectSheet, kbOffset > 0 ? { marginBottom: kbOffset } : null]}>
-          <View style={styles.sheetHandle} />
-          <Text style={styles.sheetTitle}>Reject Application</Text>
-          {rejectTarget ? (
-            <Text style={styles.sheetMeta}>{rejectTarget.name}</Text>
-          ) : null}
-
-          <Text style={styles.inputLabel}>
-            Reason for rejection <Text style={styles.required}>*</Text>
+        {rejectAttempted ? (
+          <Text style={styles.inputError}>
+            {rejectReason.trim().length === 0
+              ? 'A reason is required.'
+              : 'Reason must be at least 10 characters.'}
           </Text>
-          <TextInput
-            style={[
-              styles.reasonInput,
-              rejectAttempted && styles.reasonInputError,
-            ]}
-            value={rejectReason}
-            onChangeText={t => {
-              setRejectReason(t);
-              if (rejectAttempted) setRejectAttempted(false);
-            }}
-            placeholder="Explain why this application is being rejected (min 10 characters)…"
-            placeholderTextColor={Colors.textMuted}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            accessibilityLabel="Rejection reason"
-          />
-          {rejectAttempted ? (
-            <Text style={styles.inputError}>
-              {rejectReason.trim().length === 0
-                ? 'A reason is required.'
-                : 'Reason must be at least 10 characters.'}
-            </Text>
-          ) : null}
+        ) : null}
 
-          {/* Submit failure (generic-error branch). The sheet stays open, so a toast
-              would render behind the Modal — show the message inline here instead. */}
-          {rejectError ? (
-            <View style={styles.rejectErrorBox}>
-              <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
-              <Text style={styles.rejectErrorText}>{rejectError}</Text>
-            </View>
-          ) : null}
-
-          <View style={styles.sheetActions}>
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={closeRejectSheet}
-              disabled={rejectSubmitting}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-            >
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.submitBtn, rejectSubmitting && styles.submitBtnDisabled]}
-              onPress={handleRejectSubmit}
-              disabled={rejectSubmitting}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-            >
-              <Text style={styles.submitBtnText}>{rejectSubmitting ? 'Rejecting…' : 'Reject'}</Text>
-            </TouchableOpacity>
+        {/* Submit failure (generic-error branch). The sheet stays open, so a toast
+            would render behind the Modal — show the message inline here instead. */}
+        {rejectError ? (
+          <View style={styles.rejectErrorBox}>
+            <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
+            <Text style={styles.rejectErrorText}>{rejectError}</Text>
           </View>
+        ) : null}
+
+        <View style={styles.sheetActions}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={closeRejectSheet}
+            disabled={rejectSubmitting}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+          >
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitBtn, rejectSubmitting && styles.submitBtnDisabled]}
+            onPress={handleRejectSubmit}
+            disabled={rejectSubmitting}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+          >
+            <Text style={styles.submitBtnText}>{rejectSubmitting ? 'Rejecting…' : 'Reject'}</Text>
+          </TouchableOpacity>
         </View>
-        </View>
-      </Modal>
+      </ResponsiveSheet>
 
       {/* Approve confirm sheet — PLAIN confirm (PENDING→ACTIVE). Mirrors the reject
-          sheet's structure (same RN Modal + reusable sheet styles) but DROPS the
-          reason TextInput entirely; just church name + consequence + Cancel/Approve. */}
-      <Modal
+          sheet's structure (same ResponsiveSheet + reusable sheet styles) but DROPS
+          the reason TextInput entirely; just church name + consequence + Cancel/Approve.
+          No keyboardOffset — there is no text input here, and the old sheet never
+          applied kbOffset either. */}
+      <ResponsiveSheet
         visible={approveTarget !== null}
-        transparent
-        animationType="slide"
-        onRequestClose={() => { if (!approveSubmitting) closeApproveSheet(); }}
+        onRequestClose={closeApproveSheet}
+        dismissable={!approveSubmitting}
       >
-        <View style={styles.kavContainer}>
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            onPress={() => { if (!approveSubmitting) closeApproveSheet(); }}
-            activeOpacity={1}
-          />
-          <View style={styles.rejectSheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Approve Church</Text>
-            {approveTarget ? (
-              <Text style={styles.sheetMeta}>{approveTarget.name}</Text>
-            ) : null}
+        <View style={styles.sheetHandle} />
+        <Text style={styles.sheetTitle}>Approve Church</Text>
+        {approveTarget ? (
+          <Text style={styles.sheetMeta}>{approveTarget.name}</Text>
+        ) : null}
 
-            <Text style={styles.approveBody}>
-              They will be notified and can immediately start creating campaigns and
-              receiving donations.
-            </Text>
+        <Text style={styles.approveBody}>
+          They will be notified and can immediately start creating campaigns and
+          receiving donations.
+        </Text>
 
-            {/* Submit failure (generic-error branch). The sheet stays open, so a toast
-                would render behind the Modal — show the message inline here instead. */}
-            {approveError ? (
-              <View style={styles.rejectErrorBox}>
-                <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
-                <Text style={styles.rejectErrorText}>{approveError}</Text>
-              </View>
-            ) : null}
-
-            <View style={styles.sheetActions}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={closeApproveSheet}
-                disabled={approveSubmitting}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-              >
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.approveConfirmBtn, approveSubmitting && styles.approveConfirmBtnDisabled]}
-                onPress={handleApproveSubmit}
-                disabled={approveSubmitting}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-              >
-                <Text style={styles.approveConfirmBtnText}>{approveSubmitting ? 'Approving…' : 'Approve'}</Text>
-              </TouchableOpacity>
-            </View>
+        {/* Submit failure (generic-error branch). The sheet stays open, so a toast
+            would render behind the Modal — show the message inline here instead. */}
+        {approveError ? (
+          <View style={styles.rejectErrorBox}>
+            <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
+            <Text style={styles.rejectErrorText}>{approveError}</Text>
           </View>
+        ) : null}
+
+        <View style={styles.sheetActions}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={closeApproveSheet}
+            disabled={approveSubmitting}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+          >
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.approveConfirmBtn, approveSubmitting && styles.approveConfirmBtnDisabled]}
+            onPress={handleApproveSubmit}
+            disabled={approveSubmitting}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+          >
+            <Text style={styles.approveConfirmBtnText}>{approveSubmitting ? 'Approving…' : 'Approve'}</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </ResponsiveSheet>
     </SafeAreaView>
   );
 }
@@ -627,26 +610,6 @@ const styles = StyleSheet.create({
   },
 
   // Reject modal
-  kavContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  rejectSheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.md,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-  },
   sheetHandle: {
     width: 40,
     height: 4,

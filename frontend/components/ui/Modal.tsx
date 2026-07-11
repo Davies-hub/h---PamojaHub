@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { useIsWideWeb } from '../layout/Screen';
 import Button from './Button';
 
 interface ModalProps {
@@ -32,6 +33,7 @@ export default function Modal({
   confirmVariant = 'primary',
   confirmDisabled = false,
 }: ModalProps) {
+  const isWideWeb = useIsWideWeb();
   return (
     <RNModal
       visible={visible}
@@ -40,7 +42,11 @@ export default function Modal({
       onRequestClose={onCancel}
     >
       <TouchableOpacity style={styles.overlay} onPress={onCancel} activeOpacity={1}>
-        <TouchableOpacity activeOpacity={1} style={styles.card} onPress={() => {}}>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={[styles.card, isWideWeb && styles.cardWide]}
+          onPress={() => {}}
+        >
           <Text style={styles.title}>{title}</Text>
           <View style={styles.body}>{children}</View>
           {onConfirm ? (
@@ -69,6 +75,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     width: '100%',
+  },
+  // Web ≥768px only — narrower windows (512–767px) and phone landscape render a
+  // card wider than 480 today and must keep doing so (pixel-identical below 768).
+  cardWide: {
+    maxWidth: 480,
+    alignSelf: 'center',
   },
   title: {
     fontFamily: 'Poppins-Bold',

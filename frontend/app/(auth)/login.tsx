@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useAuth } from '../../stores/auth.store';
 import { AuthUser } from '../../types';
@@ -120,118 +121,120 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={handleBack}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="arrow-back" size={22} color={Colors.text} />
-          </TouchableOpacity>
-
-          <Wordmark />
-
-          <Text style={styles.heading}>Sign in</Text>
-          <Text style={styles.subtext}>Treasurer access</Text>
-
-          {/* Email */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Email address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="you@church.org"
-              placeholderTextColor={Colors.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              returnKeyType="next"
-              value={email}
-              onChangeText={v => { setEmail(v); setLoginError(''); }}
-              accessibilityLabel="Email address"
-            />
-          </View>
-
-          {/* Password */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordRow}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
-                placeholderTextColor={Colors.textMuted}
-                secureTextEntry={!showPassword}
-                autoComplete="password"
-                returnKeyType="done"
-                value={password}
-                onChangeText={v => { setPassword(v); setLoginError(''); }}
-                accessibilityLabel="Password"
-              />
-              <TouchableOpacity
-                style={styles.eyeBtn}
-                onPress={() => setShowPassword(s => !s)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-              >
-                <Ionicons
-                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
-                  color={Colors.textMuted}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Inline error */}
-          {loginError ? (
-            <View style={styles.errorBanner}>
-              <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
-              <Text style={styles.errorText}>{loginError}</Text>
-            </View>
-          ) : null}
-
-          {/* Sign In button */}
-          <TouchableOpacity
-            style={[styles.primaryBtn, isLoading && styles.primaryBtnDisabled]}
-            onPress={handleSignIn}
-            disabled={isLoading}
-            activeOpacity={0.85}
-            accessibilityRole="button"
-            accessibilityLabel="Sign in"
-            accessibilityState={{ disabled: isLoading }}
-          >
-            {isLoading
-              ? <ActivityIndicator color={Colors.white} size="small" />
-              : <Text style={styles.primaryBtnText}>Sign In</Text>
-            }
-          </TouchableOpacity>
-
-          {/* Forgot password */}
-          <TouchableOpacity
-            style={styles.forgotBtn}
-            onPress={() => router.push('/reset-password')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Forgot password"
-          >
-            <Text style={styles.forgotText}>Forgot password?</Text>
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          {/* Register link */}
-          <View style={styles.registerRow}>
-            <Text style={styles.registerLabel}>{"Don't have an account?  "}</Text>
+          <Screen variant="form">
             <TouchableOpacity
-              onPress={() => router.push('/register')}
+              style={styles.backBtn}
+              onPress={handleBack}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Register your church"
+              accessibilityLabel="Go back"
             >
-              <Text style={styles.registerLink}>Register your church</Text>
+              <Ionicons name="arrow-back" size={22} color={Colors.text} />
             </TouchableOpacity>
-          </View>
+
+            <Wordmark />
+
+            <Text style={styles.heading}>Sign in</Text>
+            <Text style={styles.subtext}>Treasurer access</Text>
+
+            {/* Email */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Email address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="you@church.org"
+                placeholderTextColor={Colors.textMuted}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                returnKeyType="next"
+                value={email}
+                onChangeText={v => { setEmail(v); setLoginError(''); }}
+                accessibilityLabel="Email address"
+              />
+            </View>
+
+            {/* Password */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordRow}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password"
+                  placeholderTextColor={Colors.textMuted}
+                  secureTextEntry={!showPassword}
+                  autoComplete="password"
+                  returnKeyType="done"
+                  value={password}
+                  onChangeText={v => { setPassword(v); setLoginError(''); }}
+                  accessibilityLabel="Password"
+                />
+                <TouchableOpacity
+                  style={styles.eyeBtn}
+                  onPress={() => setShowPassword(s => !s)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={Colors.textMuted}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Inline error */}
+            {loginError ? (
+              <View style={styles.errorBanner}>
+                <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
+                <Text style={styles.errorText}>{loginError}</Text>
+              </View>
+            ) : null}
+
+            {/* Sign In button */}
+            <TouchableOpacity
+              style={[styles.primaryBtn, isLoading && styles.primaryBtnDisabled]}
+              onPress={handleSignIn}
+              disabled={isLoading}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Sign in"
+              accessibilityState={{ disabled: isLoading }}
+            >
+              {isLoading
+                ? <ActivityIndicator color={Colors.white} size="small" />
+                : <Text style={styles.primaryBtnText}>Sign In</Text>
+              }
+            </TouchableOpacity>
+
+            {/* Forgot password */}
+            <TouchableOpacity
+              style={styles.forgotBtn}
+              onPress={() => router.push('/reset-password')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Forgot password"
+            >
+              <Text style={styles.forgotText}>Forgot password?</Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            {/* Register link */}
+            <View style={styles.registerRow}>
+              <Text style={styles.registerLabel}>{"Don't have an account?  "}</Text>
+              <TouchableOpacity
+                onPress={() => router.push('/register')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Register your church"
+              >
+                <Text style={styles.registerLink}>Register your church</Text>
+              </TouchableOpacity>
+            </View>
+          </Screen>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
