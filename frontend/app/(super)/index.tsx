@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
 import Toast from '../../components/ui/Toast';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
@@ -98,6 +99,7 @@ export default function RegistrationQueueScreen() {
   const { data, status: qState, retry } = useFocusRefetch(
     () => superadminService.listPendingChurches(),
   );
+  const isWideWeb = useIsWideWeb();
   const { setPendingCount }       = usePendingQueue();
   const [queue, setQueue]         = useState<Church[]>([]);
   const [total, setTotal]         = useState(0);
@@ -256,11 +258,11 @@ export default function RegistrationQueueScreen() {
       ) : null}
 
       {qState === 'loading' ? (
-        <View style={styles.centerBlock}>
+        <View style={[styles.centerBlock, isWideWeb && styles.wideColumn]}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : qState === 'error' ? (
-        <View style={styles.errorBlock}>
+        <View style={[styles.errorBlock, isWideWeb && styles.wideColumn]}>
           <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
           <Text style={styles.errorText}>Couldn’t load the queue.</Text>
           <TouchableOpacity
@@ -276,7 +278,7 @@ export default function RegistrationQueueScreen() {
       ) : (
         <>
           {truncated ? (
-            <View style={styles.truncBanner}>
+            <View style={[styles.truncBanner, isWideWeb && styles.wideColumn]}>
               <Ionicons name="information-circle-outline" size={15} color={Colors.warning} />
               <Text style={styles.truncText}>Showing first {queue.length} of {total}.</Text>
             </View>
@@ -291,7 +293,7 @@ export default function RegistrationQueueScreen() {
                 onReject={handleRejectOpen}
               />
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListHeaderComponent={
               queue.length > 0 ? (
@@ -446,6 +448,14 @@ export default function RegistrationQueueScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.grey },
+
+  // Wide-web (≥768) only — FlatList content and its outside-the-list siblings
+  // (trunc banner, loading/error blocks) share one centered 760 column.
+  wideColumn: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   toastWrap: {
     paddingHorizontal: Spacing.md,
