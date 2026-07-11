@@ -91,6 +91,26 @@ Route groups are transparent — `(public)` is not in the URL. `/campaigns` maps
 
 ---
 
+## Responsive web UI baseline (2026-07-12 — MANDATORY for all future screens)
+
+The whole app is responsive on web ≥768px; phone rendering is identical by construction (all wide styles are gated). Two shared components carry the system — **all future screens must use them**:
+
+- **`components/layout/Screen.tsx`** — exports `useIsWideWeb()` (web AND width ≥ **768**) and a `<Screen>` wrapper with content-cap variants **480 / 760 / 1100**.
+- **`components/ui/ResponsiveSheet.tsx`** — the ONLY dialog wrapper: bottom sheet on phone/narrow, centered max-480 card on wide web. Props: `visible / onRequestClose / dismissable / keyboardOffset`. Never hand-roll a Modal+overlay+sheet again.
+
+**Conventions (owner-decided):**
+- Back buttons anchor at the **window edge** (`left: Spacing.md`), NOT the content column (owner decision, slice 11 reverted the column-anchored math).
+- List screens cap at **760**; grids (landing, public lists, analytics tiles) cap at **1100** with 3-across (4-across stat tiles on analytics); forms/OTP screens cap at **480**.
+- Top bars stay **full-bleed teal**; their inner row (title + actions) gets the 1100 cap + center so bar content aligns with page content. Tab bars untouched.
+
+**Known accepted costs:**
+- FlatList `numColumns` remount resets scroll position when the window crosses the 768 breakpoint (accepted).
+- `DisbursementApprovalDialog` narrow-mode deltas from ResponsiveSheet adoption (overlay 0.45→0.40, paddingTop sm→md, gap 4→sm) — accepted by owner.
+- OTP-portal dashboard header inner row deliberately uncapped.
+- The 4 old `components/layout/` sidebar/nav files (TopNav, NotificationBell, TreasurerSidebar, SuperAdminSidebar) are dead/unused — delete-candidates.
+
+---
+
 ## Current status — 2026-07-10 (READ THIS FIRST)
 
 **Frontend Phase 1:** ✅ complete (screen inventory in the next section). `npx tsc --noEmit` = 0 errors; `npm test` (vitest) = **60/60** (mock-consistency + reducer suites).

@@ -249,5 +249,23 @@ Remaining buildable slices (pre-deploy):
 - **The original Tier-1 live gates**: STK success round-trip, OTP-over-real-SMS, production Daraja, prod DB REVOKE, sweep cron, the missing `b2c-queue/` route.
 - **Dead-code triage** (audit Appendix A): ✅ DELETED 2026-07-08 (commit `4709e88`) — `DisbursementRequestForm.tsx`, `CampaignCreationForm.tsx`, `donationsService.listForCampaign`, orphaned mock files. ⬜ STILL PRESENT (deferred, unused-status not re-confirmed this pass): `dayjs`, routed-but-unused `/campaigns/{slug}/updates/`.
 
+## ✅ RESPONSIVE WEB UI BASELINE — DONE 2026-07-12 (slices 1–11, committed + pushed)
+
+The whole frontend is now responsive on web ≥768px; phone rendering is identical by construction (every wide style is gated on `useIsWideWeb()`). Backend suite re-confirmed green after the arc (UI-only work).
+
+**New shared components — all future screens MUST use them:**
+- `components/layout/Screen.tsx` — `useIsWideWeb()` (web AND width ≥ 768) + `<Screen>` wrapper with content-cap variants 480 / 760 / 1100.
+- `components/ui/ResponsiveSheet.tsx` — the only dialog wrapper: bottom sheet on phone/narrow, centered max-480 card on wide web (`visible / onRequestClose / dismissable / keyboardOffset`). No more hand-rolled Modal+overlay+sheet constructions (payouts reject, OTP-portal payout, DisbursementApprovalDialog all converted).
+
+**Conventions (owner-decided):** back buttons anchor at the window edge (`left: Spacing.md`), not the content column; list screens 760; grids 1100 with 3-across (analytics stat tiles 4-across); forms/OTP 480; top bars full-bleed teal with the inner title/actions row capped at 1100 so bar content aligns with page content; tab bars untouched.
+
+**Known accepted costs:**
+- FlatList `numColumns` remount resets scroll when the window crosses 768.
+- `DisbursementApprovalDialog` narrow-mode deltas from ResponsiveSheet adoption (overlay 0.45→0.40, paddingTop sm→md, gap 4→sm) — accepted by owner.
+- OTP-portal dashboard header inner row deliberately uncapped.
+- Dead delete-candidates: the 4 unused `components/layout/` files (TopNav, NotificationBell, TreasurerSidebar, SuperAdminSidebar — the landing page uses its own local TopNav).
+
+---
+
 ## ✅ HIGH-VALUE non-code task — DONE 2026-07-09: context files reconciled
 The §0 "still mock / not wired" list overstated remaining work **4× this session** (resolve-paid, request-disbursement form, billing tier-prices were all already built; PH2-01 was rated MEDIUM when it was CRITICAL). A future session trusting a stale §0/severity will chase phantom slices or under-rate a real hole. Also: at the time this to-do was written the test baseline had drifted to **422** (docs variously said 299 / 406) — reconcile §0, the wired/mock status of every screen, and that baseline against reality so the next session starts from truth, not drift. **✅ DONE 2026-07-09:** §0/status reconciled — set to the **499** baseline (see CURRENT VERIFIED BASELINE above); C2 reports-export (BUILT), C3 document_url (LOCKED) and C4 PH2-02 (CLOSED) phantom-open items corrected; dead-code cluster partially closed (FE deletions done; `dayjs` + `/campaigns/{slug}/updates/` deferred).
