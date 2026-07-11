@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
@@ -230,6 +231,7 @@ const CampaignRowCard = React.memo(function CampaignRowCard({
 // ─── Campaigns screen ─────────────────────────────────────────────────────────
 
 export default function TreasurerCampaignsScreen() {
+  const isWideWeb = useIsWideWeb();
   const router = useRouter();
   const [campaigns, setCampaigns] = useState<TreasurerCampaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -325,55 +327,58 @@ export default function TreasurerCampaignsScreen() {
     <View style={styles.root}>
       {/* ── Sticky action bar ── */}
       <View style={styles.actionBar}>
-        <TouchableOpacity
-          style={styles.newCampaignBtn}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPress={() => router.push('/(treasurer)/campaigns/new' as any)}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-          accessibilityLabel="Create new campaign"
-        >
-          <Ionicons name="add-circle-outline" size={18} color={Colors.white} />
-          <Text style={styles.newCampaignBtnText}>New Campaign</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.manageGroupsBtn}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPress={() => router.push('/(treasurer)/groups' as any)}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="Manage group labels"
-        >
-          <Ionicons name="pricetags-outline" size={16} color={Colors.primary} />
-          <Text style={styles.manageGroupsBtnText}>Group Labels</Text>
-        </TouchableOpacity>
+        <View style={[styles.actionBarInner, isWideWeb && styles.wideCap]}>
+          <TouchableOpacity
+            style={styles.newCampaignBtn}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onPress={() => router.push('/(treasurer)/campaigns/new' as any)}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Create new campaign"
+          >
+            <Ionicons name="add-circle-outline" size={18} color={Colors.white} />
+            <Text style={styles.newCampaignBtnText}>New Campaign</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.manageGroupsBtn}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onPress={() => router.push('/(treasurer)/groups' as any)}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Manage group labels"
+          >
+            <Ionicons name="pricetags-outline" size={16} color={Colors.primary} />
+            <Text style={styles.manageGroupsBtnText}>Group Labels</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* ── Filter bar ── */}
       <View style={styles.filterBar}>
-        {/* Search */}
-        <View style={styles.searchRow}>
-          <Ionicons name="search-outline" size={18} color={Colors.textMuted} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search campaigns…"
-            placeholderTextColor={Colors.textMuted}
-            value={search}
-            onChangeText={setSearch}
-            returnKeyType="search"
-            accessibilityLabel="Search campaigns"
-          />
-          {search.length > 0 ? (
-            <TouchableOpacity
-              onPress={() => setSearch('')}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityLabel="Clear search"
-            >
-              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
-            </TouchableOpacity>
-          ) : null}
+        <View style={isWideWeb && styles.wideCap}>
+          {/* Search */}
+          <View style={styles.searchRow}>
+            <Ionicons name="search-outline" size={18} color={Colors.textMuted} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search campaigns…"
+              placeholderTextColor={Colors.textMuted}
+              value={search}
+              onChangeText={setSearch}
+              returnKeyType="search"
+              accessibilityLabel="Search campaigns"
+            />
+            {search.length > 0 ? (
+              <TouchableOpacity
+                onPress={() => setSearch('')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityLabel="Clear search"
+              >
+                <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
         </View>
-
       </View>
 
       {/* ── Action error banner (pause/resume write failures) ── */}
@@ -425,7 +430,7 @@ export default function TreasurerCampaignsScreen() {
               busy={actingSlug === item.slug}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, isWideWeb && styles.wideCap]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
@@ -706,13 +711,20 @@ const styles = StyleSheet.create({
 
   // Sticky action bar
   actionBar: {
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  actionBarInner: {
     flexDirection: 'row',
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+  },
+  wideCap: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
   newCampaignBtn: {
     flex: 1,

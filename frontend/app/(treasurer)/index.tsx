@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { campaignsService } from '../../services/campaigns.service';
@@ -148,6 +149,7 @@ function SectionHeader({
 
 export default function OverviewScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
   const { unreadCount, setUnreadCount } = useNotifications();
   const { user } = useAuth();
 
@@ -234,7 +236,7 @@ export default function OverviewScreen() {
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Greeting + notifications bell ── */}
@@ -432,6 +434,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  wideCap: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   // Loading / error / empty (dashboard)

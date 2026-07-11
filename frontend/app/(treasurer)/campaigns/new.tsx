@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { groupsService } from '../../../services/groups.service';
@@ -176,6 +177,7 @@ function PickerModal<T>({
 // ─── New Campaign screen ──────────────────────────────────────────────────────
 
 export default function NewCampaignScreen() {
+  const isWideWeb = useIsWideWeb();
   const router = useRouter();
 
   // ── Create state ────────────────────────────────────────────────────────
@@ -358,7 +360,7 @@ export default function NewCampaignScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -644,6 +646,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.md,
     paddingBottom: Spacing.xxl,
+  },
+  wideCap: {
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   // Back link

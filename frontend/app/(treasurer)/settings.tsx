@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import SubscriptionCard from '../../components/treasurer/SubscriptionCard';
 import Card from '../../components/ui/Card';
 import CountyPicker from '../../components/ui/CountyPicker';
@@ -100,6 +101,7 @@ function RowItem({
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function SettingsScreen() {
+  const isWideWeb = useIsWideWeb();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -275,7 +277,7 @@ export default function SettingsScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, isWideWeb && styles.wideCap]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -495,6 +497,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  wideCap: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   sectionHeader: {

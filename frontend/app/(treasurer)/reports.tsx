@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { campaignsService } from '../../services/campaigns.service';
@@ -105,6 +106,7 @@ function SectionLabel({ label }: { label: string }) {
 // ─── Reports screen ───────────────────────────────────────────────────────────
 
 export default function ReportsScreen() {
+  const isWideWeb = useIsWideWeb();
   const [reportType, setReportType] = useState<ReportType>('campaign_summary');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -360,7 +362,7 @@ export default function ReportsScreen() {
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Report type ── */}
@@ -703,6 +705,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  wideCap: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
   },
 
   // Card

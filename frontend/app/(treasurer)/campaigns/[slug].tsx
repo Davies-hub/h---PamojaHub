@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
@@ -209,6 +210,7 @@ function PayoutHistorySection({ history }: { history: Withdrawal[] }) {
 // ─── Campaign detail screen ───────────────────────────────────────────────────
 
 export default function TreasurerCampaignDetailScreen() {
+  const isWideWeb = useIsWideWeb();
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
@@ -331,7 +333,7 @@ export default function TreasurerCampaignDetailScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         showsVerticalScrollIndicator={false}
       >
         {/* Banner */}
@@ -556,6 +558,11 @@ const styles = StyleSheet.create({
   // Scroll
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: Spacing.xl },
+  wideCap: {
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   // Banner
   banner: {
