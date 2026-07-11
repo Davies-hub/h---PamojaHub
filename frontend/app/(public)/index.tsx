@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import CampaignCard from '../../components/campaign/CampaignCard';
+import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import BrandLogo from '../../components/ui/BrandLogo';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { campaignsService } from '../../services/campaigns.service';
@@ -105,37 +106,39 @@ function HeroSection() {
       end={{ x: 1, y: 1 }}
       style={styles.hero}
     >
-      <Text style={styles.heroHeadline}>
-        A Paybill collects money.{'\n'}Pamoja Hub proves where it went.
-      </Text>
-      <Text style={styles.heroSubtext}>
-        Kenya's church crowdfunding platform. Donate via M-Pesa. Every shilling on record.
-      </Text>
+      <Screen variant="wide">
+        <Text style={styles.heroHeadline}>
+          A Paybill collects money.{'\n'}Pamoja Hub proves where it went.
+        </Text>
+        <Text style={styles.heroSubtext}>
+          Kenya's church crowdfunding platform. Donate via M-Pesa. Every shilling on record.
+        </Text>
 
-      {/* CTA — Browse */}
-      <TouchableOpacity
-        style={styles.ctaButton}
-        onPress={() => router.push('/campaigns')}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel="Browse campaigns"
-      >
-        <Text style={styles.ctaButtonText}>Browse Campaigns</Text>
-      </TouchableOpacity>
+        {/* CTA — Browse */}
+        <TouchableOpacity
+          style={styles.ctaButton}
+          onPress={() => router.push('/campaigns')}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Browse campaigns"
+        >
+          <Text style={styles.ctaButtonText}>Browse Campaigns</Text>
+        </TouchableOpacity>
 
-      {/* Secondary — Register */}
-      <TouchableOpacity
-        style={styles.outlineButton}
-        onPress={() => router.push('/register')}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel="Register your church"
-      >
-        <Text style={styles.outlineButtonText}>Register Your Church</Text>
-      </TouchableOpacity>
+        {/* Secondary — Register */}
+        <TouchableOpacity
+          style={styles.outlineButton}
+          onPress={() => router.push('/register')}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Register your church"
+        >
+          <Text style={styles.outlineButtonText}>Register Your Church</Text>
+        </TouchableOpacity>
 
-      {/* Stats row */}
-      <StatsRow />
+        {/* Stats row */}
+        <StatsRow />
+      </Screen>
     </LinearGradient>
   );
 }
@@ -207,10 +210,12 @@ const HOW_IT_WORKS_STEPS = [
 function HowItWorksSection() {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>How it works</Text>
-      {HOW_IT_WORKS_STEPS.map((step) => (
-        <StepCard key={step.number} {...step} />
-      ))}
+      <Screen variant="wide">
+        <Text style={styles.sectionTitle}>How it works</Text>
+        {HOW_IT_WORKS_STEPS.map((step) => (
+          <StepCard key={step.number} {...step} />
+        ))}
+      </Screen>
     </View>
   );
 }
@@ -241,6 +246,7 @@ function StepCard({
 
 function ActiveCampaignsSection() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
   const [campaigns, setCampaigns] = useState<PublicCampaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -270,34 +276,39 @@ function ActiveCampaignsSection() {
 
   return (
     <View style={[styles.section, styles.campaignsSection]}>
-      {/* Section header */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Active campaigns</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/campaigns')}
-          accessibilityRole="button"
-          accessibilityLabel="See all campaigns"
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.seeAllLink}>See all</Text>
-        </TouchableOpacity>
-      </View>
-
-      {loading ? (
-        <View style={styles.campaignsCenter}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+      <Screen variant="wide">
+        {/* Section header */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Active campaigns</Text>
+          <TouchableOpacity
+            onPress={() => router.push('/campaigns')}
+            accessibilityRole="button"
+            accessibilityLabel="See all campaigns"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.seeAllLink}>See all</Text>
+          </TouchableOpacity>
         </View>
-      ) : error ? (
-        <Text style={styles.campaignsError}>Couldn’t load campaigns right now.</Text>
-      ) : (
-        campaigns.map((campaign) => (
-          <CampaignCard
-            key={campaign.id}
-            campaign={campaign}
-            onDonate={() => router.push(`/campaigns/${campaign.slug}`)}
-          />
-        ))
-      )}
+
+        {loading ? (
+          <View style={styles.campaignsCenter}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+          </View>
+        ) : error ? (
+          <Text style={styles.campaignsError}>Couldn’t load campaigns right now.</Text>
+        ) : (
+          <View style={isWideWeb && styles.campaignsGrid}>
+            {campaigns.map((campaign) => (
+              <View key={campaign.id} style={isWideWeb && styles.campaignsGridItem}>
+                <CampaignCard
+                  campaign={campaign}
+                  onDonate={() => router.push(`/campaigns/${campaign.slug}`)}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+      </Screen>
     </View>
   );
 }
@@ -471,6 +482,16 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  campaignsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+  },
+  campaignsGridItem: {
+    flexBasis: '31%',
+    flexGrow: 1,
+    maxWidth: '32%',
   },
   campaignsError: {
     fontFamily: 'Poppins-Regular',
