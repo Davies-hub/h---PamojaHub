@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  Modal as RNModal,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +14,7 @@ import {
 import { useIsWideWeb } from '../../components/layout/Screen';
 import DisbursementApprovalDialog from '../../components/disbursement/DisbursementApprovalDialog';
 import Modal from '../../components/ui/Modal';
+import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { withdrawalsService } from '../../services/withdrawals.service';
 import { Withdrawal, WithdrawalStatus } from '../../types';
@@ -602,19 +602,11 @@ export default function PayoutsScreen() {
       </Modal>
 
       {/* ── Reject modal ── */}
-      <RNModal
+      <ResponsiveSheet
         visible={rejectTarget !== null}
-        transparent
-        animationType="slide"
         onRequestClose={() => setRejectTarget(null)}
+        keyboardOffset={kbOffset}
       >
-        <View style={styles.kavContainer}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          onPress={() => setRejectTarget(null)}
-          activeOpacity={1}
-        />
-        <View style={[styles.rejectSheet, kbOffset > 0 ? { marginBottom: kbOffset } : null]}>
           <View style={styles.pickerHandle} />
           <Text style={styles.rejectSheetTitle}>Reject Payout</Text>
           {rejectTarget ? (
@@ -671,9 +663,7 @@ export default function PayoutsScreen() {
               )}
             </TouchableOpacity>
           </View>
-        </View>
-        </View>
-      </RNModal>
+      </ResponsiveSheet>
     </View>
   );
 }
@@ -1037,26 +1027,7 @@ const styles = StyleSheet.create({
   },
 
   // Reject modal
-  kavContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  rejectSheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.md,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-  },
+  // Reject modal container/overlay/sheet now come from ResponsiveSheet.
   pickerHandle: {
     width: 40,
     height: 4,

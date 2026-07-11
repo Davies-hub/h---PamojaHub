@@ -3,6 +3,7 @@ import { router, Tabs, useSegments } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ColorValue, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { Colors, FontSize, Spacing } from '../../constants/theme';
 import { notificationsService } from '../../services/notifications.service';
 import { useAuth } from '../../stores/auth.store';
@@ -21,6 +22,7 @@ function tabIcon(active: IoniconsName, inactive: IoniconsName) {
 
 function SuperAdminTopBar() {
   const insets = useSafeAreaInsets();
+  const isWideWeb = useIsWideWeb();
   const { logout } = useAuth();
   const { unreadCount, setUnreadCount } = useNotifications();
   const segments = useSegments();
@@ -52,6 +54,7 @@ function SuperAdminTopBar() {
 
   return (
     <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
+      <View style={[styles.topBarRow, isWideWeb && styles.topBarRowWide]}>
       <Text style={styles.topBarTitle}>Super Admin</Text>
       <View style={styles.topBarActions}>
         <TouchableOpacity
@@ -78,6 +81,7 @@ function SuperAdminTopBar() {
         >
           <Ionicons name="log-out-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
+      </View>
       </View>
     </View>
   );
@@ -184,12 +188,21 @@ export default function SuperAdminLayout() {
 
 const styles = StyleSheet.create({
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.md,
     paddingBottom: 12,
+  },
+  // Inner row — full-width on phone; capped + centered on wide web so the bar
+  // content aligns with the 1100-capped page content (bar itself stays full-bleed).
+  topBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topBarRowWide: {
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
   },
   topBarTitle: {
     fontFamily: 'Poppins-SemiBold',

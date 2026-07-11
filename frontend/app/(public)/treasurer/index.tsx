@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -16,6 +15,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../../components/layout/Screen';
+import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
 import { treasurerPortalService } from '../../../services/treasurer-portal.service';
 import type { PortalDonationRow } from '../../../services/mappers';
@@ -127,6 +128,7 @@ function Wordmark() {
 
 export default function TreasurerPortalScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
   const [portalState, setPortalState] = useState<PortalState>('phone');
 
   // Phone state
@@ -404,7 +406,7 @@ export default function TreasurerPortalScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
-            contentContainerStyle={styles.centeredContent}
+            contentContainerStyle={[styles.centeredContent, isWideWeb && styles.wideContent]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -484,7 +486,7 @@ export default function TreasurerPortalScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
-            contentContainerStyle={styles.centeredContent}
+            contentContainerStyle={[styles.centeredContent, isWideWeb && styles.wideContent]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -602,7 +604,7 @@ export default function TreasurerPortalScreen() {
 
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.dashContent}
+        contentContainerStyle={[styles.dashContent, isWideWeb && styles.wideContent]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -731,20 +733,12 @@ export default function TreasurerPortalScreen() {
       </ScrollView>
 
       {/* ── Request Payout Modal ── */}
-      <Modal
+      <ResponsiveSheet
         visible={showPayoutModal}
-        transparent
-        animationType="slide"
         onRequestClose={handlePayoutClose}
+        keyboardOffset={kbOffset}
       >
-        <View style={styles.modalKavContainer}>
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            onPress={handlePayoutClose}
-            activeOpacity={1}
-          />
-          <View style={[styles.payoutSheet, kbOffset > 0 ? { marginBottom: kbOffset } : null]}>
-            <View style={styles.sheetHandle} />
+        <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>Request Payout</Text>
             {selectedCampaign ? (
               <Text style={styles.sheetMeta} numberOfLines={1}>{selectedCampaign.title}</Text>
@@ -824,9 +818,7 @@ export default function TreasurerPortalScreen() {
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
+      </ResponsiveSheet>
 
     </SafeAreaView>
     </SafeAreaView>
@@ -841,6 +833,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   flex: { flex: 1 },
+
+  // Wide-web content cap (OTP + forms → 480)
+  wideContent: {
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
+  },
 
   // Centered phone/otp layout
   centeredContent: {
@@ -1364,27 +1363,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Request Payout modal
-  modalKavContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  payoutSheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.md,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-  },
+  // Request Payout modal (container/overlay/sheet now come from ResponsiveSheet)
   sheetHandle: {
     width: 40,
     height: 4,

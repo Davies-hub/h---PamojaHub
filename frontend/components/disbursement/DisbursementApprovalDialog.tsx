@@ -2,12 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   ActivityIndicator,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import ResponsiveSheet from '../ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { fmtKes } from '../../utils/formatters';
 
@@ -45,20 +45,11 @@ export default function DisbursementApprovalDialog({
   }
 
   return (
-    <Modal
+    <ResponsiveSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={submitting ? () => {} : onCancel}
+      onRequestClose={onCancel}
+      dismissable={!submitting}
     >
-      <View style={styles.kavContainer}>
-        <TouchableOpacity
-          style={styles.overlay}
-          onPress={submitting ? undefined : onCancel}
-          activeOpacity={1}
-          disabled={submitting}
-        />
-        <View style={styles.sheet}>
           <View style={styles.handle} />
 
           <Text style={styles.title}>Approve Payout</Text>
@@ -118,34 +109,12 @@ export default function DisbursementApprovalDialog({
               )}
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
-    </Modal>
+    </ResponsiveSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  kavContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-  },
-  sheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.sm,
-    paddingBottom: Spacing.xxl,
-    gap: 4,
-  },
+  // Container/overlay/sheet now come from ResponsiveSheet.
   handle: {
     width: 40,
     height: 4,

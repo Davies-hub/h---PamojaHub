@@ -3,6 +3,7 @@ import { router, Tabs } from 'expo-router';
 import React, { useState } from 'react';
 import { ColorValue, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useAuth } from '../../stores/auth.store';
 
@@ -19,6 +20,7 @@ function tabIcon(active: IoniconsName, inactive: IoniconsName) {
 function TreasurerTopBar() {
   const { logout, user } = useAuth();
   const insets = useSafeAreaInsets();
+  const isWideWeb = useIsWideWeb();
   const [showConfirm, setShowConfirm] = useState(false);
   // Real church name from /auth/me. Fallback keeps the bar from rendering blank
   // in the brief window before the user is hydrated.
@@ -34,18 +36,20 @@ function TreasurerTopBar() {
   return (
     <>
       <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.churchName} numberOfLines={1}>
-          {churchName}
-        </Text>
-        <TouchableOpacity
-          style={styles.signOutBtn}
-          onPress={() => setShowConfirm(true)}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Sign out"
-        >
-          <Text style={styles.signOutBtnText}>Sign Out</Text>
-        </TouchableOpacity>
+        <View style={[styles.topBarRow, isWideWeb && styles.topBarRowWide]}>
+          <Text style={styles.churchName} numberOfLines={1}>
+            {churchName}
+          </Text>
+          <TouchableOpacity
+            style={styles.signOutBtn}
+            onPress={() => setShowConfirm(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+          >
+            <Text style={styles.signOutBtnText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -60,7 +64,10 @@ function TreasurerTopBar() {
           onPress={() => setShowConfirm(false)}
           accessibilityRole="none"
         >
-          <View style={styles.dialogCard} onStartShouldSetResponder={() => true}>
+          <View
+            style={[styles.dialogCard, isWideWeb && styles.dialogCardWide]}
+            onStartShouldSetResponder={() => true}
+          >
             <Text style={styles.dialogTitle}>Sign Out</Text>
             <Text style={styles.dialogMessage}>
               Are you sure you want to sign out of your church account?
@@ -168,12 +175,21 @@ export default function TreasurerLayout() {
 
 const styles = StyleSheet.create({
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.md,
     paddingBottom: 12,
+  },
+  // Inner row — full-width on phone; capped + centered on wide web so the bar
+  // content aligns with the 1100-capped page content (bar itself stays full-bleed).
+  topBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topBarRowWide: {
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
   },
   churchName: {
     fontFamily: 'Poppins-SemiBold',
@@ -214,6 +230,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 10,
+  },
+  dialogCardWide: {
+    maxWidth: 480,
   },
   dialogTitle: {
     fontFamily: 'Poppins-Bold',

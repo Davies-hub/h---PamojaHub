@@ -12,7 +12,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -39,10 +38,6 @@ export default function CampaignDetailScreen() {
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
   const isWideWeb = useIsWideWeb();
-  const { width: windowWidth } = useWindowDimensions();
-  const backLeft = isWideWeb
-    ? Math.max(Spacing.md, (windowWidth - CONTENT_CAP) / 2 + Spacing.md)
-    : Spacing.md;
 
   const [campaign, setCampaign] = useState<PublicCampaign | null>(null);
   const [state, setState] = useState<LoadState>('loading');
@@ -76,7 +71,7 @@ export default function CampaignDetailScreen() {
 
       {/* Back button — absolute overlay above content, present in every state */}
       <TouchableOpacity
-        style={[styles.backBtn, { top: statusBarHeight + 8, left: backLeft }]}
+        style={[styles.backBtn, { top: statusBarHeight + 8 }]}
         onPress={() => router.back()}
         activeOpacity={0.7}
         accessibilityRole="button"
@@ -234,6 +229,7 @@ const styles = StyleSheet.create({
 
   backBtn: {
     position: 'absolute',
+    left: Spacing.md,
     zIndex: 50,
     width: 40,
     height: 40,
