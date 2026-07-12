@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CampaignCard from '../../../components/campaign/CampaignCard';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import RemoteImage from '../../../components/ui/RemoteImage';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 
 const CONTENT_CAP = 760;
 import { campaignsService } from '../../../services/campaigns.service';
@@ -30,6 +30,7 @@ type SectionState = 'loading' | 'error' | 'ok';
 // Address row REMOVED (Decision A — the public church serializer omits address).
 
 function ProfileHeader({ church }: { church: PublicChurch }) {
+  const isWideWeb = useIsWideWeb();
   const initials = church.name
     .split(' ')
     .slice(0, 2)
@@ -44,16 +45,19 @@ function ProfileHeader({ church }: { church: PublicChurch }) {
         style={styles.logoCircle}
         resizeMode="cover"
         fallback={
-          <View style={styles.logoCircle}>
+          <View style={[styles.logoCircle, styles.logoFallback]}>
             <Text style={styles.logoText}>{initials}</Text>
           </View>
         }
       />
 
-      <Text style={styles.churchName}>{church.name}</Text>
-      <Text style={styles.denomination}>
-        {church.denomination}{church.county ? ` · ${church.county}` : ''}
-      </Text>
+      <Text style={[styles.churchName, isWideWeb && styles.churchNameWide]}>{church.name}</Text>
+      <View style={styles.metaRow}>
+        <Ionicons name="business-outline" size={13} color={Colors.textMuted} />
+        <Text style={styles.denomination}>
+          {church.denomination}{church.county ? ` · ${church.county}` : ''}
+        </Text>
+      </View>
 
       {church.description ? (
         <Text style={styles.description}>{church.description}</Text>
@@ -65,9 +69,12 @@ function ProfileHeader({ church }: { church: PublicChurch }) {
 function CampaignsHeading({ count }: { count: number }) {
   return (
     <View style={styles.headingRow}>
-      <Text style={styles.sectionHeading}>
-        Active Campaigns{count > 0 ? ` (${count})` : ''}
-      </Text>
+      <Text style={styles.sectionHeading}>Active Campaigns</Text>
+      {count > 0 ? (
+        <View style={styles.countPill}>
+          <Text style={styles.countPillText}>{count}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -75,7 +82,9 @@ function CampaignsHeading({ count }: { count: number }) {
 function EmptyCampaigns() {
   return (
     <View style={styles.emptyCampaigns}>
-      <Ionicons name="megaphone-outline" size={36} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="megaphone-outline" size={26} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyText}>No active campaigns right now</Text>
     </View>
   );
@@ -92,7 +101,9 @@ function CampaignsLoading() {
 function CampaignsError({ onRetry }: { onRetry: () => void }) {
   return (
     <View style={styles.emptyCampaigns}>
-      <Ionicons name="cloud-offline-outline" size={36} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="cloud-offline-outline" size={26} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyText}>Couldn’t load campaigns.</Text>
       <TouchableOpacity
         style={styles.sectionRetryBtn}
@@ -177,7 +188,7 @@ export default function ChurchProfileScreen() {
       accessibilityRole="button"
       accessibilityLabel="Go back"
     >
-      <Ionicons name="arrow-back" size={22} color={Colors.white} />
+      <Ionicons name="arrow-back" size={22} color={Colors.primary} />
     </TouchableOpacity>
   );
 
@@ -192,7 +203,9 @@ export default function ChurchProfileScreen() {
             <ActivityIndicator size="large" color={Colors.primary} />
           ) : churchState === 'notfound' ? (
             <>
-              <Ionicons name="business-outline" size={48} color={Colors.border} />
+              <View style={styles.stateIconCircle}>
+                <Ionicons name="business-outline" size={34} color={Colors.primary} />
+              </View>
               <Text style={styles.stateTitle}>Church not found</Text>
               <Text style={styles.stateSub}>
                 This church may not exist or is not currently active.
@@ -200,7 +213,9 @@ export default function ChurchProfileScreen() {
             </>
           ) : (
             <>
-              <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+              <View style={styles.stateIconCircle}>
+                <Ionicons name="cloud-offline-outline" size={34} color={Colors.primary} />
+              </View>
               <Text style={styles.stateTitle}>Couldn’t load church</Text>
               <Text style={styles.stateSub}>Please check your connection and try again.</Text>
               <TouchableOpacity
@@ -248,7 +263,10 @@ export default function ChurchProfileScreen() {
               start={{ x: 0.15, y: 0 }}
               end={{ x: 0.85, y: 1 }}
               style={styles.banner}
-            />
+            >
+              <View pointerEvents="none" style={styles.bannerOrnamentA} />
+              <View pointerEvents="none" style={styles.bannerOrnamentB} />
+            </LinearGradient>
             <ProfileHeader church={church} />
             <CampaignsHeading count={church.activeCampaignCount} />
           </>
@@ -278,11 +296,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
   },
+  stateIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
   stateTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     color: Colors.text,
-    marginTop: Spacing.md,
     marginBottom: 6,
     textAlign: 'center',
   },
@@ -291,13 +317,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: FontSize.md * 1.5,
+    lineHeight: FontSize.md * 1.55,
+    maxWidth: 420,
   },
   retryBtn: {
-    marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -312,17 +339,39 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.md,
     zIndex: 50,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.28)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.md,
   },
 
   banner: {
-    height: 160,
+    height: 176,
     width: '100%',
+    overflow: 'hidden',
+  },
+  bannerOrnamentA: {
+    position: 'absolute',
+    top: -70,
+    right: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  bannerOrnamentB: {
+    position: 'absolute',
+    bottom: -80,
+    left: -60,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
 
   wideContent: {
@@ -338,63 +387,89 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -36,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    marginTop: -42,
     borderWidth: 4,
     borderColor: Colors.white,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
+    ...Shadows.md,
+  },
+  logoFallback: {
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoText: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xl,
-    color: Colors.white,
+    fontSize: FontSize.xxl,
+    color: Colors.primary,
   },
   churchName: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxl,
     color: Colors.text,
     textAlign: 'center',
-    marginTop: Spacing.sm,
+    marginTop: Spacing.sm + 2,
     lineHeight: FontSize.xxl * 1.3,
+    maxWidth: 560,
+  },
+  churchNameWide: {
+    fontSize: FontSize.title,
+    lineHeight: FontSize.title * 1.25,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 4,
+    marginBottom: Spacing.sm,
   },
   denomination: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
     color: Colors.textMuted,
-    marginTop: 4,
-    marginBottom: Spacing.sm,
   },
   description: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: FontSize.md * 1.6,
+    lineHeight: FontSize.md * 1.65,
     marginBottom: Spacing.sm,
+    maxWidth: 560,
   },
 
   // Campaigns section
   headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.lg,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.sm + 2,
   },
   sectionHeading: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.lg,
     color: Colors.text,
+  },
+  countPill: {
+    minWidth: 26,
+    height: 24,
+    paddingHorizontal: 8,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countPillText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.xs,
+    color: Colors.primaryDark,
   },
   cardWrapper: {
     paddingHorizontal: Spacing.md,
@@ -404,6 +479,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,
+  },
+  emptyIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyText: {
     fontFamily: 'Poppins-Regular',
@@ -415,7 +498,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingHorizontal: Spacing.lg,
     height: 40,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
