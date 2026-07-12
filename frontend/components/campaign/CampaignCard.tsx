@@ -1,6 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { PublicCampaign } from '../../types';
 import ProgressBar from '../ui/ProgressBar';
 import RemoteImage from '../ui/RemoteImage';
@@ -25,6 +26,10 @@ function CampaignCard({ campaign, onDonate }: CampaignCardProps) {
   const handleDonate = onDonate ?? (() => Alert.alert('Donate', `Donate to: ${campaign.title}`));
   const initial = CATEGORY_INITIALS[campaign.category] ?? '?';
   const goalFormatted = campaign.goalAmount.toLocaleString();
+  // Display-only percent — mirrors ProgressBar's own clamp math
+  const percent = campaign.goalAmount > 0
+    ? Math.min(Math.round((campaign.raisedAmount / campaign.goalAmount) * 100), 100)
+    : 0;
 
   return (
     <View style={styles.card}>
@@ -35,7 +40,7 @@ function CampaignCard({ campaign, onDonate }: CampaignCardProps) {
         resizeMode="cover"
         fallback={
           <View
-            style={styles.banner}
+            style={[styles.banner, styles.bannerFallback]}
             accessible={false}
           >
             <View style={styles.bannerIconCircle}>
@@ -64,21 +69,27 @@ function CampaignCard({ campaign, onDonate }: CampaignCardProps) {
         </Text>
 
         {/* Church name */}
-        <Text style={styles.churchName} numberOfLines={1}>
-          {campaign.churchName}
-        </Text>
+        <View style={styles.churchRow}>
+          <Ionicons name="business-outline" size={12} color={Colors.textMuted} />
+          <Text style={styles.churchName} numberOfLines={1}>
+            {campaign.churchName}
+          </Text>
+        </View>
 
-        {/* Progress bar — 4px compact variant, no labels (we show our own below) */}
+        {/* Progress bar — compact variant, no labels (we show our own below) */}
         <View style={styles.progressWrapper}>
-          <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={4} showLabels={false} />
+          <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={6} showLabels={false} />
         </View>
 
         {/* Amount row */}
         <View style={styles.amountRow}>
-          <Text style={styles.amountRaised}>
-            KES {campaign.raisedAmount.toLocaleString()}
+          <Text style={styles.amountText} numberOfLines={1}>
+            <Text style={styles.amountRaised}>
+              KES {campaign.raisedAmount.toLocaleString()}
+            </Text>
+            <Text style={styles.amountGoal}> of KES {goalFormatted}</Text>
           </Text>
-          <Text style={styles.amountGoal}> raised of KES {goalFormatted}</Text>
+          <Text style={styles.percentText}>{percent}%</Text>
         </View>
 
         {/* Donate button */}
@@ -100,34 +111,33 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: BorderRadius.lg,
+    borderColor: Colors.borderLight,
+    borderRadius: BorderRadius.xl,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
     marginBottom: Spacing.md,
+    ...Shadows.md,
   },
   banner: {
-    height: 160,
+    height: 168,
     backgroundColor: Colors.primaryLight,
+  },
+  bannerFallback: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   bannerIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   bannerIconText: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 22,
-    color: Colors.white,
+    fontSize: FontSize.xxl,
+    color: Colors.primary,
   },
   body: {
     padding: Spacing.md,
@@ -136,18 +146,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 8,
+    marginBottom: Spacing.sm + 2,
   },
   pill: {
     backgroundColor: Colors.primaryLight,
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
   },
   pillText: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.xs,
-    color: Colors.primary,
+    color: Colors.primaryDark,
   },
   categoryPill: {
     backgroundColor: Colors.accentLight,
@@ -157,29 +167,40 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.text,
-    lineHeight: 20,
-    marginBottom: 4,
+    lineHeight: 21,
+    minHeight: 42,
+    marginBottom: 2,
+  },
+  churchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: Spacing.sm + 4,
   },
   churchName: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    marginBottom: 10,
+    flexShrink: 1,
   },
   progressWrapper: {
-    marginBottom: 6,
+    marginBottom: Spacing.sm,
   },
   amountRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 12,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  amountText: {
+    flexShrink: 1,
   },
   amountRaised: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.primary,
   },
   amountGoal: {
@@ -187,9 +208,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.textMuted,
   },
+  percentText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.sm,
+    color: Colors.accentDark,
+  },
   donateButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: Spacing.touch,
     alignItems: 'center',
     justifyContent: 'center',

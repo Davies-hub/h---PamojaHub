@@ -33,6 +33,11 @@ export const Colors = {
   primaryLightest: '#F7FCFC',  // Lightest teal tint — unread notification backgrounds
   gradientStart:   '#F0FAFB',  // Hero card gradient start — light teal
   gradientEnd:     '#FEF8F0',  // Hero card gradient end — light warm
+
+  // Neutral tints (ui-redesign) — brand palette above is LOCKED and unchanged
+  borderLight:    '#E4E9EA',  // hairline strokes on white cards (softer than border)
+  surfaceSubtle:  '#F6F9F9',  // cool full-bleed section bands behind card groups
+  shadowInk:      '#053B42',  // shadow base color — deep teal-ink, never pure black
 };
 
 export const Spacing = {
@@ -55,6 +60,7 @@ export const FontSize = {
   xxl:   20,
   xxxl:  22,
   title: 28,
+  display: 40,  // marketing hero headlines on wide web only
 };
 
 export const BorderRadius = {
@@ -63,4 +69,30 @@ export const BorderRadius = {
   lg:   12,
   xl:   16,
   pill: 999,
+};
+
+// Soft layered shadows (iOS/web: shadow*, Android: elevation). Use on white
+// surfaces, usually paired with a Colors.borderLight hairline stroke.
+export const Shadows = {
+  sm: {
+    shadowColor: Colors.shadowInk,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  md: {
+    shadowColor: Colors.shadowInk,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  lg: {
+    shadowColor: Colors.shadowInk,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 28,
+    elevation: 7,
+  },
 };
