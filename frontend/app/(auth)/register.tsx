@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen from '../../components/layout/Screen';
 import CountyPicker from '../../components/ui/CountyPicker';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
@@ -61,7 +62,9 @@ function Field({
 function SuccessScreen({ onHome }: { onHome: () => void }) {
   return (
     <View style={styles.successContainer}>
-      <Ionicons name="checkmark-circle" size={72} color={Colors.success} />
+      <View style={styles.successIconCircle}>
+        <Ionicons name="checkmark-circle" size={48} color={Colors.success} />
+      </View>
       <Text style={styles.successHeading}>Application submitted.</Text>
       <Text style={styles.successBody}>
         We will review your application and contact you within 2 business days.
@@ -238,6 +241,7 @@ export default function RegisterScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Screen variant="form">
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
@@ -251,9 +255,12 @@ export default function RegisterScreen() {
           <ProfilePhotoSection uri={profilePhoto} onPress={handlePhotoPress} />
           <Wordmark />
           <Text style={styles.heading}>Register Your Church</Text>
-          <Text style={styles.helperText}>
-            The person completing this form becomes the designated Church Treasurer — the primary contact for payouts and campaign management.
-          </Text>
+          <View style={styles.helperBox}>
+            <Ionicons name="information-circle-outline" size={18} color={Colors.primaryDark} style={styles.helperIcon} />
+            <Text style={styles.helperText}>
+              The person completing this form becomes the designated Church Treasurer — the primary contact for payouts and campaign management.
+            </Text>
+          </View>
 
           {/* Church name */}
           <Field label="Church name" error={errors.churchName}>
@@ -394,6 +401,7 @@ export default function RegisterScreen() {
               <Text style={styles.signInLink}>Sign in</Text>
             </TouchableOpacity>
           </View>
+          </Screen>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -496,16 +504,25 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 8,
   },
+  helperBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 4,
+    marginBottom: Spacing.xl,
+  },
+  helperIcon: {
+    marginTop: 2,
+  },
   helperText: {
+    flex: 1,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: Colors.primaryDark,
     lineHeight: FontSize.sm * 1.65,
-    marginBottom: Spacing.xl,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
   },
 
   fieldGroup: {
@@ -514,14 +531,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.base,
@@ -543,9 +560,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.white,
-    height: Spacing.touch,
+    height: 50,
   },
   passwordInput: {
     flex: 1,
@@ -567,7 +584,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: 10,
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
@@ -581,7 +598,7 @@ const styles = StyleSheet.create({
 
   primaryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -625,6 +642,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
     gap: Spacing.md,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  successIconCircle: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: Colors.successLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   successHeading: {
     fontFamily: 'Poppins-Bold',

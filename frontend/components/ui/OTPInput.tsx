@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     height: 58,
     borderWidth: 2,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxl,
     color: Colors.text,

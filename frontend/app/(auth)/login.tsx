@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Screen from '../../components/layout/Screen';
+import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { useAuth } from '../../stores/auth.store';
 import { AuthUser } from '../../types';
@@ -48,6 +48,7 @@ function churchStatusMessage(user: AuthUser): string {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
   const { login, user } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -117,7 +118,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, isWideWeb && styles.contentWideCenter]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -253,6 +254,11 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xl,
   },
+  // Wide web: short form floats vertically centered
+  contentWideCenter: {
+    justifyContent: 'center',
+    paddingTop: Spacing.xl,
+  },
 
   backBtn: {
     width: Spacing.touch,
@@ -290,14 +296,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.base,
@@ -310,9 +316,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.white,
-    height: Spacing.touch,
+    height: 50,
   },
   passwordInput: {
     flex: 1,
@@ -334,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: 10,
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
@@ -348,7 +354,7 @@ const styles = StyleSheet.create({
 
   primaryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -374,7 +380,7 @@ const styles = StyleSheet.create({
 
   divider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginBottom: Spacing.lg,
   },
 

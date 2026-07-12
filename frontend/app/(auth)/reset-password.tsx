@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import OTPInput, { OTPInputRef } from '../../components/ui/OTPInput';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
@@ -31,6 +32,7 @@ function Wordmark() {
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
+  const isWideWeb = useIsWideWeb();
 
   const [state, setState] = useState<ResetState>('email');
   const [email, setEmail] = useState('');
@@ -120,10 +122,11 @@ export default function ResetPasswordScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
-            contentContainerStyle={styles.content}
+            contentContainerStyle={[styles.content, isWideWeb && styles.contentWideCenter]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            <Screen variant="form">
             <TouchableOpacity
               style={styles.backBtn}
               onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
@@ -185,6 +188,7 @@ export default function ResetPasswordScreen() {
             >
               <Text style={styles.secondaryLinkText}>Back to Sign In</Text>
             </TouchableOpacity>
+            </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -206,6 +210,7 @@ export default function ResetPasswordScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            <Screen variant="form">
             <TouchableOpacity
               style={styles.backBtn}
               onPress={() => setState('email')}
@@ -326,6 +331,7 @@ export default function ResetPasswordScreen() {
                 : <Text style={styles.primaryBtnText}>Reset Password</Text>
               }
             </TouchableOpacity>
+            </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -337,7 +343,9 @@ export default function ResetPasswordScreen() {
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
       <View style={styles.successContainer}>
-        <Ionicons name="checkmark-circle" size={72} color={Colors.success} />
+        <View style={styles.successIconCircle}>
+          <Ionicons name="checkmark-circle" size={48} color={Colors.success} />
+        </View>
         <Text style={styles.successHeading}>Password reset!</Text>
         <Text style={styles.successBody}>
           Your password has been updated. Sign in with your new password.
@@ -369,6 +377,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xl,
+  },
+  // Wide web: short form floats vertically centered
+  contentWideCenter: {
+    justifyContent: 'center',
+    paddingTop: Spacing.xl,
   },
 
   backBtn: {
@@ -423,14 +436,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.base,
@@ -456,9 +469,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.white,
-    height: Spacing.touch,
+    height: 50,
   },
   passwordRowError: {
     borderColor: Colors.danger,
@@ -483,7 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: 10,
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
@@ -497,7 +510,7 @@ const styles = StyleSheet.create({
 
   primaryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -527,6 +540,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
     gap: Spacing.md,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  successIconCircle: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: Colors.successLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   successHeading: {
     fontFamily: 'Poppins-Bold',
