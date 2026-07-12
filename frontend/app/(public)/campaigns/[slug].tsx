@@ -155,91 +155,72 @@ export default function CampaignDetailScreen() {
             />
           );
 
-          const titleBlock = (
+          // Organizer line — GFM-style attribution: avatar + church + provenance.
+          const organizerRow = (
+            <View style={styles.organizerRow}>
+              <View style={styles.organizerAvatar}>
+                <Text style={styles.organizerAvatarText}>{churchInitials}</Text>
+              </View>
+              <Text style={styles.organizerText}>
+                <Text style={styles.organizerName}>{campaign.churchName}</Text>
+                <Text> is fundraising on Pamoja Hub · Started {formatDate(campaign.createdAt)}</Text>
+              </Text>
+            </View>
+          );
+
+          // Trust badge + category chips in one quiet row.
+          const badgesRow = (
+            <View style={styles.badgesRow}>
+              <View style={styles.trustBadge}>
+                <Ionicons name="shield-checkmark" size={14} color={Colors.primaryDark} />
+                <Text style={styles.trustBadgeText}>Treasurer-controlled payouts</Text>
+              </View>
+              <View style={[styles.chip, styles.chipAccent]}>
+                <Text style={[styles.chipText, styles.chipTextAccent]}>{campaign.category}</Text>
+              </View>
+              {campaign.groupLabelName ? (
+                <View style={styles.chip}>
+                  <Text style={styles.chipText}>{campaign.groupLabelName}</Text>
+                </View>
+              ) : null}
+            </View>
+          );
+
+          // The donate card — money header, form, share, trust line. One card,
+          // both widths (sticky column on wide web).
+          const donateCardContent = (
             <View>
-              <Text style={[styles.title, isWideWeb && styles.titleWide]}>{campaign.title}</Text>
-              <View style={styles.chipsRow}>
-                <View style={[styles.chip, styles.chipAccent]}>
-                  <Text style={[styles.chipText, styles.chipTextAccent]}>{campaign.category}</Text>
+              <View style={styles.moneyHeader}>
+                <View style={styles.percentBadge}>
+                  <Text style={styles.percentBadgeText}>{percent}%</Text>
                 </View>
-                {campaign.groupLabelName ? (
-                  <View style={styles.chip}>
-                    <Text style={styles.chipText}>{campaign.groupLabelName}</Text>
-                  </View>
-                ) : null}
-              </View>
-              <View style={styles.churchCard}>
-                <View style={styles.churchAvatar}>
-                  <Text style={styles.churchAvatarText}>{churchInitials}</Text>
-                </View>
-                <View style={styles.churchTextWrap}>
-                  <Text style={styles.churchName} numberOfLines={1}>{campaign.churchName}</Text>
-                  <Text style={styles.churchCaption}>
-                    Church on Pamoja Hub · Started {formatDate(campaign.createdAt)}
+                <View style={styles.moneyTextWrap}>
+                  <Text style={styles.raisedAmount} numberOfLines={1}>
+                    {fmtKes(campaign.raisedAmount)}
+                  </Text>
+                  <Text style={styles.goalText}>
+                    raised of {fmtKes(campaign.goalAmount)} goal · {campaign.donorCount}{' '}
+                    {campaign.donorCount === 1 ? 'donor' : 'donors'}
                   </Text>
                 </View>
+              </View>
+              <View style={styles.progressWrap}>
+                <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={10} showLabels={false} />
+              </View>
+              <View style={styles.cardDivider} />
+              <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+              <View style={styles.shareWrap}>
+                <WhatsAppShareButton campaignTitle={campaign.title} campaignUrl={campaignUrl} />
+              </View>
+              <View style={styles.cardTrustRow}>
+                <Ionicons name="receipt-outline" size={13} color={Colors.textMuted} />
+                <Text style={styles.cardTrustText}>Every donation is recorded on Pamoja Hub</Text>
               </View>
             </View>
           );
 
-          const statsBlock = (
-            <View>
-              <Text style={styles.raisedAmount}>{fmtKes(campaign.raisedAmount)}</Text>
-              <Text style={styles.goalText}>raised of {fmtKes(campaign.goalAmount)} goal</Text>
-              <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={8} showLabels={false} />
-              <View style={styles.statMetaRow}>
-                <View style={styles.percentPill}>
-                  <Text style={styles.percentPillText}>{percent}% funded</Text>
-                </View>
-                <View style={styles.donorMeta}>
-                  <Ionicons name="people-outline" size={15} color={Colors.textSecondary} />
-                  <Text style={styles.donorMetaText}>
-                    {campaign.donorCount} {campaign.donorCount === 1 ? 'donor' : 'donors'}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          );
-
-          const trustStrip = (
-            <View style={styles.trustStrip}>
-              <View style={styles.trustRow}>
-                <View style={styles.trustIcon}>
-                  <Ionicons name="shield-checkmark-outline" size={16} color={Colors.primary} />
-                </View>
-                <View style={styles.trustTextWrap}>
-                  <Text style={styles.trustRowTitle}>Treasurer-controlled</Text>
-                  <Text style={styles.trustRowCaption}>
-                    Payouts require the church treasurer’s approval.
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.trustRowDivider} />
-              <View style={styles.trustRow}>
-                <View style={styles.trustIcon}>
-                  <Ionicons name="receipt-outline" size={16} color={Colors.primary} />
-                </View>
-                <View style={styles.trustTextWrap}>
-                  <Text style={styles.trustRowTitle}>On the record</Text>
-                  <Text style={styles.trustRowCaption}>
-                    Every donation is recorded on Pamoja Hub.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          );
-
-          const aboutBlock = (
-            <View style={isWideWeb && styles.aboutWide}>
-              <Text style={styles.aboutLabel}>ABOUT THIS CAMPAIGN</Text>
-              <Text style={[styles.aboutBody, isWideWeb && styles.aboutBodyWide]}>{description}</Text>
-            </View>
-          );
-
-          const shareBlock = (
-            <View style={isWideWeb && styles.shareWide}>
-              <WhatsAppShareButton campaignTitle={campaign.title} campaignUrl={campaignUrl} />
-            </View>
+          const story = (
+            <Text style={[styles.storyBody, isWideWeb && styles.storyBodyWide]}>{description}</Text>
           );
 
           return (
@@ -254,39 +235,38 @@ export default function CampaignDetailScreen() {
                 keyboardShouldPersistTaps="handled"
               >
                 {isWideWeb ? (
-                  // ── Wide web: content left, donate column right ──────────────
+                  // ── Wide web: story column left, sticky donate column right ──
                   <View style={styles.wideGrid}>
                     <View style={styles.wideLeft}>
+                      <Text style={[styles.title, styles.titleWide]}>{campaign.title}</Text>
                       <View style={styles.bannerWrapWide}>{banner}</View>
-                      {titleBlock}
-                      {aboutBlock}
-                      {shareBlock}
+                      {organizerRow}
+                      {badgesRow}
+                      <View style={styles.leftDivider} />
+                      {story}
                     </View>
                     <View style={styles.wideRight}>
                       <View style={stickyWide}>
-                        <View style={styles.rightCard}>
-                          {statsBlock}
-                          <View style={styles.rightDivider} />
-                          <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
-                        </View>
-                        {trustStrip}
+                        <View style={styles.donateCard}>{donateCardContent}</View>
                       </View>
                     </View>
                   </View>
                 ) : (
-                  // ── Phone: banner, sheet-lip info block, donate right after ──
+                  // ── Phone: banner, sheet-lip header, donate card, story ──────
                   <View>
                     {banner}
                     <View style={styles.sheet}>
-                      {titleBlock}
-                      <View style={styles.sheetStats}>{statsBlock}</View>
+                      <Text style={styles.title}>{campaign.title}</Text>
+                      {organizerRow}
+                      {badgesRow}
                     </View>
                     <View style={styles.phoneSection}>
-                      <DonationForm campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+                      <View style={styles.donateCard}>{donateCardContent}</View>
                     </View>
-                    <View style={styles.phoneSection}>{trustStrip}</View>
-                    <View style={styles.phoneSection}>{aboutBlock}</View>
-                    <View style={styles.phoneSection}>{shareBlock}</View>
+                    <View style={styles.phoneSection}>
+                      <View style={styles.leftDivider} />
+                      {story}
+                    </View>
                   </View>
                 )}
               </ScrollView>
@@ -371,7 +351,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   bannerWide: {
-    height: 360,
+    height: 380,
   },
   bannerFallback: {
     alignItems: 'center',
@@ -399,9 +379,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'stretch',
-    gap: Spacing.xl,
+    gap: Spacing.xl + 8,
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.xl,
   },
   wideLeft: {
     flex: 1.6,
@@ -415,7 +395,7 @@ const styles = StyleSheet.create({
   bannerWrapWide: {
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
-    marginBottom: Spacing.lg,
+    marginTop: Spacing.lg,
   },
 
   // Phone sheet — white block lipping over the banner's bottom edge
@@ -427,15 +407,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.lg,
   },
-  sheetStats: {
-    marginTop: Spacing.lg,
-  },
   phoneSection: {
     paddingHorizontal: Spacing.md,
     marginTop: Spacing.lg,
   },
 
-  // Title / chips / church
+  // Title
   title: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxxl,
@@ -443,20 +420,70 @@ const styles = StyleSheet.create({
     lineHeight: FontSize.xxxl * 1.3,
   },
   titleWide: {
-    fontSize: FontSize.title,
-    lineHeight: FontSize.title * 1.25,
+    fontSize: FontSize.titleLg,
+    lineHeight: FontSize.titleLg * 1.22,
   },
-  chipsRow: {
+
+  // Organizer attribution
+  organizerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm + 2,
+    marginTop: Spacing.md + 2,
+  },
+  organizerAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  organizerAvatarText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.sm,
+    color: Colors.primary,
+  },
+  organizerText: {
+    flex: 1,
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: FontSize.sm * 1.5,
+  },
+  organizerName: {
+    fontFamily: 'Poppins-SemiBold',
+    color: Colors.text,
+  },
+
+  // Badges
+  badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: Spacing.sm,
-    marginTop: Spacing.sm + 2,
+    marginTop: Spacing.md,
+  },
+  trustBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  trustBadgeText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.xs,
+    color: Colors.primaryDark,
   },
   chip: {
     backgroundColor: Colors.primaryLight,
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   chipText: {
     fontFamily: 'Poppins-Medium',
@@ -469,89 +496,26 @@ const styles = StyleSheet.create({
   chipTextAccent: {
     color: Colors.accentDark,
   },
-  churchCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm + 4,
-    backgroundColor: Colors.surfaceSubtle,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    marginTop: Spacing.md,
+
+  // Left column story
+  leftDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: Spacing.lg,
   },
-  churchAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  churchAvatarText: {
-    fontFamily: 'Poppins-Bold',
+  storyBody: {
+    fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
-    color: Colors.primary,
-  },
-  churchTextWrap: {
-    flex: 1,
-    minWidth: 0,
-  },
-  churchName: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.base,
     color: Colors.text,
-    lineHeight: 22,
+    lineHeight: FontSize.md * 1.75,
   },
-  churchCaption: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    marginTop: 1,
+  storyBodyWide: {
+    fontSize: FontSize.base,
+    lineHeight: FontSize.base * 1.75,
   },
 
-  // Stats
-  raisedAmount: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xxl + 2,
-    color: Colors.primary,
-    lineHeight: (FontSize.xxl + 2) * 1.3,
-  },
-  goalText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
-    marginBottom: Spacing.sm + 2,
-  },
-  statMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: Spacing.sm + 2,
-  },
-  percentPill: {
-    backgroundColor: Colors.accentLight,
-    borderRadius: BorderRadius.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  percentPillText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.xs,
-    color: Colors.accentDark,
-  },
-  donorMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  donorMetaText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-  },
-
-  // Right column (wide)
-  rightCard: {
+  // Donate card
+  donateCard: {
     backgroundColor: Colors.white,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
@@ -559,85 +523,63 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     ...Shadows.lg,
   },
-  rightDivider: {
-    height: 1,
-    backgroundColor: Colors.borderLight,
-    marginVertical: Spacing.lg,
-  },
-
-  // Trust strip
-  trustStrip: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    padding: Spacing.md,
-    marginTop: Spacing.md,
-    ...Shadows.sm,
-  },
-  trustRow: {
+  moneyHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm + 2,
+    alignItems: 'center',
+    gap: Spacing.md,
   },
-  trustIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primaryLight,
+  percentBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.accentLight,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
-  trustTextWrap: {
+  percentBadgeText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.md,
+    color: Colors.accentDark,
+  },
+  moneyTextWrap: {
     flex: 1,
     minWidth: 0,
   },
-  trustRowTitle: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.sm,
-    color: Colors.text,
-    lineHeight: 19,
+  raisedAmount: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.xxxl,
+    color: Colors.primary,
+    lineHeight: FontSize.xxxl * 1.3,
   },
-  trustRowCaption: {
+  goalText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    lineHeight: 17,
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+    lineHeight: FontSize.sm * 1.45,
     marginTop: 1,
   },
-  trustRowDivider: {
+  progressWrap: {
+    marginTop: Spacing.md,
+  },
+  cardDivider: {
     height: 1,
     backgroundColor: Colors.borderLight,
-    marginVertical: Spacing.sm + 2,
-    marginLeft: 32 + Spacing.sm + 2,
+    marginVertical: Spacing.lg,
   },
-
-  // About
-  aboutWide: {
-    marginTop: Spacing.xl,
+  shareWrap: {
+    marginTop: Spacing.md,
   },
-  aboutLabel: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.xs,
-    letterSpacing: 1.3,
-    color: Colors.textMuted,
-    marginBottom: Spacing.sm + 2,
+  cardTrustRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: Spacing.md,
   },
-  aboutBody: {
+  cardTrustText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.md,
-    color: Colors.text,
-    lineHeight: FontSize.md * 1.7,
-  },
-  aboutBodyWide: {
-    fontSize: FontSize.base,
-    lineHeight: FontSize.base * 1.7,
-  },
-
-  // Share
-  shareWide: {
-    marginTop: Spacing.lg,
-    maxWidth: 320,
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
   },
 });

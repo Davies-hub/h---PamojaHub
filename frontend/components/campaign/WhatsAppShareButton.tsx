@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: WHATSAPP_GREEN,
     borderRadius: BorderRadius.pill,
-    height: 50,
+    height: 52,
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
   },

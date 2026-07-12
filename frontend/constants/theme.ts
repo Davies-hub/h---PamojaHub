@@ -60,6 +60,7 @@ export const FontSize = {
   xxl:   20,
   xxxl:  22,
   title: 28,
+  titleLg: 32,  // page h1 on wide web (campaign detail etc.)
   display: 40,  // marketing hero headlines on wide web only
 };
 
