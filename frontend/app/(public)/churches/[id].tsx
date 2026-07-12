@@ -17,8 +17,6 @@ import CampaignCard from '../../../components/campaign/CampaignCard';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
-
-const CONTENT_CAP = 760;
 import { campaignsService } from '../../../services/campaigns.service';
 import { churchesService } from '../../../services/churches.service';
 import { PublicCampaign, PublicChurch } from '../../../types';
@@ -126,6 +124,7 @@ export default function ChurchProfileScreen() {
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
   const isWideWeb = useIsWideWeb();
+  const numColumns = isWideWeb ? 3 : 1;
 
   const [church, setChurch] = useState<PublicChurch | null>(null);
   const [churchState, setChurchState] = useState<LoadState>('loading');
@@ -248,8 +247,11 @@ export default function ChurchProfileScreen() {
       <FlatList
         data={campaigns}
         keyExtractor={item => item.id}
+        numColumns={numColumns}
+        key={numColumns}
+        columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
         renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
+          <View style={isWideWeb ? styles.gridItem : styles.cardWrapper}>
             <CampaignCard
               campaign={item}
               onDonate={() => router.push(`/campaigns/${item.slug}` as any)}
@@ -262,20 +264,19 @@ export default function ChurchProfileScreen() {
               colors={[Colors.primary, Colors.primaryDark]}
               start={{ x: 0.15, y: 0 }}
               end={{ x: 0.85, y: 1 }}
-              style={styles.banner}
+              style={[styles.banner, isWideWeb && styles.bannerWide]}
             >
               <View pointerEvents="none" style={styles.bannerOrnamentA} />
               <View pointerEvents="none" style={styles.bannerOrnamentB} />
             </LinearGradient>
             <ProfileHeader church={church} />
-            <CampaignsHeading count={church.activeCampaignCount} />
+            <View style={isWideWeb && styles.headingCapWide}>
+              <CampaignsHeading count={church.activeCampaignCount} />
+            </View>
           </>
         }
         ListEmptyComponent={campaignsEmpty}
-        contentContainerStyle={[
-          { paddingBottom: (insets.bottom || 16) + Spacing.xl },
-          isWideWeb && styles.wideContent,
-        ]}
+        contentContainerStyle={{ paddingBottom: (insets.bottom || 16) + Spacing.xl }}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -355,6 +356,9 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
   },
+  bannerWide: {
+    height: 224,
+  },
   bannerOrnamentA: {
     position: 'absolute',
     top: -70,
@@ -374,10 +378,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
 
-  wideContent: {
-    maxWidth: CONTENT_CAP,
+  // Wide web — masthead is full-bleed; heading + grid share the 1100 cap
+  headingCapWide: {
+    maxWidth: 1100,
     width: '100%',
     alignSelf: 'center',
+  },
+  gridRow: {
+    gap: Spacing.lg,
+    maxWidth: 1100,
+    width: '100%',
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.md,
+  },
+  gridItem: {
+    flex: 1,
+    maxWidth: '32%',
   },
 
   // Profile info
