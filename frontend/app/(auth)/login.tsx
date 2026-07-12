@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Screen, { useIsWideWeb } from '../../components/layout/Screen';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useAuth } from '../../stores/auth.store';
 import { AuthUser } from '../../types';
 import { resolveAuthDestination } from '../../utils/authRouting';
@@ -113,6 +113,11 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      {/* Decorative — oversized brand circles behind the card */}
+      <View pointerEvents="none" style={styles.bgOrnamentA} />
+      <View pointerEvents="none" style={styles.bgOrnamentB} />
+      <View pointerEvents="none" style={styles.bgOrnamentC} />
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -130,110 +135,114 @@ export default function LoginScreen() {
               accessibilityRole="button"
               accessibilityLabel="Go back"
             >
-              <Ionicons name="arrow-back" size={22} color={Colors.text} />
+              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
             </TouchableOpacity>
 
-            <Wordmark />
+            <View style={styles.card}>
+              <Wordmark />
 
-            <Text style={styles.heading}>Sign in</Text>
-            <Text style={styles.subtext}>Treasurer access</Text>
+              <Text style={styles.heading}>Welcome back</Text>
+              <Text style={styles.subtext}>
+                Sign in to manage your church’s campaigns and payouts.
+              </Text>
 
-            {/* Email */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Email address</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="you@church.org"
-                placeholderTextColor={Colors.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                returnKeyType="next"
-                value={email}
-                onChangeText={v => { setEmail(v); setLoginError(''); }}
-                accessibilityLabel="Email address"
-              />
-            </View>
-
-            {/* Password */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordRow}>
+              {/* Email */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Email address</Text>
                 <TextInput
-                  style={styles.passwordInput}
-                  placeholder="Enter your password"
+                  style={styles.input}
+                  placeholder="you@church.org"
                   placeholderTextColor={Colors.textMuted}
-                  secureTextEntry={!showPassword}
-                  autoComplete="password"
-                  returnKeyType="done"
-                  value={password}
-                  onChangeText={v => { setPassword(v); setLoginError(''); }}
-                  accessibilityLabel="Password"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  returnKeyType="next"
+                  value={email}
+                  onChangeText={v => { setEmail(v); setLoginError(''); }}
+                  accessibilityLabel="Email address"
                 />
-                <TouchableOpacity
-                  style={styles.eyeBtn}
-                  onPress={() => setShowPassword(s => !s)}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={Colors.textMuted}
+              </View>
+
+              {/* Password */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Password</Text>
+                <View style={styles.passwordRow}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Enter your password"
+                    placeholderTextColor={Colors.textMuted}
+                    secureTextEntry={!showPassword}
+                    autoComplete="password"
+                    returnKeyType="done"
+                    value={password}
+                    onChangeText={v => { setPassword(v); setLoginError(''); }}
+                    accessibilityLabel="Password"
                   />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.eyeBtn}
+                    onPress={() => setShowPassword(s => !s)}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={Colors.textMuted}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
 
-            {/* Inline error */}
-            {loginError ? (
-              <View style={styles.errorBanner}>
-                <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
-                <Text style={styles.errorText}>{loginError}</Text>
-              </View>
-            ) : null}
+              {/* Inline error */}
+              {loginError ? (
+                <View style={styles.errorBanner}>
+                  <Ionicons name="alert-circle-outline" size={16} color={Colors.danger} />
+                  <Text style={styles.errorText}>{loginError}</Text>
+                </View>
+              ) : null}
 
-            {/* Sign In button */}
-            <TouchableOpacity
-              style={[styles.primaryBtn, isLoading && styles.primaryBtnDisabled]}
-              onPress={handleSignIn}
-              disabled={isLoading}
-              activeOpacity={0.85}
-              accessibilityRole="button"
-              accessibilityLabel="Sign in"
-              accessibilityState={{ disabled: isLoading }}
-            >
-              {isLoading
-                ? <ActivityIndicator color={Colors.white} size="small" />
-                : <Text style={styles.primaryBtnText}>Sign In</Text>
-              }
-            </TouchableOpacity>
-
-            {/* Forgot password */}
-            <TouchableOpacity
-              style={styles.forgotBtn}
-              onPress={() => router.push('/reset-password')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="Forgot password"
-            >
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Register link */}
-            <View style={styles.registerRow}>
-              <Text style={styles.registerLabel}>{"Don't have an account?  "}</Text>
+              {/* Sign In button */}
               <TouchableOpacity
-                onPress={() => router.push('/register')}
+                style={[styles.primaryBtn, isLoading && styles.primaryBtnDisabled]}
+                onPress={handleSignIn}
+                disabled={isLoading}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel="Sign in"
+                accessibilityState={{ disabled: isLoading }}
+              >
+                {isLoading
+                  ? <ActivityIndicator color={Colors.white} size="small" />
+                  : <Text style={styles.primaryBtnText}>Sign In</Text>
+                }
+              </TouchableOpacity>
+
+              {/* Forgot password */}
+              <TouchableOpacity
+                style={styles.forgotBtn}
+                onPress={() => router.push('/reset-password')}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel="Register your church"
+                accessibilityLabel="Forgot password"
               >
-                <Text style={styles.registerLink}>Register your church</Text>
+                <Text style={styles.forgotText}>Forgot password?</Text>
               </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              {/* Register link */}
+              <View style={styles.registerRow}>
+                <Text style={styles.registerLabel}>{"Don't have an account?  "}</Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/register')}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="Register your church"
+                >
+                  <Text style={styles.registerLink}>Register your church</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Screen>
         </ScrollView>
@@ -245,7 +254,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfaceSubtle,
   },
   flex: { flex: 1 },
   content: {
@@ -260,19 +269,64 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xl,
   },
 
+  // Background ornaments — oversized, very quiet
+  bgOrnamentA: {
+    position: 'absolute',
+    top: -130,
+    right: -110,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: 'rgba(5,124,138,0.06)',
+  },
+  bgOrnamentB: {
+    position: 'absolute',
+    bottom: -150,
+    left: -130,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(5,124,138,0.05)',
+  },
+  bgOrnamentC: {
+    position: 'absolute',
+    top: '32%',
+    left: -70,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(237,143,28,0.07)',
+  },
+
   backBtn: {
-    width: Spacing.touch,
-    height: Spacing.touch,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -Spacing.sm,
     marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+
+  // The floating auth card
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    ...Shadows.lg,
   },
 
   wordmark: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxxl,
     marginBottom: Spacing.lg,
+    textAlign: 'center',
   },
   wordmarkPamoja: { color: Colors.primary },
   wordmarkHub: { color: Colors.accent },
@@ -282,12 +336,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize.title,
     color: Colors.text,
     marginBottom: 4,
+    textAlign: 'center',
   },
   subtext: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
     color: Colors.textMuted,
     marginBottom: Spacing.xl,
+    textAlign: 'center',
+    lineHeight: FontSize.md * 1.55,
   },
 
   fieldGroup: {

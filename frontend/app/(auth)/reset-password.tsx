@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import OTPInput, { OTPInputRef } from '../../components/ui/OTPInput';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
 
 type ResetState = 'email' | 'otp' | 'success';
@@ -117,6 +117,8 @@ export default function ResetPasswordScreen() {
   if (state === 'email') {
     return (
       <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -134,9 +136,10 @@ export default function ResetPasswordScreen() {
               accessibilityRole="button"
               accessibilityLabel="Go back"
             >
-              <Ionicons name="arrow-back" size={22} color={Colors.text} />
+              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
             </TouchableOpacity>
 
+            <View style={styles.card}>
             <Wordmark />
 
             <View style={styles.iconCircle}>
@@ -188,6 +191,7 @@ export default function ResetPasswordScreen() {
             >
               <Text style={styles.secondaryLinkText}>Back to Sign In</Text>
             </TouchableOpacity>
+            </View>
             </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -201,6 +205,8 @@ export default function ResetPasswordScreen() {
     const allFilled = otp.every(d => d !== '');
     return (
       <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -218,9 +224,10 @@ export default function ResetPasswordScreen() {
               accessibilityRole="button"
               accessibilityLabel="Go back"
             >
-              <Ionicons name="arrow-back" size={22} color={Colors.text} />
+              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
             </TouchableOpacity>
 
+            <View style={styles.card}>
             <Wordmark />
 
             <Text style={styles.heading}>Verify & Reset</Text>
@@ -331,6 +338,7 @@ export default function ResetPasswordScreen() {
                 : <Text style={styles.primaryBtnText}>Reset Password</Text>
               }
             </TouchableOpacity>
+            </View>
             </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -342,6 +350,8 @@ export default function ResetPasswordScreen() {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      <View pointerEvents="none" style={styles.bgOrnamentA} />
+      <View pointerEvents="none" style={styles.bgOrnamentB} />
       <View style={styles.successContainer}>
         <View style={styles.successIconCircle}>
           <Ionicons name="checkmark-circle" size={48} color={Colors.success} />
@@ -369,9 +379,40 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfaceSubtle,
   },
   flex: { flex: 1 },
+
+  // Background ornaments — oversized, very quiet
+  bgOrnamentA: {
+    position: 'absolute',
+    top: -130,
+    right: -110,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: 'rgba(5,124,138,0.06)',
+  },
+  bgOrnamentB: {
+    position: 'absolute',
+    bottom: -150,
+    left: -130,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(5,124,138,0.05)',
+  },
+
+  // The floating auth card
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    ...Shadows.lg,
+  },
   content: {
     flexGrow: 1,
     paddingHorizontal: Spacing.md,
@@ -385,18 +426,23 @@ const styles = StyleSheet.create({
   },
 
   backBtn: {
-    width: Spacing.touch,
-    height: Spacing.touch,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -Spacing.sm,
     marginBottom: Spacing.md,
+    ...Shadows.sm,
   },
 
   wordmark: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxxl,
     marginBottom: Spacing.lg,
+    textAlign: 'center',
   },
   wordmarkPamoja: { color: Colors.primary },
   wordmarkHub: { color: Colors.accent },
@@ -417,6 +463,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.title,
     color: Colors.text,
     marginBottom: 4,
+    textAlign: 'center',
   },
   subtext: {
     fontFamily: 'Poppins-Regular',
@@ -424,6 +471,7 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     lineHeight: FontSize.md * 1.6,
     marginBottom: Spacing.xl,
+    textAlign: 'center',
   },
   emailHighlight: {
     fontFamily: 'Poppins-SemiBold',
@@ -535,14 +583,21 @@ const styles = StyleSheet.create({
   },
 
   successContainer: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxl,
     gap: Spacing.md,
     maxWidth: 480,
-    width: '100%',
     alignSelf: 'center',
+    marginHorizontal: Spacing.md,
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.lg,
   },
   successIconCircle: {
     width: 92,
