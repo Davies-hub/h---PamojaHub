@@ -13,6 +13,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DonationForm from '../../../components/campaign/DonationForm';
@@ -20,15 +21,20 @@ import WhatsAppShareButton from '../../../components/campaign/WhatsAppShareButto
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import RemoteImage from '../../../components/ui/RemoteImage';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
-
-const CONTENT_CAP = 760;
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { PublicCampaign } from '../../../types';
+import { formatDate } from '../../../utils/formatters';
 
 function fmtKes(n: number) {
   return `KES ${n.toLocaleString('en-KE')}`;
 }
+
+// Web-only sticky for the wide-web donate column — CSS pass-through RN types
+// don't know about; harmless no-op elsewhere.
+const stickyWide = Platform.OS === 'web'
+  ? ({ position: 'sticky', top: Spacing.lg } as unknown as ViewStyle)
+  : null;
 
 type LoadState = 'loading' | 'error' | 'notfound' | 'ok';
 
@@ -77,7 +83,7 @@ export default function CampaignDetailScreen() {
         accessibilityRole="button"
         accessibilityLabel="Go back"
       >
-        <Ionicons name="arrow-back" size={22} color={Colors.white} />
+        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
 
       {state === 'loading' ? (
@@ -86,7 +92,9 @@ export default function CampaignDetailScreen() {
         </View>
       ) : state === 'notfound' ? (
         <View style={styles.center}>
-          <Ionicons name="search-outline" size={48} color={Colors.border} />
+          <View style={styles.stateIconCircle}>
+            <Ionicons name="search-outline" size={34} color={Colors.primary} />
+          </View>
           <Text style={styles.stateTitle}>Campaign not found</Text>
           <Text style={styles.stateSub}>
             This campaign may have been removed or is no longer available.
@@ -94,7 +102,9 @@ export default function CampaignDetailScreen() {
         </View>
       ) : state === 'error' ? (
         <View style={styles.center}>
-          <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+          <View style={styles.stateIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={34} color={Colors.primary} />
+          </View>
           <Text style={styles.stateTitle}>Couldn’t load campaign</Text>
           <Text style={styles.stateSub}>Please check your connection and try again.</Text>
           <TouchableOpacity
@@ -114,6 +124,124 @@ export default function CampaignDetailScreen() {
             : 0;
           const description = campaign.description.replace(/<[^>]*>/g, '').trim();
           const campaignUrl = `https://pamojahub.com/campaigns/${campaign.slug}`;
+          const churchInitials =
+            campaign.churchName
+              .split(/\s+/)
+              .filter(Boolean)
+              .slice(0, 2)
+              .map(w => w[0])
+              .join('')
+              .toUpperCase() || 'C';
+
+          // ── Shared visual blocks (identical data at both widths) ────────────
+
+          const banner = (
+            <RemoteImage
+              uri={campaign.bannerImageUrl}
+              style={[styles.banner, isWideWeb && styles.bannerWide]}
+              resizeMode="cover"
+              fallback={
+                <LinearGradient
+                  colors={[Colors.primary, Colors.primaryDark]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[styles.banner, styles.bannerFallback, isWideWeb && styles.bannerWide]}
+                >
+                  <View style={styles.bannerLetterCircle}>
+                    <Text style={styles.bannerLetterText}>{campaign.title[0]?.toUpperCase() ?? 'P'}</Text>
+                  </View>
+                </LinearGradient>
+              }
+            />
+          );
+
+          const titleBlock = (
+            <View>
+              <Text style={[styles.title, isWideWeb && styles.titleWide]}>{campaign.title}</Text>
+              <View style={styles.chipsRow}>
+                <View style={[styles.chip, styles.chipAccent]}>
+                  <Text style={[styles.chipText, styles.chipTextAccent]}>{campaign.category}</Text>
+                </View>
+                {campaign.groupLabelName ? (
+                  <View style={styles.chip}>
+                    <Text style={styles.chipText}>{campaign.groupLabelName}</Text>
+                  </View>
+                ) : null}
+              </View>
+              <View style={styles.churchCard}>
+                <View style={styles.churchAvatar}>
+                  <Text style={styles.churchAvatarText}>{churchInitials}</Text>
+                </View>
+                <View style={styles.churchTextWrap}>
+                  <Text style={styles.churchName} numberOfLines={1}>{campaign.churchName}</Text>
+                  <Text style={styles.churchCaption}>
+                    Church on Pamoja Hub · Started {formatDate(campaign.createdAt)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          );
+
+          const statsBlock = (
+            <View>
+              <Text style={styles.raisedAmount}>{fmtKes(campaign.raisedAmount)}</Text>
+              <Text style={styles.goalText}>raised of {fmtKes(campaign.goalAmount)} goal</Text>
+              <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={8} showLabels={false} />
+              <View style={styles.statMetaRow}>
+                <View style={styles.percentPill}>
+                  <Text style={styles.percentPillText}>{percent}% funded</Text>
+                </View>
+                <View style={styles.donorMeta}>
+                  <Ionicons name="people-outline" size={15} color={Colors.textSecondary} />
+                  <Text style={styles.donorMetaText}>
+                    {campaign.donorCount} {campaign.donorCount === 1 ? 'donor' : 'donors'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          );
+
+          const trustStrip = (
+            <View style={styles.trustStrip}>
+              <View style={styles.trustRow}>
+                <View style={styles.trustIcon}>
+                  <Ionicons name="shield-checkmark-outline" size={16} color={Colors.primary} />
+                </View>
+                <View style={styles.trustTextWrap}>
+                  <Text style={styles.trustRowTitle}>Treasurer-controlled</Text>
+                  <Text style={styles.trustRowCaption}>
+                    Payouts require the church treasurer’s approval.
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.trustRowDivider} />
+              <View style={styles.trustRow}>
+                <View style={styles.trustIcon}>
+                  <Ionicons name="receipt-outline" size={16} color={Colors.primary} />
+                </View>
+                <View style={styles.trustTextWrap}>
+                  <Text style={styles.trustRowTitle}>On the record</Text>
+                  <Text style={styles.trustRowCaption}>
+                    Every donation is recorded on Pamoja Hub.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          );
+
+          const aboutBlock = (
+            <View style={isWideWeb && styles.aboutWide}>
+              <Text style={styles.aboutLabel}>ABOUT THIS CAMPAIGN</Text>
+              <Text style={[styles.aboutBody, isWideWeb && styles.aboutBodyWide]}>{description}</Text>
+            </View>
+          );
+
+          const shareBlock = (
+            <View style={isWideWeb && styles.shareWide}>
+              <WhatsAppShareButton campaignTitle={campaign.title} campaignUrl={campaignUrl} />
+            </View>
+          );
+
           return (
             <KeyboardAvoidingView
               style={styles.flex}
@@ -121,60 +249,46 @@ export default function CampaignDetailScreen() {
             >
               <ScrollView
                 style={styles.flex}
-                contentContainerStyle={[
-                  { paddingBottom: (insets.bottom || 16) + Spacing.xl },
-                  isWideWeb && styles.wideContent,
-                ]}
+                contentContainerStyle={{ paddingBottom: (insets.bottom || 16) + Spacing.xl }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
               >
-                {/* 1. Banner — real image if uploaded, gradient placeholder otherwise */}
-                <RemoteImage
-                  uri={campaign.bannerImageUrl}
-                  style={styles.banner}
-                  resizeMode="cover"
-                  fallback={
-                    <LinearGradient
-                      colors={[Colors.primary, Colors.primaryDark]}
-                      start={{ x: 0.15, y: 0 }}
-                      end={{ x: 0.85, y: 1 }}
-                      style={styles.banner}
-                    />
-                  }
-                />
-
-                {/* 2. Campaign info */}
-                <View style={styles.infoSection}>
-                  <Text style={styles.breadcrumb} numberOfLines={1}>
-                    {campaign.churchName}
-                    {campaign.groupLabelName ? ` › ${campaign.groupLabelName}` : ''}
-                  </Text>
-                  <Text style={styles.title}>{campaign.title}</Text>
-                  <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={8} showLabels={false} />
-                  <View style={styles.progressRow}>
-                    <View style={styles.progressLeft}>
-                      <Text style={styles.raisedAmount}>{fmtKes(campaign.raisedAmount)} raised</Text>
-                      <Text style={styles.goalText}>
-                        of {fmtKes(campaign.goalAmount)} goal · {campaign.donorCount} donors
-                      </Text>
+                {isWideWeb ? (
+                  // ── Wide web: content left, donate column right ──────────────
+                  <View style={styles.wideGrid}>
+                    <View style={styles.wideLeft}>
+                      <View style={styles.bannerWrapWide}>{banner}</View>
+                      {titleBlock}
+                      {aboutBlock}
+                      {shareBlock}
                     </View>
-                    <Text style={styles.percentLabel}>{percent}%</Text>
+                    <View style={styles.wideRight}>
+                      <View style={stickyWide}>
+                        <View style={styles.rightCard}>
+                          {statsBlock}
+                          <View style={styles.rightDivider} />
+                          <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+                        </View>
+                        {trustStrip}
+                      </View>
+                    </View>
                   </View>
-                </View>
-
-                {/* 3. Donation form */}
-                <DonationForm campaignSlug={campaign.slug} campaignTitle={campaign.title} />
-
-                {/* 4. About */}
-                <View style={styles.aboutSection}>
-                  <Text style={styles.aboutLabel}>About this campaign</Text>
-                  <Text style={styles.aboutBody}>{description}</Text>
-                </View>
-
-                {/* 5. WhatsApp share */}
-                <View style={styles.shareSection}>
-                  <WhatsAppShareButton campaignTitle={campaign.title} campaignUrl={campaignUrl} />
-                </View>
+                ) : (
+                  // ── Phone: banner, sheet-lip info block, donate right after ──
+                  <View>
+                    {banner}
+                    <View style={styles.sheet}>
+                      {titleBlock}
+                      <View style={styles.sheetStats}>{statsBlock}</View>
+                    </View>
+                    <View style={styles.phoneSection}>
+                      <DonationForm campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+                    </View>
+                    <View style={styles.phoneSection}>{trustStrip}</View>
+                    <View style={styles.phoneSection}>{aboutBlock}</View>
+                    <View style={styles.phoneSection}>{shareBlock}</View>
+                  </View>
+                )}
               </ScrollView>
             </KeyboardAvoidingView>
           );
@@ -197,11 +311,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
   },
+  stateIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
   stateTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     color: Colors.text,
-    marginTop: Spacing.md,
     marginBottom: 6,
     textAlign: 'center',
   },
@@ -210,13 +332,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: FontSize.md * 1.5,
+    lineHeight: FontSize.md * 1.55,
+    maxWidth: 420,
   },
   retryBtn: {
-    marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -231,89 +354,290 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.md,
     zIndex: 50,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.28)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.md,
+  },
+
+  // Banner
+  banner: {
+    height: 248,
+    width: '100%',
+  },
+  bannerWide: {
+    height: 360,
+  },
+  bannerFallback: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  banner: {
-    height: 220,
-    width: '100%',
+  bannerLetterCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.sm,
+  },
+  bannerLetterText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.title,
+    color: Colors.primary,
   },
 
-  wideContent: {
-    maxWidth: CONTENT_CAP,
+  // Wide grid
+  wideGrid: {
+    maxWidth: 1100,
     width: '100%',
     alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.lg,
+  },
+  wideLeft: {
+    flex: 1.6,
+    minWidth: 0,
+  },
+  wideRight: {
+    flex: 1,
+    minWidth: 320,
+    maxWidth: 400,
+  },
+  bannerWrapWide: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    marginBottom: Spacing.lg,
   },
 
-  infoSection: {
+  // Phone sheet — white block lipping over the banner's bottom edge
+  sheet: {
+    marginTop: -20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: Colors.background,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.lg,
   },
-  breadcrumb: {
+  sheetStats: {
+    marginTop: Spacing.lg,
+  },
+  phoneSection: {
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+
+  // Title / chips / church
+  title: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.xxxl,
+    color: Colors.text,
+    lineHeight: FontSize.xxxl * 1.3,
+  },
+  titleWide: {
+    fontSize: FontSize.title,
+    lineHeight: FontSize.title * 1.25,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm + 2,
+  },
+  chip: {
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  chipText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.xs,
+    color: Colors.primaryDark,
+  },
+  chipAccent: {
+    backgroundColor: Colors.accentLight,
+  },
+  chipTextAccent: {
+    color: Colors.accentDark,
+  },
+  churchCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm + 4,
+    backgroundColor: Colors.surfaceSubtle,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  churchAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  churchAvatarText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.md,
+    color: Colors.primary,
+  },
+  churchTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  churchName: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.base,
+    color: Colors.text,
+    lineHeight: 22,
+  },
+  churchCaption: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    marginBottom: 6,
+    marginTop: 1,
   },
-  title: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xxl,
-    color: Colors.text,
-    lineHeight: FontSize.xxl * 1.3,
-    marginBottom: Spacing.md,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  progressLeft: {
-    flex: 1,
-    marginRight: Spacing.sm,
-  },
+
+  // Stats
   raisedAmount: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xl,
+    fontSize: FontSize.xxl + 2,
     color: Colors.primary,
+    lineHeight: (FontSize.xxl + 2) * 1.3,
   },
   goalText: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
     color: Colors.textMuted,
-    marginTop: 2,
+    marginBottom: Spacing.sm + 2,
   },
-  percentLabel: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.lg,
-    color: Colors.accent,
-    paddingTop: 2,
+  statMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.sm + 2,
+  },
+  percentPill: {
+    backgroundColor: Colors.accentLight,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  percentPillText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.xs,
+    color: Colors.accentDark,
+  },
+  donorMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  donorMetaText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
   },
 
-  aboutSection: {
-    paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
+  // Right column (wide)
+  rightCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    padding: Spacing.lg,
+    ...Shadows.lg,
+  },
+  rightDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: Spacing.lg,
+  },
+
+  // Trust strip
+  trustStrip: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    padding: Spacing.md,
+    marginTop: Spacing.md,
+    ...Shadows.sm,
+  },
+  trustRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm + 2,
+  },
+  trustIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  trustTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  trustRowTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.sm,
+    color: Colors.text,
+    lineHeight: 19,
+  },
+  trustRowCaption: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    lineHeight: 17,
+    marginTop: 1,
+  },
+  trustRowDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: Spacing.sm + 2,
+    marginLeft: 32 + Spacing.sm + 2,
+  },
+
+  // About
+  aboutWide: {
+    marginTop: Spacing.xl,
   },
   aboutLabel: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
-    color: Colors.text,
-    marginBottom: 8,
+    fontSize: FontSize.xs,
+    letterSpacing: 1.3,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm + 2,
   },
   aboutBody: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
     color: Colors.text,
-    lineHeight: FontSize.md * 1.6,
+    lineHeight: FontSize.md * 1.7,
+  },
+  aboutBodyWide: {
+    fontSize: FontSize.base,
+    lineHeight: FontSize.base * 1.7,
   },
 
-  shareSection: {
-    paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
+  // Share
+  shareWide: {
+    marginTop: Spacing.lg,
+    maxWidth: 320,
   },
 });
