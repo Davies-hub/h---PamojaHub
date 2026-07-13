@@ -257,6 +257,15 @@ export default function GroupLabelsScreen() {
 
     return (
       <View style={styles.row}>
+        {/* Leading icon circle — hierarchical (accent) vs flat (teal) */}
+        <View style={[styles.rowIcon, isHierarchical && styles.rowIconH]}>
+          <Ionicons
+            name={isHierarchical ? 'git-branch-outline' : 'pricetag-outline'}
+            size={18}
+            color={isHierarchical ? Colors.accentDark : Colors.primary}
+          />
+        </View>
+
         {/* Left: badge + name/edit + count */}
         <View style={styles.rowLeft}>
           <TypeBadge isHierarchical={isHierarchical} />
@@ -814,8 +823,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
     padding: Spacing.md,
-    gap: Spacing.sm,
+    gap: Spacing.sm + 2,
     ...Shadows.sm,
+  },
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  rowIconH: {
+    backgroundColor: Colors.accentLight,
   },
   rowLeft: {
     flex: 1,

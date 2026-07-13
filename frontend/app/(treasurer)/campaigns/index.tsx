@@ -115,7 +115,6 @@ const CampaignRowCard = React.memo(function CampaignRowCard({
   busy,
 }: CampaignRowProps) {
   const initial = (item.groupLabelName ?? item.title).charAt(0).toUpperCase();
-  const progress = Math.min(100, Math.round((item.walletBalance / item.goalAmount) * 100));
 
   return (
     <View style={styles.card}>
@@ -143,25 +142,19 @@ const CampaignRowCard = React.memo(function CampaignRowCard({
           <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} style={styles.chevron} />
         </View>
 
-        {/* Stats grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statCell}>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+        {/* Money block — raised figure large in teal, goal + funded pill */}
+        <View style={styles.moneyBlock}>
+          <View style={styles.moneyLeft}>
+            <Text style={styles.raisedValue} numberOfLines={1} adjustsFontSizeToFit>
               {fmtKes(item.walletBalance)}
             </Text>
-            <Text style={styles.statLabel}>Raised</Text>
-          </View>
-          <View style={styles.statCell}>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {fmtKes(item.goalAmount)}
+            <Text style={styles.goalCaption} numberOfLines={1}>
+              raised of {fmtKes(item.goalAmount)} goal
             </Text>
-            <Text style={styles.statLabel}>Goal</Text>
           </View>
-          <View style={[styles.statCell, styles.statCellProgress]}>
-            <Text style={[styles.statValue, styles.statValueProgress]}>
-              {pct(item.walletBalance, item.goalAmount)}
-            </Text>
-            <Text style={styles.statLabel}>{progress}% funded</Text>
+          <View style={styles.fundedPill}>
+            <Text style={styles.fundedPillText}>{pct(item.walletBalance, item.goalAmount)}</Text>
+            <Text style={styles.fundedPillLabel}>funded</Text>
           </View>
         </View>
 
@@ -170,7 +163,7 @@ const CampaignRowCard = React.memo(function CampaignRowCard({
           <ProgressBar
             raised={item.walletBalance}
             goal={item.goalAmount}
-            height={5}
+            height={7}
             showLabels={false}
           />
         </View>
@@ -572,33 +565,52 @@ const styles = StyleSheet.create({
     color: Colors.primaryDark,
   },
 
-  // Stats grid
-  statsGrid: {
+  // Money block
+  moneyBlock: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
     marginBottom: 10,
   },
-  statCell: {
+  moneyLeft: {
     flex: 1,
-    alignItems: 'center',
+    minWidth: 0,
   },
-  statCellProgress: {
-    borderLeftWidth: 1,
-    borderLeftColor: Colors.borderLight,
-  },
-  statValue: {
+  raisedValue: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.sm,
-    color: Colors.text,
-  },
-  statValueProgress: {
+    fontSize: FontSize.xxl,
     color: Colors.primary,
-    fontSize: FontSize.md,
+    lineHeight: FontSize.xxl * 1.25,
   },
-  statLabel: {
+  goalCaption: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 10,
+    fontSize: FontSize.xs,
     color: Colors.textMuted,
     marginTop: 1,
+  },
+  fundedPill: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.accentLight,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minWidth: 56,
+    flexShrink: 0,
+  },
+  fundedPillText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.lg,
+    color: Colors.accentDark,
+    lineHeight: FontSize.lg * 1.15,
+  },
+  fundedPillLabel: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 9,
+    letterSpacing: 0.5,
+    color: Colors.accentDark,
+    textTransform: 'uppercase',
   },
 
   // Progress bar

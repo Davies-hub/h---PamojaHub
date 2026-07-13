@@ -86,6 +86,17 @@ const PAYOUT_STATUS_BADGE: Record<WithdrawalStatus, { bg: string; text: string }
   NEEDS_RECONCILIATION: { bg: Colors.accentLight,  text: Colors.accentDark },
 };
 
+// Leading icon per payout status — drives the history rows' status circles.
+const PAYOUT_STATUS_ICON: Record<WithdrawalStatus, React.ComponentProps<typeof Ionicons>['name']> = {
+  PENDING_APPROVAL:     'time-outline',
+  PROCESSING:           'sync-outline',
+  PAID:                 'checkmark-done-outline',
+  FAILED:               'close-outline',
+  FAILED_FINAL:         'alert-outline',
+  REJECTED:             'ban-outline',
+  NEEDS_RECONCILIATION: 'search-outline',
+};
+
 function pctFunded(raised: number, goal: number): number {
   if (!goal) return 0;
   return Math.min(100, Math.round((raised / goal) * 100));
@@ -122,36 +133,6 @@ function PayoutStatusBadge({ status }: { status: WithdrawalStatus }) {
   );
 }
 
-function CategoryBadge({ category }: { category: CampaignCategory }) {
-  const icon = CATEGORY_ICON[category] ?? 'pricetag-outline';
-  return (
-    <View style={styles.categoryBadge}>
-      <Ionicons name={icon} size={11} color={Colors.primary} />
-      <Text style={styles.categoryBadgeText}>{category}</Text>
-    </View>
-  );
-}
-
-function StatTile({
-  icon,
-  label,
-  value,
-  valueColor,
-}: {
-  icon: React.ComponentProps<typeof Ionicons>['name'];
-  label: string;
-  value: string;
-  valueColor?: string;
-}) {
-  return (
-    <View style={styles.statTile}>
-      <Ionicons name={icon} size={18} color={Colors.primary} />
-      <Text style={[styles.statValue, valueColor ? { color: valueColor } : null]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
 function BackBar({ onBack, status }: { onBack: () => void; status?: CampaignStatus }) {
   return (
     <View style={styles.backBar}>
@@ -162,7 +143,7 @@ function BackBar({ onBack, status }: { onBack: () => void; status?: CampaignStat
         accessibilityLabel="Back to Campaigns"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Ionicons name="arrow-back" size={20} color={Colors.primary} />
+        <Ionicons name="arrow-back" size={18} color={Colors.primary} />
         <Text style={styles.backBtnText}>Campaigns</Text>
       </TouchableOpacity>
       {status ? <StatusBadge status={status} /> : null}
@@ -170,38 +151,52 @@ function BackBar({ onBack, status }: { onBack: () => void; status?: CampaignStat
   );
 }
 
-// Disbursement (payout) history section — NET amount, status, date, masked
-// destination phone, and the M-Pesa receipt (payout_reference) once PAID.
+// Disbursement (payout) history — status-coded icon circles, NET amount, date,
+// masked destination phone, and the M-Pesa receipt (payout_reference) once PAID.
 function PayoutHistorySection({ history }: { history: Withdrawal[] }) {
   return (
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Payout history</Text>
+      <Text style={styles.sectionEyebrow}>PAYOUT HISTORY</Text>
       {history.length === 0 ? (
         <View style={styles.historyEmpty}>
-          <Ionicons name="receipt-outline" size={28} color={Colors.border} />
+          <View style={styles.historyEmptyIcon}>
+            <Ionicons name="receipt-outline" size={22} color={Colors.primary} />
+          </View>
           <Text style={styles.historyEmptyText}>No payouts yet for this campaign.</Text>
         </View>
       ) : (
-        history.map((w, i) => (
-          <View key={w.id} style={[styles.historyRow, i === 0 && styles.historyRowFirst]}>
-            <View style={styles.historyRowTop}>
-              <Text style={styles.historyAmount}>{fmtKes(w.amount)}</Text>
-              <PayoutStatusBadge status={w.status} />
-            </View>
-            <View style={styles.historyMeta}>
-              <Ionicons name="phone-portrait-outline" size={12} color={Colors.textMuted} />
-              <Text style={styles.historyMetaText}>{maskPhone(w.destinationPhone)}</Text>
-              <Text style={styles.historyDot}>·</Text>
-              <Text style={styles.historyMetaText}>{formatDate(w.createdAt)}</Text>
-            </View>
-            {w.payoutReference ? (
-              <View style={styles.historyReceiptRow}>
-                <Ionicons name="checkmark-circle-outline" size={12} color={Colors.success} />
-                <Text style={styles.historyReceiptText}>Receipt {w.payoutReference}</Text>
+        history.map((w, i) => {
+          const badge = PAYOUT_STATUS_BADGE[w.status];
+          return (
+            <View key={w.id} style={[styles.historyRow, i === 0 && styles.historyRowFirst]}>
+              <View style={[styles.historyIconCircle, { backgroundColor: badge.bg }]}>
+                <Ionicons
+                  name={PAYOUT_STATUS_ICON[w.status]}
+                  size={17}
+                  color={w.status === 'FAILED_FINAL' ? Colors.white : badge.text}
+                />
               </View>
-            ) : null}
-          </View>
-        ))
+              <View style={styles.historyBody}>
+                <View style={styles.historyRowTop}>
+                  <Text style={styles.historyAmount}>{fmtKes(w.amount)}</Text>
+                  <PayoutStatusBadge status={w.status} />
+                </View>
+                <View style={styles.historyMeta}>
+                  <Ionicons name="phone-portrait-outline" size={11} color={Colors.textMuted} />
+                  <Text style={styles.historyMetaText}>{maskPhone(w.destinationPhone)}</Text>
+                  <Text style={styles.historyDot}>·</Text>
+                  <Text style={styles.historyMetaText}>{formatDate(w.createdAt)}</Text>
+                </View>
+                {w.payoutReference ? (
+                  <View style={styles.historyReceiptRow}>
+                    <Ionicons name="checkmark-circle-outline" size={12} color={Colors.success} />
+                    <Text style={styles.historyReceiptText}>Receipt {w.payoutReference}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          );
+        })
       )}
     </View>
   );
@@ -296,6 +291,7 @@ export default function TreasurerCampaignDetailScreen() {
 
   const displayStatus = statusOverride ?? detail.status;
   const pct = pctFunded(detail.walletBalance, detail.goalAmount);
+  const categoryIcon = detail.category ? (CATEGORY_ICON[detail.category] ?? 'pricetag-outline') : null;
 
   // ── Actions (Pause/Resume/Close = LOCAL MOCK ONLY — write slice is later) ────
 
@@ -340,99 +336,96 @@ export default function TreasurerCampaignDetailScreen() {
         contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Banner */}
+        {/* ── HERO — the campaign's money story on the brand gradient ── */}
         <LinearGradient
-          colors={[Colors.primary, Colors.primaryDark]}
-          style={styles.banner}
+          colors={[Colors.primaryDark, Colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
+          style={styles.heroCard}
         >
-          <View style={styles.bannerInitial}>
-            <Text style={styles.bannerInitialText}>
-              {detail.title.charAt(0).toUpperCase()}
-            </Text>
+          <View pointerEvents="none" style={styles.heroOrnamentA} />
+          <View pointerEvents="none" style={styles.heroOrnamentB} />
+
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroAvatar}>
+              <Text style={styles.heroAvatarText}>
+                {detail.title.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.heroTitleWrap}>
+              <Text style={styles.heroTitle}>{detail.title}</Text>
+              <View style={styles.heroBadgeRow}>
+                {detail.groupLabelName ? (
+                  <View style={styles.heroPill}>
+                    <Ionicons name="people-outline" size={11} color={Colors.white} />
+                    <Text style={styles.heroPillText}>{detail.groupLabelName}</Text>
+                  </View>
+                ) : null}
+                {detail.category && categoryIcon ? (
+                  <View style={styles.heroPill}>
+                    <Ionicons name={categoryIcon} size={11} color={Colors.white} />
+                    <Text style={styles.heroPillText}>{detail.category}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.heroDivider} />
+
+          <View style={styles.heroMoneyRow}>
+            <View style={styles.heroMoneyCell}>
+              <Text style={styles.heroRaised} numberOfLines={1} adjustsFontSizeToFit>
+                {fmtKes(detail.walletBalance)}
+              </Text>
+              <Text style={styles.heroMoneyLabel}>raised</Text>
+            </View>
+            <View style={styles.heroMoneyCellRight}>
+              <Text style={styles.heroGoal} numberOfLines={1}>
+                {fmtKes(detail.goalAmount)}
+              </Text>
+              <Text style={styles.heroMoneyLabel}>goal</Text>
+            </View>
           </View>
         </LinearGradient>
 
-        {/* Title + badges */}
-        <View style={styles.titleSection}>
-          <Text style={styles.campaignTitle}>{detail.title}</Text>
-          <View style={styles.badgeRow}>
-            {detail.groupLabelName ? (
-              <View style={styles.groupBadge}>
-                <Ionicons name="people-outline" size={11} color={Colors.primary} />
-                <Text style={styles.groupBadgeText}>{detail.groupLabelName}</Text>
+        {/* ── Floating progress card — overlaps the hero's bottom edge ── */}
+        <View style={styles.floatCard}>
+          <View style={styles.floatTopRow}>
+            <View style={styles.pctPill}>
+              <Text style={styles.pctPillText}>{pct}% funded</Text>
+            </View>
+            {detail.donorCount !== undefined ? (
+              <View style={styles.floatMetaItem}>
+                <Ionicons name="people-outline" size={14} color={Colors.textSecondary} />
+                <Text style={styles.floatMetaText}>
+                  {detail.donorCount} {detail.donorCount === 1 ? 'donor' : 'donors'}
+                </Text>
               </View>
             ) : null}
-            {detail.category ? <CategoryBadge category={detail.category} /> : null}
+            {detail.createdAt ? (
+              <View style={styles.floatMetaItem}>
+                <Ionicons name="calendar-outline" size={14} color={Colors.textSecondary} />
+                <Text style={styles.floatMetaText}>{formatDate(detail.createdAt)}</Text>
+              </View>
+            ) : null}
           </View>
+          <ProgressBar raised={detail.walletBalance} goal={detail.goalAmount} height={8} showLabels={false} />
         </View>
 
-        {/* Progress card */}
-        <View style={styles.card}>
-          <View style={styles.amountRow}>
-            <View>
-              <Text style={styles.raisedAmount}>{fmtKes(detail.walletBalance)}</Text>
-              <Text style={styles.amountLabel}>raised</Text>
-            </View>
-            <Text style={styles.pctText}>{pct}%</Text>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={styles.goalAmount}>{fmtKes(detail.goalAmount)}</Text>
-              <Text style={styles.amountLabel}>goal</Text>
-            </View>
-          </View>
-          <ProgressBar raised={detail.walletBalance} goal={detail.goalAmount} showLabels={false} />
-        </View>
-
-        {/* Stats row */}
-        <View style={styles.statsRow}>
-          {detail.donorCount !== undefined ? (
-            <StatTile
-              icon="people-outline"
-              label="Donors"
-              value={String(detail.donorCount)}
-            />
-          ) : null}
-          {detail.createdAt ? (
-            <StatTile
-              icon="calendar-outline"
-              label="Started"
-              value={formatDate(detail.createdAt)}
-            />
-          ) : null}
-          <StatTile
-            icon="trending-up-outline"
-            label="Funded"
-            value={`${pct}%`}
-            valueColor={pct >= 100 ? Colors.success : Colors.primary}
-          />
-        </View>
-
-        {/* Description */}
+        {/* ── Description ── */}
         {detail.description ? (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>About this campaign</Text>
+            <Text style={styles.sectionEyebrow}>ABOUT THIS CAMPAIGN</Text>
             <Text style={styles.description}>{detail.description}</Text>
           </View>
         ) : null}
 
-        {/* Payout history */}
+        {/* ── Payout history ── */}
         <PayoutHistorySection history={history} />
 
-        {/* Actions */}
+        {/* ── Actions ── */}
         <View style={styles.actionsCard}>
-          {/* WhatsApp share */}
-          <TouchableOpacity
-            style={styles.whatsappBtn}
-            onPress={handleShare}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel="Share on WhatsApp"
-          >
-            <Ionicons name="logo-whatsapp" size={18} color="#25D366" />
-            <Text style={styles.whatsappBtnText}>Share on WhatsApp</Text>
-          </TouchableOpacity>
-
           {/* Request payout — nav to the Payouts tab (the real request flow is the OTP
               portal, a different actor; this JWT screen only routes there). */}
           {detail.walletBalance > 0 && displayStatus !== 'CLOSED' ? (
@@ -447,6 +440,18 @@ export default function TreasurerCampaignDetailScreen() {
               <Text style={styles.disbursementBtnText}>Request Payout</Text>
             </TouchableOpacity>
           ) : null}
+
+          {/* WhatsApp share */}
+          <TouchableOpacity
+            style={styles.whatsappBtn}
+            onPress={handleShare}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Share on WhatsApp"
+          >
+            <Ionicons name="logo-whatsapp" size={18} color="#25D366" />
+            <Text style={styles.whatsappBtnText}>Share on WhatsApp</Text>
+          </TouchableOpacity>
 
           {/* Pause / Resume / Close — LOCAL MOCK ONLY (write slice is later) */}
           {displayStatus !== 'CLOSED' ? (
@@ -520,10 +525,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    backgroundColor: Colors.surfaceSubtle,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
   backBtnText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: FontSize.md,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.sm,
     color: Colors.primary,
   },
 
@@ -537,13 +546,6 @@ const styles = StyleSheet.create({
 
   // Not-found / error state
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, paddingHorizontal: Spacing.xl },
-  notFoundTitle: { fontFamily: 'Poppins-SemiBold', fontSize: FontSize.lg, color: Colors.text },
-  notFoundSubtitle: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.md,
-    color: Colors.textMuted,
-    textAlign: 'center',
-  },
   stateIconCircle: {
     width: 72,
     height: 72,
@@ -551,6 +553,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  notFoundTitle: { fontFamily: 'Poppins-SemiBold', fontSize: FontSize.lg, color: Colors.text },
+  notFoundSubtitle: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.md,
+    color: Colors.textMuted,
+    textAlign: 'center',
   },
   retryBtn: {
     marginTop: Spacing.md,
@@ -576,76 +585,171 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  // Banner
-  banner: {
-    height: 140,
+  // Hero
+  heroCard: {
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.md,
+    borderRadius: BorderRadius.xl + 4,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.lg + 26,
+    overflow: 'hidden',
+    ...Shadows.lg,
+  },
+  heroOrnamentA: {
+    position: 'absolute',
+    top: -70,
+    right: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+  },
+  heroOrnamentB: {
+    position: 'absolute',
+    bottom: -80,
+    left: -60,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  heroAvatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    ...Shadows.sm,
   },
-  bannerInitial: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerInitialText: {
+  heroAvatarText: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 30,
+    fontSize: FontSize.xxl,
+    color: Colors.primary,
+  },
+  heroTitleWrap: {
+    flex: 1,
+    minWidth: 0,
+    gap: 6,
+  },
+  heroTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.lg,
+    color: Colors.white,
+    lineHeight: FontSize.lg * 1.35,
+  },
+  heroBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  heroPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  heroPillText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.xs,
     color: Colors.white,
   },
-
-  // Title section
-  titleSection: {
-    backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    gap: Spacing.sm,
+  heroDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    marginVertical: Spacing.md,
   },
-  campaignTitle: {
+  heroMoneyRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  heroMoneyCell: {
+    flex: 1,
+    minWidth: 0,
+  },
+  heroMoneyCellRight: {
+    alignItems: 'flex-end',
+    flexShrink: 0,
+  },
+  heroRaised: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xl,
-    color: Colors.text,
-    lineHeight: 26,
+    fontSize: FontSize.xxxl,
+    color: Colors.white,
+    lineHeight: FontSize.xxxl * 1.25,
   },
-  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  heroGoal: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.base,
+    color: 'rgba(255,255,255,0.85)',
+  },
+  heroMoneyLabel: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.72)',
+    marginTop: 1,
+  },
 
-  // Badges
+  // Floating progress card — overlaps the hero's bottom edge
+  floatCard: {
+    marginHorizontal: Spacing.lg + 4,
+    marginTop: -30,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    padding: Spacing.md,
+    ...Shadows.lg,
+  },
+  floatTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+    marginBottom: Spacing.sm + 2,
+  },
+  pctPill: {
+    backgroundColor: Colors.accentLight,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  pctPillText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.sm,
+    color: Colors.accentDark,
+  },
+  floatMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  floatMetaText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+  },
+
+  // Badges (campaign status in the back bar)
   badge: {
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 10,
     paddingVertical: 3,
     alignSelf: 'flex-start',
   },
-  badgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs },
+  badgeText: { fontFamily: 'Poppins-SemiBold', fontSize: FontSize.xs },
 
-  categoryBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  categoryBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.primaryDark },
-
-  groupBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.accentLight,
-    borderRadius: BorderRadius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  groupBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.accentDark },
-
-  // Card
+  // Cards
   card: {
     backgroundColor: Colors.white,
     borderRadius: BorderRadius.xl,
@@ -657,86 +761,34 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     ...Shadows.sm,
   },
-  sectionTitle: {
+  sectionEyebrow: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.base,
-    color: Colors.text,
-  },
-
-  // Progress card contents
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  raisedAmount: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xl,
-    color: Colors.text,
-  },
-  goalAmount: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.base,
-    color: Colors.textSecondary,
-    textAlign: 'right',
-  },
-  amountLabel: {
-    fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
+    letterSpacing: 1.2,
     color: Colors.textMuted,
-  },
-  pctText: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xl,
-    color: Colors.accent,
-  },
-
-  // Stats row
-  statsRow: {
-    flexDirection: 'row',
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.md,
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  statTile: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    gap: 4,
-    borderRightWidth: 1,
-    borderRightColor: Colors.borderLight,
-  },
-  statValue: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.sm,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    textAlign: 'center',
   },
 
   // Description
   description: {
     fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    lineHeight: 20,
+    fontSize: FontSize.md,
+    color: Colors.text,
+    lineHeight: FontSize.md * 1.7,
   },
 
   // Payout history
   historyEmpty: {
     alignItems: 'center',
     paddingVertical: Spacing.md,
-    gap: 6,
+    gap: Spacing.sm,
+  },
+  historyEmptyIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   historyEmptyText: {
     fontFamily: 'Poppins-Regular',
@@ -744,21 +796,37 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   historyRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm + 2,
     borderTopWidth: 1,
     borderTopColor: Colors.borderLight,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.sm,
-    gap: 5,
+    paddingTop: Spacing.sm + 2,
+    marginTop: Spacing.sm + 2,
   },
   historyRowFirst: {
     borderTopWidth: 0,
     paddingTop: 0,
     marginTop: 0,
   },
+  historyIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  historyBody: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
   historyRowTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: Spacing.sm,
   },
   historyAmount: {
     fontFamily: 'Poppins-Bold',
@@ -812,12 +880,27 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     ...Shadows.sm,
   },
+  disbursementBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 52,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.accent,
+    ...Shadows.sm,
+  },
+  disbursementBtnText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.base,
+    color: Colors.white,
+  },
   whatsappBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 46,
+    height: 48,
     borderRadius: BorderRadius.pill,
     borderWidth: 1.5,
     borderColor: '#25D366',
@@ -827,20 +910,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.sm,
     color: '#25D366',
-  },
-  disbursementBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 50,
-    borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary,
-  },
-  disbursementBtnText: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.base,
-    color: Colors.white,
   },
   statusActions: {
     flexDirection: 'row',

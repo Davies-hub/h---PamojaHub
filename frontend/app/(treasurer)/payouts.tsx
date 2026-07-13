@@ -63,6 +63,17 @@ const STATUS_BADGE: Record<WithdrawalStatus, { bg: string; text: string }> = {
   NEEDS_RECONCILIATION: { bg: Colors.accentLight,   text: Colors.accentDark },
 };
 
+// Leading icon per status — drives each row's status circle.
+const STATUS_ICON: Record<WithdrawalStatus, React.ComponentProps<typeof Ionicons>['name']> = {
+  PENDING_APPROVAL:     'time-outline',
+  PROCESSING:           'sync-outline',
+  PAID:                 'checkmark-done-outline',
+  FAILED:               'close-outline',
+  FAILED_FINAL:         'alert-outline',
+  REJECTED:             'ban-outline',
+  NEEDS_RECONCILIATION: 'search-outline',
+};
+
 function StatusBadge({ status }: { status: WithdrawalStatus }) {
   const c = STATUS_BADGE[status];
   return (
@@ -112,6 +123,7 @@ interface WithdrawalRowProps {
 
 function WithdrawalRow({ item, onApprove, onReject, onRetry, stillConfirming }: WithdrawalRowProps) {
   const isFinalFail = item.status === 'FAILED_FINAL';
+  const badge = STATUS_BADGE[item.status];
 
   return (
     <View style={[styles.row, isFinalFail && styles.rowDanger]}>
@@ -123,6 +135,13 @@ function WithdrawalRow({ item, onApprove, onReject, onRetry, stillConfirming }: 
       ) : null}
 
       <View style={styles.rowTop}>
+        <View style={[styles.statusCircle, { backgroundColor: badge.bg }]}>
+          <Ionicons
+            name={STATUS_ICON[item.status]}
+            size={19}
+            color={item.status === 'FAILED_FINAL' ? Colors.white : badge.text}
+          />
+        </View>
         <View style={styles.rowLeft}>
           <Text style={styles.campaignTitle} numberOfLines={1}>
             {item.campaignTitle}
@@ -787,6 +806,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
+  },
+  statusCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   rowLeft: {
     flex: 1,
