@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import OTPInput, { OTPInputRef } from '../../../components/ui/OTPInput';
@@ -17,7 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { treasurerPortalService } from '../../../services/treasurer-portal.service';
 import type { PortalDonationRow } from '../../../services/mappers';
 import { PortalCampaign } from '../../../types';
@@ -56,6 +57,18 @@ function maskPhone(p: string): string {
   const d = p.replace(/\s/g, '');
   if (d.length < 7) return d;
   return `${d.slice(0, 4)} *** ${d.slice(-3)}`;
+}
+
+// Display-only initials for the donor avatar ('?' for anonymous gifts).
+function donorInitials(name: string | null | undefined): string {
+  const trimmed = name?.trim();
+  if (!trimmed) return '?';
+  return trimmed
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase();
 }
 
 // ── Error mapping (HTTP status → user-facing message) ───────────────────────────
@@ -121,6 +134,17 @@ function Wordmark() {
       <Text style={styles.wordmarkPamoja}>Pamoja</Text>
       <Text style={styles.wordmarkHub}>Hub</Text>
     </Text>
+  );
+}
+
+// Oversized, very quiet brand circles behind the auth card (shared with the auth screens).
+function AuthOrnaments() {
+  return (
+    <>
+      <View pointerEvents="none" style={styles.bgOrnamentA} />
+      <View pointerEvents="none" style={styles.bgOrnamentB} />
+      <View pointerEvents="none" style={styles.bgOrnamentC} />
+    </>
   );
 }
 
@@ -400,7 +424,8 @@ export default function TreasurerPortalScreen() {
 
   if (portalState === 'phone') {
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.authRoot}>
+        <AuthOrnaments />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -417,59 +442,63 @@ export default function TreasurerPortalScreen() {
               accessibilityRole="button"
               accessibilityLabel="Back to home"
             >
-              <Ionicons name="arrow-back" size={16} color={Colors.textMuted} />
+              <Ionicons name="arrow-back" size={16} color={Colors.primary} />
               <Text style={styles.homeLinkText}>Home</Text>
             </TouchableOpacity>
 
-            <Wordmark />
+            <View style={styles.authCard}>
+              <Wordmark />
 
-            <View style={styles.lockCircle}>
-              <Ionicons name="lock-closed-outline" size={32} color={Colors.primary} />
-            </View>
-
-            <Text style={styles.stateHeading}>Treasurer Portal</Text>
-            <Text style={styles.stateSubtext}>
-              Access your campaign reports and request payouts
-            </Text>
-
-            {authLostMessage ? (
-              <View style={styles.noticeBanner}>
-                <Ionicons name="alert-circle-outline" size={18} color={Colors.warning} />
-                <Text style={styles.noticeText}>{authLostMessage}</Text>
+              <View style={styles.lockCircle}>
+                <Ionicons name="lock-closed-outline" size={30} color={Colors.primary} />
               </View>
-            ) : null}
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>M-Pesa Phone Number</Text>
-              <TextInput
-                style={[styles.input, phoneError ? styles.inputError : null]}
-                placeholder="e.g. 0712 345 678"
-                placeholderTextColor={Colors.textMuted}
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={v => { setPhone(v); setPhoneError(''); }}
-                maxLength={13}
-                returnKeyType="done"
-                accessibilityLabel="M-Pesa phone number registered with your church"
-              />
-              {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+              <Text style={styles.stateHeading}>Treasurer Portal</Text>
+              <Text style={styles.stateSubtext}>
+                Access your campaign reports and request payouts
+              </Text>
+
+              {authLostMessage ? (
+                <View style={styles.noticeBanner}>
+                  <Ionicons name="alert-circle-outline" size={18} color={Colors.warning} />
+                  <Text style={styles.noticeText}>{authLostMessage}</Text>
+                </View>
+              ) : null}
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>M-Pesa Phone Number</Text>
+                <TextInput
+                  style={[styles.input, phoneError ? styles.inputError : null]}
+                  placeholder="e.g. 0712 345 678"
+                  placeholderTextColor={Colors.textMuted}
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={v => { setPhone(v); setPhoneError(''); }}
+                  maxLength={13}
+                  returnKeyType="done"
+                  accessibilityLabel="M-Pesa phone number registered with your church"
+                />
+                {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+              </View>
+
+              <TouchableOpacity
+                style={[styles.primaryBtn, isSendingOtp && styles.primaryBtnDisabled]}
+                onPress={handleSendOtp}
+                disabled={isSendingOtp}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel="Send OTP"
+              >
+                <Text style={styles.primaryBtnText}>{isSendingOtp ? 'Sending…' : 'Send OTP'}</Text>
+              </TouchableOpacity>
+
+              <View style={styles.finePrintRow}>
+                <Ionicons name="shield-checkmark-outline" size={13} color={Colors.textMuted} />
+                <Text style={styles.finePrint}>
+                  Enter the M-Pesa number registered with your church. You’ll get a 6-digit code by SMS.
+                </Text>
+              </View>
             </View>
-
-            <TouchableOpacity
-              style={[styles.primaryBtn, isSendingOtp && styles.primaryBtnDisabled]}
-              onPress={handleSendOtp}
-              disabled={isSendingOtp}
-              activeOpacity={0.85}
-              accessibilityRole="button"
-              accessibilityLabel="Send OTP"
-            >
-              <Text style={styles.primaryBtnText}>{isSendingOtp ? 'Sending…' : 'Send OTP'}</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.finePrint}>
-              Enter the M-Pesa number registered with your church treasurer account.
-              {'\n'}You will receive a 6-digit code via SMS.
-            </Text>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -480,7 +509,8 @@ export default function TreasurerPortalScreen() {
 
   if (portalState === 'otp') {
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.authRoot}>
+        <AuthOrnaments />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -497,61 +527,63 @@ export default function TreasurerPortalScreen() {
               accessibilityRole="button"
               accessibilityLabel="Back to home"
             >
-              <Ionicons name="arrow-back" size={16} color={Colors.textMuted} />
+              <Ionicons name="arrow-back" size={16} color={Colors.primary} />
               <Text style={styles.homeLinkText}>Home</Text>
             </TouchableOpacity>
 
-            <Wordmark />
+            <View style={styles.authCard}>
+              <Wordmark />
 
-            <View style={styles.lockCircle}>
-              <Ionicons name="chatbubble-ellipses-outline" size={32} color={Colors.primary} />
+              <View style={styles.lockCircle}>
+                <Ionicons name="chatbubble-ellipses-outline" size={30} color={Colors.primary} />
+              </View>
+
+              <Text style={styles.stateHeading}>Enter Verification Code</Text>
+              <Text style={styles.stateSubtext}>
+                We sent a 6-digit code to{'\n'}
+                <Text style={styles.phoneMasked}>{maskPhone(phone)}</Text>
+              </Text>
+
+              {/* 6 OTP boxes — auto-submits on 6th digit */}
+              <View style={styles.otpRow}>
+                <OTPInput
+                  ref={otpInputRef}
+                  value={otp}
+                  onChange={setOtp}
+                  onComplete={handleVerifyOtp}
+                  disabled={isVerifying}
+                />
+              </View>
+
+              {isVerifying ? (
+                <Text style={styles.verifyingText}>Verifying…</Text>
+              ) : otpError ? (
+                <Text style={styles.otpError}>{otpError}</Text>
+              ) : null}
+
+              <View style={styles.resendRow}>
+                {countdown > 0 ? (
+                  <Text style={styles.resendCountdown}>Resend code in {countdown}s</Text>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handleResend}
+                    accessibilityRole="button"
+                    accessibilityLabel="Resend OTP"
+                  >
+                    <Text style={styles.resendLink}>Resend OTP</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.wrongNumberBtn}
+                onPress={() => setPortalState('phone')}
+                accessibilityRole="button"
+                accessibilityLabel="Change phone number"
+              >
+                <Text style={styles.wrongNumberText}>Wrong number? Change it</Text>
+              </TouchableOpacity>
             </View>
-
-            <Text style={styles.stateHeading}>Enter Verification Code</Text>
-            <Text style={styles.stateSubtext}>
-              We sent a 6-digit code to{'\n'}
-              <Text style={styles.phoneMasked}>{maskPhone(phone)}</Text>
-            </Text>
-
-            {/* 6 OTP boxes — auto-submits on 6th digit */}
-            <View style={styles.otpRow}>
-              <OTPInput
-                ref={otpInputRef}
-                value={otp}
-                onChange={setOtp}
-                onComplete={handleVerifyOtp}
-                disabled={isVerifying}
-              />
-            </View>
-
-            {isVerifying ? (
-              <Text style={styles.verifyingText}>Verifying…</Text>
-            ) : otpError ? (
-              <Text style={styles.otpError}>{otpError}</Text>
-            ) : null}
-
-            <View style={styles.resendRow}>
-              {countdown > 0 ? (
-                <Text style={styles.resendCountdown}>Resend code in {countdown}s</Text>
-              ) : (
-                <TouchableOpacity
-                  onPress={handleResend}
-                  accessibilityRole="button"
-                  accessibilityLabel="Resend OTP"
-                >
-                  <Text style={styles.resendLink}>Resend OTP</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <TouchableOpacity
-              style={styles.wrongNumberBtn}
-              onPress={() => setPortalState('phone')}
-              accessibilityRole="button"
-              accessibilityLabel="Change phone number"
-            >
-              <Text style={styles.wrongNumberText}>Wrong number? Change it</Text>
-            </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -619,7 +651,12 @@ export default function TreasurerPortalScreen() {
             </View>
 
             {portalCampaigns.length === 0 ? (
-              <Text style={styles.noDataText}>No campaigns are linked to this number.</Text>
+              <View style={styles.emptyCard}>
+                <View style={styles.emptyIconCircle}>
+                  <Ionicons name="megaphone-outline" size={22} color={Colors.primary} />
+                </View>
+                <Text style={styles.noDataText}>No campaigns are linked to this number.</Text>
+              </View>
             ) : (
               portalCampaigns.map(campaign => (
                 <TouchableOpacity
@@ -630,12 +667,17 @@ export default function TreasurerPortalScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`View ${campaign.title}`}
                 >
-                  <View style={styles.pickerCardBody}>
-                    <Text style={styles.pickerTitle}>{campaign.title}</Text>
-                    <Text style={styles.pickerAmount}>
-                      {fmtKes(campaign.walletBalance)}{' '}
-                      <Text style={styles.pickerGoal}>available to pay out</Text>
+                  <View style={styles.pickerAvatar}>
+                    <Text style={styles.pickerAvatarText}>
+                      {campaign.title.charAt(0).toUpperCase()}
                     </Text>
+                  </View>
+                  <View style={styles.pickerCardBody}>
+                    <Text style={styles.pickerTitle} numberOfLines={1}>{campaign.title}</Text>
+                    <Text style={styles.pickerAmount} numberOfLines={1}>
+                      {fmtKes(campaign.walletBalance)}
+                    </Text>
+                    <Text style={styles.pickerGoal}>available to pay out</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
                 </TouchableOpacity>
@@ -647,12 +689,32 @@ export default function TreasurerPortalScreen() {
         {/* ── Campaign scoped view ── */}
         {selectedCampaign && (
           <>
-            {/* Progress summary — raised + wallet are REAL. goal_amount is not on the
-                portal wire (PortalCampaignSerializer omits it), so no progress-to-goal bar. */}
-            <View style={styles.progressCard}>
-              <Text style={styles.progressRaised}>{fmtKes(selectedCampaign.raisedAmount)} raised</Text>
-              <Text style={styles.progressDisburse}>{fmtKes(selectedCampaign.walletBalance)} to disburse</Text>
-            </View>
+            {/* Money hero — wallet balance (to disburse) is the headline; raised is
+                secondary. goal_amount is not on the portal wire (PortalCampaignSerializer
+                omits it), so no progress-to-goal bar. */}
+            <LinearGradient
+              colors={[Colors.primaryDark, Colors.primary]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.heroCard}
+            >
+              <View pointerEvents="none" style={styles.heroOrnamentA} />
+              <View pointerEvents="none" style={styles.heroOrnamentB} />
+
+              <Text style={styles.heroEyebrow}>AVAILABLE TO PAY OUT</Text>
+              <Text style={styles.heroAmount} numberOfLines={1} adjustsFontSizeToFit>
+                {fmtKes(selectedCampaign.walletBalance)}
+              </Text>
+
+              <View style={styles.heroDivider} />
+
+              <View style={styles.heroFootRow}>
+                <Ionicons name="cash-outline" size={15} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.heroFootText}>
+                  {fmtKes(selectedCampaign.raisedAmount)} raised on record
+                </Text>
+              </View>
+            </LinearGradient>
 
             {/* Request Payout */}
             <TouchableOpacity
@@ -672,21 +734,21 @@ export default function TreasurerPortalScreen() {
 
             {/* Pending requests */}
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Pending Requests</Text>
+              <Text style={styles.sectionEyebrow}>PENDING REQUESTS</Text>
               {campaignDisbursements.length === 0 ? (
                 <Text style={styles.noDataText}>No pending payout requests</Text>
               ) : (
                 campaignDisbursements.map(req => (
                   <View key={req.id} style={styles.disbRow}>
-                    <View style={styles.disbRowLeft}>
-                      <Text style={styles.disbId}>{req.id}</Text>
-                      <Text style={styles.disbTime}>{timeAgo(req.requestedAt)}</Text>
+                    <View style={styles.disbIconCircle}>
+                      <Ionicons name="time-outline" size={16} color={Colors.warning} />
                     </View>
-                    <View style={styles.disbRight}>
+                    <View style={styles.disbRowLeft}>
                       <Text style={styles.disbAmount}>{fmtKes(req.amount)}</Text>
-                      <View style={styles.pendingBadge}>
-                        <Text style={styles.pendingBadgeText}>Pending</Text>
-                      </View>
+                      <Text style={styles.disbTime}>Requested {timeAgo(req.requestedAt)}</Text>
+                    </View>
+                    <View style={styles.pendingBadge}>
+                      <Text style={styles.pendingBadgeText}>Pending</Text>
                     </View>
                   </View>
                 ))
@@ -695,9 +757,12 @@ export default function TreasurerPortalScreen() {
 
             {/* Recent donations — REAL, via the portal-token report call (NET amounts). */}
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Recent Donations</Text>
+              <Text style={styles.sectionEyebrow}>RECENT DONATIONS</Text>
               {donationsLoading ? (
-                <Text style={styles.noDataText}>Loading donations…</Text>
+                <View style={styles.donationsLoadingRow}>
+                  <ActivityIndicator size="small" color={Colors.primary} />
+                  <Text style={styles.noDataText}>Loading donations…</Text>
+                </View>
               ) : donationsError ? (
                 <Text style={styles.donationsError}>{donationsError}</Text>
               ) : portalDonations.length === 0 ? (
@@ -714,14 +779,17 @@ export default function TreasurerPortalScreen() {
                       i < portalDonations.length - 1 && styles.donRowBorder,
                     ]}
                   >
+                    <View style={styles.donAvatar}>
+                      <Text style={styles.donAvatarText}>{donorInitials(don.donorName)}</Text>
+                    </View>
                     <View style={styles.donLeft}>
-                      <Text style={styles.donName}>
+                      <Text style={styles.donName} numberOfLines={1}>
                         {don.donorName ?? 'Anonymous'}
                       </Text>
                       <Text style={styles.donReceipt}>{don.mpesaReceipt}</Text>
                     </View>
                     <View style={styles.donRight}>
-                      <Text style={styles.donAmount}>{fmtKes(don.netAmount)}</Text>{/* Net per Net-Everywhere rule */}
+                      <Text style={styles.donAmount}>+{fmtKes(don.netAmount)}</Text>{/* Net per Net-Everywhere rule */}
                       <Text style={styles.donTime}>{timeAgo(don.createdAt)}</Text>
                     </View>
                   </View>
@@ -830,9 +898,43 @@ export default function TreasurerPortalScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfaceSubtle,
+  },
+  // Auth states (phone + OTP) — tinted page behind the floating card
+  authRoot: {
+    flex: 1,
+    backgroundColor: Colors.surfaceSubtle,
   },
   flex: { flex: 1 },
+
+  // Background ornaments (shared with the auth screens)
+  bgOrnamentA: {
+    position: 'absolute',
+    top: -130,
+    right: -110,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: 'rgba(5,124,138,0.06)',
+  },
+  bgOrnamentB: {
+    position: 'absolute',
+    bottom: -150,
+    left: -130,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(5,124,138,0.05)',
+  },
+  bgOrnamentC: {
+    position: 'absolute',
+    top: '30%',
+    left: -70,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(237,143,28,0.07)',
+  },
 
   // Wide-web content cap (OTP + forms → 480)
   wideContent: {
@@ -844,15 +946,27 @@ const styles = StyleSheet.create({
   // Centered phone/otp layout
   centeredContent: {
     flexGrow: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xl,
+  },
+
+  // Floating auth card
+  authCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    ...Shadows.lg,
   },
   wordmark: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxxl,
     marginBottom: Spacing.md,
+    textAlign: 'center',
   },
   wordmarkPamoja: {
     color: Colors.primary,
@@ -897,14 +1011,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 52,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.lg,
@@ -925,7 +1039,7 @@ const styles = StyleSheet.create({
   // Primary button
   primaryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -941,11 +1055,18 @@ const styles = StyleSheet.create({
     fontSize: FontSize.lg,
     color: Colors.white,
   },
+  finePrintRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.sm,
+  },
   finePrint: {
+    flex: 1,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    textAlign: 'center',
     lineHeight: 18,
   },
   homeLink: {
@@ -953,13 +1074,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 4,
-    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     marginBottom: Spacing.md,
+    ...Shadows.sm,
   },
   homeLinkText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.sm,
-    color: Colors.textMuted,
+    color: Colors.primary,
   },
 
   // Auth-loss notice (phone screen, on portal re-entry)
@@ -969,7 +1096,7 @@ const styles = StyleSheet.create({
     gap: 8,
     width: '100%',
     backgroundColor: Colors.warningLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     marginBottom: Spacing.md,
@@ -1003,6 +1130,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: Spacing.sm,
   },
+  donationsLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.sm,
+  },
 
   // OTP boxes
   otpRow: {
@@ -1010,31 +1144,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.xl,
-  },
-  otpBox: {
-    width: 48,
-    height: 58,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xxl,
-    color: Colors.text,
-    backgroundColor: Colors.white,
-    textAlign: 'center',
-  },
-  otpBoxFilled: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-    color: Colors.primary,
-  },
-  otpBoxFocused: {
-    borderColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
   },
 
   // Resend + wrong number
@@ -1057,11 +1166,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   wrongNumberText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
     color: Colors.primary,
     textAlign: 'center',
-    textDecorationLine: 'underline',
   },
 
   // Dashboard header
@@ -1071,11 +1179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadows.md,
   },
   dashBackBtn: {
     width: 40,
@@ -1122,30 +1226,56 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  // Empty state
+  emptyCard: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    ...Shadows.sm,
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   // Campaign picker cards
   campaignPickerCard: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-    gap: Spacing.sm,
+    gap: Spacing.sm + 2,
+    ...Shadows.sm,
+  },
+  pickerAvatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  pickerAvatarText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.lg,
+    color: Colors.primary,
   },
   pickerCardBody: {
     flex: 1,
-    gap: 6,
-  },
-  pickerGroup: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: FontSize.xs,
-    color: Colors.primary,
+    minWidth: 0,
   },
   pickerTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -1154,99 +1284,80 @@ const styles = StyleSheet.create({
   },
   pickerAmount: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.sm,
+    fontSize: FontSize.lg,
     color: Colors.primary,
-    marginTop: 2,
+    marginTop: 3,
   },
   pickerGoal: {
     fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
     color: Colors.textMuted,
   },
 
-  // Campaign scoped view
-  progressCard: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.md,
-    gap: 8,
+  // Money hero (campaign scoped view)
+  heroCard: {
+    borderRadius: BorderRadius.xl + 4,
+    padding: Spacing.lg,
+    overflow: 'hidden',
+    ...Shadows.lg,
   },
-  groupLabel: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: FontSize.xs,
-    color: Colors.primary,
+  heroOrnamentA: {
+    position: 'absolute',
+    top: -70,
+    right: -50,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: 'rgba(255,255,255,0.07)',
   },
-  progressMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginTop: 4,
+  heroOrnamentB: {
+    position: 'absolute',
+    bottom: -80,
+    left: -60,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
-  progressRaised: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.lg,
-    color: Colors.primary,
-  },
-  progressDisburse: {
+  heroEyebrow: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
-    color: Colors.accent,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: 'rgba(255,255,255,0.75)',
+    marginBottom: 6,
   },
-  progressPercent: {
+  heroAmount: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.md,
-    color: Colors.accent,
+    fontSize: FontSize.title,
+    color: Colors.white,
+    lineHeight: FontSize.title * 1.2,
   },
-  progressGoal: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
+  heroDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    marginVertical: Spacing.md,
   },
-
-  // Stats
-  statsRow: {
+  heroFootRow: {
     flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: Colors.grey,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
     alignItems: 'center',
+    gap: 6,
   },
-  statBoxLeft: {},
-  statBoxRight: {},
-  statValue: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.md,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  walletBox: {
-    backgroundColor: Colors.grey,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    alignItems: 'center',
+  heroFootText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: 'rgba(255,255,255,0.9)',
   },
 
   // Disbursement button
   disbursementBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
+    ...Shadows.sm,
   },
   disbursementBtnDisabled: {
     opacity: 0.4,
@@ -1260,16 +1371,18 @@ const styles = StyleSheet.create({
   // Section cards (pending + donations)
   sectionCard: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     gap: Spacing.sm,
+    ...Shadows.sm,
   },
-  sectionTitle: {
+  sectionEyebrow: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
-    color: Colors.text,
+    fontSize: FontSize.xs,
+    letterSpacing: 1.2,
+    color: Colors.textMuted,
   },
   noDataText: {
     fontFamily: 'Poppins-Regular',
@@ -1279,45 +1392,48 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
 
-  // Disbursement rows
+  // Disbursement (pending) rows
   disbRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.xs,
+    gap: Spacing.sm + 2,
+    paddingTop: Spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.borderLight,
+  },
+  disbIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.warningLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   disbRowLeft: {
+    flex: 1,
+    minWidth: 0,
     gap: 2,
-  },
-  disbId: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.sm,
-    color: Colors.text,
   },
   disbTime: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
   },
-  disbRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
   disbAmount: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.text,
   },
   pendingBadge: {
     backgroundColor: Colors.warningLight,
     borderRadius: BorderRadius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    flexShrink: 0,
   },
   pendingBadgeText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.xs,
     color: Colors.warning,
   },
@@ -1325,35 +1441,50 @@ const styles = StyleSheet.create({
   // Donation rows
   donRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: Spacing.sm + 2,
     paddingVertical: Spacing.sm,
   },
   donRowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
+  },
+  donAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  donAvatarText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.xs,
+    color: Colors.primary,
   },
   donLeft: {
     flex: 1,
-    marginRight: Spacing.sm,
+    minWidth: 0,
   },
   donName: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: FontSize.sm,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.md,
     color: Colors.text,
   },
   donReceipt: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    marginTop: 2,
+    marginTop: 1,
   },
   donRight: {
     alignItems: 'flex-end',
+    flexShrink: 0,
   },
   donAmount: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.sm,
+    fontSize: FontSize.md,
     color: Colors.primary,
   },
   donTime: {
@@ -1384,7 +1515,7 @@ const styles = StyleSheet.create({
   },
   sheetDivider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginVertical: Spacing.xs,
   },
   sheetFieldLabel: {
@@ -1397,10 +1528,10 @@ const styles = StyleSheet.create({
     color: Colors.danger,
   },
   sheetInput: {
-    height: 48,
+    height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
@@ -1425,14 +1556,14 @@ const styles = StyleSheet.create({
   sheetActions: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginTop: Spacing.xs,
+    marginTop: Spacing.md,
   },
   sheetCancelBtn: {
     flex: 1,
     height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1445,7 +1576,7 @@ const styles = StyleSheet.create({
     flex: 2,
     height: 50,
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1466,10 +1597,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 6,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.sm + 2,
     paddingVertical: Spacing.sm,
-    marginTop: Spacing.xs,
+    marginTop: Spacing.sm,
   },
   sheetSubmitErrorText: {
     flex: 1,
