@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../components/layout/Screen';
 import Modal from '../../components/ui/Modal';
 import Toast from '../../components/ui/Toast';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { superadminService } from '../../services/superadmin.service';
 import { Withdrawal, WithdrawalStatus } from '../../types';
@@ -726,7 +726,7 @@ export default function SuperWithdrawalsScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Wide-web (≥768) only — list content and its outside-the-list siblings share
   // one centered 760 column.
@@ -806,15 +806,11 @@ const styles = StyleSheet.create({
 
   row: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
   },
   rowDanger: { borderColor: Colors.danger, backgroundColor: Colors.dangerLight },
   investigationBanner: {
@@ -853,7 +849,7 @@ const styles = StyleSheet.create({
   confirmingNoteText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.primary },
   noteBox: {
     marginTop: 10,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
     borderRadius: BorderRadius.sm,
     padding: Spacing.sm,
   },

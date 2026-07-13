@@ -361,7 +361,7 @@ export default function SuperBillingScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Wide-web (≥768) only — scroll content and loading/error blocks share one
   // centered 760 column.

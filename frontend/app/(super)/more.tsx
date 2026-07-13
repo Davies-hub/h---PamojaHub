@@ -70,7 +70,7 @@ export default function MoreScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Wide-web (≥768) only — header + menu card share one centered 760 column.
   wideColumn: {
@@ -94,9 +94,9 @@ const styles = StyleSheet.create({
 
   list: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     marginHorizontal: Spacing.md,
     overflow: 'hidden',
   },
