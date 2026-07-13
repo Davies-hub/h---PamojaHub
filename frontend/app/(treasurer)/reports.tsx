@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useIsWideWeb } from '../../components/layout/Screen';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { campaignsService } from '../../services/campaigns.service';
 import { churchesService } from '../../services/churches.service';
@@ -696,7 +696,7 @@ function PayoutTable({ rows }: { rows: Withdrawal[] }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
   scroll: {
     flex: 1,
@@ -715,15 +715,11 @@ const styles = StyleSheet.create({
   // Card
   card: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
     gap: Spacing.sm,
   },
   sectionLabel: {
@@ -742,13 +738,13 @@ const styles = StyleSheet.create({
   },
   reportOptionBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.grey,
+    borderBottomColor: Colors.borderLight,
   },
   reportIconCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -799,10 +795,10 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   dateInput: {
-    height: 44,
+    height: 46,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.sm,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
@@ -841,10 +837,10 @@ const styles = StyleSheet.create({
   },
   pickerField: {
     flex: 1,
-    height: 44,
+    height: 46,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
@@ -883,7 +879,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     overflow: 'hidden',
   },
   toggleBtn: {
@@ -892,7 +888,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   toggleBtnDisabled: {
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
   toggleBtnTextDisabled: {
     fontFamily: 'Poppins-Bold',
@@ -916,14 +912,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    height: 50,
+    borderRadius: BorderRadius.pill,
     gap: 8,
   },
   downloadBtnDisabled: {
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
   },
   downloadBtnTextDisabled: {
     fontFamily: 'Poppins-Bold',
@@ -955,8 +951,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 10,
     backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
   },
   summaryText: {
     flex: 1,
@@ -983,9 +979,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: 8,
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.sm + 2,
     marginTop: 4,
   },
   truncationBannerText: {
@@ -1012,7 +1008,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingHorizontal: Spacing.md,
     paddingVertical: 8,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1.5,
     borderColor: Colors.primary,
   },
@@ -1030,14 +1026,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 8,
     borderBottomWidth: 1.5,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     gap: 6,
   },
   tableRow: {
     flexDirection: 'row',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.grey,
+    borderBottomColor: Colors.borderLight,
     gap: 6,
     alignItems: 'center',
   },
@@ -1114,7 +1110,7 @@ const styles = StyleSheet.create({
   },
   pickerSep: {
     height: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.borderLight,
     marginHorizontal: Spacing.md,
   },
 });

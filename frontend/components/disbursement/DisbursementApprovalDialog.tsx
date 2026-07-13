@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginVertical: Spacing.sm,
   },
   fieldLabel: {
@@ -167,8 +167,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
     gap: 8,
     marginTop: Spacing.sm,
   },
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.success,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     gap: 6,
   },
   confirmText: {

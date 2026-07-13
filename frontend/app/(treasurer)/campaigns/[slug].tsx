@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
 import { campaignsService } from '../../../services/campaigns.service';
 import { withdrawalsService } from '../../../services/withdrawals.service';
@@ -261,7 +261,9 @@ export default function TreasurerCampaignDetailScreen() {
       <SafeAreaView edges={['bottom']} style={styles.root}>
         <BackBar onBack={() => router.back()} />
         <View style={styles.notFound}>
-          <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+          <View style={styles.stateIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={28} color={Colors.primary} />
+          </View>
           <Text style={styles.notFoundTitle}>Couldn’t load this campaign</Text>
           <Text style={styles.notFoundSubtitle}>Please check your connection and try again.</Text>
           <TouchableOpacity
@@ -283,7 +285,9 @@ export default function TreasurerCampaignDetailScreen() {
       <SafeAreaView edges={['bottom']} style={styles.root}>
         <BackBar onBack={() => router.back()} />
         <View style={styles.notFound}>
-          <Ionicons name="alert-circle-outline" size={48} color={Colors.border} />
+          <View style={styles.stateIconCircle}>
+            <Ionicons name="alert-circle-outline" size={28} color={Colors.primary} />
+          </View>
           <Text style={styles.notFoundTitle}>Campaign not found</Text>
         </View>
       </SafeAreaView>
@@ -499,7 +503,7 @@ export default function TreasurerCampaignDetailScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Back bar (fixed strip below TreasurerTopBar)
   backBar: {
@@ -510,7 +514,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   backBtn: {
     flexDirection: 'row',
@@ -540,11 +544,19 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
   },
+  stateIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   retryBtn: {
     marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -591,7 +603,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     gap: Spacing.sm,
   },
   campaignTitle: {
@@ -620,7 +632,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  categoryBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.primary },
+  categoryBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.primaryDark },
 
   groupBadge: {
     flexDirection: 'row',
@@ -631,23 +643,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  groupBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.accent },
+  groupBadgeText: { fontFamily: 'Poppins-Medium', fontSize: FontSize.xs, color: Colors.accentDark },
 
   // Card
   card: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.md,
     gap: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -689,15 +697,11 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.md,
     marginTop: Spacing.md,
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     overflow: 'hidden',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
+    ...Shadows.sm,
   },
   statTile: {
     flex: 1,
@@ -705,7 +709,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     gap: 4,
     borderRightWidth: 1,
-    borderRightColor: Colors.border,
+    borderRightColor: Colors.borderLight,
   },
   statValue: {
     fontFamily: 'Poppins-Bold',
@@ -741,7 +745,7 @@ const styles = StyleSheet.create({
   },
   historyRow: {
     borderTopWidth: 1,
-    borderTopColor: Colors.grey,
+    borderTopColor: Colors.borderLight,
     paddingTop: Spacing.sm,
     marginTop: Spacing.sm,
     gap: 5,
@@ -788,37 +792,33 @@ const styles = StyleSheet.create({
   },
   payoutBadge: {
     borderRadius: BorderRadius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
   },
   payoutBadgeText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 10,
   },
 
   // Actions card
   actionsCard: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.md,
     gap: Spacing.sm,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
+    ...Shadows.sm,
   },
   whatsappBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 44,
-    borderRadius: BorderRadius.md,
+    height: 46,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1.5,
     borderColor: '#25D366',
     backgroundColor: Colors.white,
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     height: 50,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
   },
   disbursementBtnText: {
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     height: 42,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.white,
@@ -870,7 +870,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     height: 42,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.primary,
     backgroundColor: Colors.primaryLight,
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     height: 42,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.danger,
     backgroundColor: Colors.dangerLight,
@@ -901,9 +901,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    backgroundColor: Colors.grey,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    backgroundColor: Colors.surfaceSubtle,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
   },
   closedNoticeText: {
     flex: 1,

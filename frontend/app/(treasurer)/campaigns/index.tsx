@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignStatus, TreasurerCampaign } from '../../../types';
 
@@ -403,7 +403,9 @@ export default function TreasurerCampaignsScreen() {
         </View>
       ) : error ? (
         <View style={styles.emptyState}>
-          <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+          <View style={styles.emptyIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={28} color={Colors.primary} />
+          </View>
           <Text style={styles.emptyTitle}>Couldn’t load campaigns</Text>
           <Text style={styles.emptySubtitle}>Please check your connection and try again.</Text>
           <TouchableOpacity
@@ -434,7 +436,9 @@ export default function TreasurerCampaignsScreen() {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="grid-outline" size={48} color={Colors.border} />
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="grid-outline" size={28} color={Colors.primary} />
+              </View>
               <Text style={styles.emptyTitle}>No campaigns found</Text>
               <Text style={styles.emptySubtitle}>
                 {search
@@ -454,24 +458,24 @@ export default function TreasurerCampaignsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
 
   // Filter bar
   filterBar: {
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     paddingVertical: Spacing.sm,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: Spacing.md,
-    height: 42,
-    backgroundColor: Colors.grey,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.sm,
+    height: 44,
+    backgroundColor: Colors.surfaceSubtle,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: Spacing.md,
     gap: 6,
   },
   searchIcon: {
@@ -496,15 +500,11 @@ const styles = StyleSheet.create({
   // Campaign card
   card: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    ...Shadows.sm,
   },
 
   // Card header
@@ -551,11 +551,11 @@ const styles = StyleSheet.create({
   // Status badge
   statusBadge: {
     borderRadius: BorderRadius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
   },
   statusBadgeText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 10,
   },
 
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   groupBadgeText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 10,
-    color: Colors.primary,
+    color: Colors.primaryDark,
   },
 
   // Stats grid
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   statCellProgress: {
     borderLeftWidth: 1,
-    borderLeftColor: Colors.grey,
+    borderLeftColor: Colors.borderLight,
   },
   statValue: {
     fontFamily: 'Poppins-Bold',
@@ -613,8 +613,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: Colors.grey,
-    paddingTop: 10,
+    borderTopColor: Colors.borderLight,
+    paddingTop: 12,
   },
 
   // Share button
@@ -622,9 +622,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 14,
+    height: 38,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: '#25D366',
     backgroundColor: Colors.white,
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 8,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
   },
   actionErrorText: {
     flex: 1,
@@ -664,9 +664,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
-    height: 36,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 12,
+    height: 38,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.white,
@@ -680,9 +680,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
-    height: 36,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 12,
+    height: 38,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.primary,
     backgroundColor: Colors.primaryLight,
@@ -696,9 +696,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
-    height: 36,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 12,
+    height: 38,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.danger,
     backgroundColor: Colors.dangerLight,
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
   actionBar: {
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   actionBarInner: {
     flexDirection: 'row',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 44,
     gap: 6,
   },
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.white,
   },
   manageGroupsBtnText: {
@@ -771,6 +771,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     gap: Spacing.sm,
   },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyTitle: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.lg,
@@ -786,9 +794,9 @@ const styles = StyleSheet.create({
   },
   retryBtnState: {
     marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

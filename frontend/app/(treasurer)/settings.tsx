@@ -491,7 +491,7 @@ export default function SettingsScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
   flex: { flex: 1 },
   content: {
     paddingHorizontal: Spacing.md,
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
 
   cardDivider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginHorizontal: Spacing.md,
   },
 
@@ -530,17 +530,17 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primary,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoInitials: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxl,
-    color: Colors.white,
+    color: Colors.primary,
   },
   changeLogoLink: {
     fontFamily: 'Poppins-SemiBold',
@@ -553,15 +553,15 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
     marginTop: Spacing.md,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.base,
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: Spacing.sm,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     marginTop: Spacing.md,
@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
 
   saveBtn: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',

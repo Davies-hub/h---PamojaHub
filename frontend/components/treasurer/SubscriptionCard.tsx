@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.sm,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     borderLeftWidth: 3,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
@@ -701,7 +701,7 @@ const styles = StyleSheet.create({
 
   button: {
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -727,7 +727,7 @@ const styles = StyleSheet.create({
   // Requested (STK sent) confirmation block.
   requestedBox: {
     backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
     alignItems: 'center',
@@ -756,8 +756,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderColor: Colors.borderLight,
+    borderRadius: BorderRadius.lg,
     marginBottom: Spacing.sm,
     backgroundColor: Colors.white,
   },

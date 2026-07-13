@@ -15,7 +15,7 @@ import { useIsWideWeb } from '../../components/layout/Screen';
 import DisbursementApprovalDialog from '../../components/disbursement/DisbursementApprovalDialog';
 import Modal from '../../components/ui/Modal';
 import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { withdrawalsService } from '../../services/withdrawals.service';
 import { Withdrawal, WithdrawalStatus } from '../../types';
 import { fmtKes, timeAgo } from '../../utils/formatters';
@@ -479,7 +479,9 @@ export default function PayoutsScreen() {
       <View style={[styles.filterBar, isWideWeb && styles.wideColumn]}>
         {pendingCount > 0 ? (
           <View style={styles.pendingBanner}>
-            <Ionicons name="time-outline" size={16} color={Colors.warning} />
+            <View style={styles.pendingIconCircle}>
+              <Ionicons name="time-outline" size={15} color={Colors.white} />
+            </View>
             <Text style={styles.pendingBannerText}>
               {pendingCount} payout{pendingCount !== 1 ? 's' : ''} awaiting your approval
             </Text>
@@ -508,7 +510,9 @@ export default function PayoutsScreen() {
         </View>
       ) : error ? (
         <View style={[styles.emptyState, isWideWeb && styles.wideColumn]}>
-          <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+          <View style={styles.emptyIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={28} color={Colors.primary} />
+          </View>
           <Text style={styles.emptyTitle}>Couldn’t load payouts</Text>
           <Text style={styles.emptySubtitle}>Please check your connection and try again.</Text>
           <TouchableOpacity
@@ -538,7 +542,9 @@ export default function PayoutsScreen() {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="arrow-up-circle-outline" size={48} color={Colors.border} />
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="arrow-up-circle-outline" size={28} color={Colors.primary} />
+              </View>
               <Text style={styles.emptyTitle}>No payouts</Text>
               <Text style={styles.emptySubtitle}>
                 {statusFilter === 'ALL'
@@ -673,7 +679,7 @@ export default function PayoutsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
 
   // Wide-web (≥768) only — filter bar, states, and list content share one
@@ -687,21 +693,33 @@ const styles = StyleSheet.create({
   filterBar: {
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     paddingBottom: 8,
   },
   pendingBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.warningLight,
+    backgroundColor: Colors.accentLight,
+    borderRadius: BorderRadius.lg,
+    marginHorizontal: Spacing.md,
+    marginTop: 10,
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
-    gap: 8,
+    gap: 10,
+  },
+  pendingIconCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   pendingBannerText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.sm,
-    color: Colors.warning,
+    color: Colors.accentDark,
     flex: 1,
   },
   chipsScroll: {
@@ -714,8 +732,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderColor: Colors.borderLight,
+    backgroundColor: Colors.surfaceSubtle,
   },
   filterChipActive: {
     backgroundColor: Colors.primary,
@@ -740,15 +758,11 @@ const styles = StyleSheet.create({
 
   row: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
   },
   rowDanger: {
     borderColor: Colors.danger,
@@ -823,11 +837,11 @@ const styles = StyleSheet.create({
 
   statusBadge: {
     borderRadius: BorderRadius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
   },
   statusBadgeText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 10,
   },
 
@@ -884,18 +898,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginTop: 12,
-    paddingTop: 10,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.grey,
+    borderTopColor: Colors.borderLight,
   },
   approveBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 42,
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     gap: 6,
   },
   approveBtnText: {
@@ -908,10 +922,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 42,
     borderWidth: 1.5,
     borderColor: Colors.danger,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     gap: 6,
     backgroundColor: Colors.white,
   },
@@ -924,11 +938,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 42,
     paddingHorizontal: 20,
     borderWidth: 1.5,
     borderColor: Colors.warning,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     gap: 6,
     backgroundColor: Colors.warningLight,
   },
@@ -979,6 +993,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     gap: Spacing.sm,
   },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyTitle: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.lg,
@@ -994,9 +1016,9 @@ const styles = StyleSheet.create({
   },
   retryBtnState: {
     marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1016,8 +1038,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: Colors.danger,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
+    ...Shadows.lg,
   },
   approveErrorText: {
     flex: 1,
@@ -1057,8 +1080,8 @@ const styles = StyleSheet.create({
   rejectInput: {
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
     color: Colors.text,
@@ -1083,7 +1106,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1096,7 +1119,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     backgroundColor: Colors.danger,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },

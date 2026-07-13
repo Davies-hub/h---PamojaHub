@@ -14,7 +14,7 @@ import {
 import { useIsWideWeb } from '../../components/layout/Screen';
 import Modal from '../../components/ui/Modal';
 import Toast from '../../components/ui/Toast';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { groupsService } from '../../services/groups.service';
 import { GroupLabel } from '../../types';
@@ -587,7 +587,7 @@ export default function GroupLabelsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
 
   // Wide-web (≥768) only — header, toggle, add-form, and list content share one
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     gap: Spacing.sm,
   },
   backIconBtn: {
@@ -637,8 +637,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: 14,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 16,
     height: 40,
     gap: 6,
   },
@@ -659,15 +659,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   viewChip: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderColor: Colors.borderLight,
+    backgroundColor: Colors.surfaceSubtle,
   },
   viewChipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   viewChipText: {
@@ -681,15 +681,15 @@ const styles = StyleSheet.create({
   addForm: {
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     padding: Spacing.md,
     gap: Spacing.sm,
   },
   addInput: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     overflow: 'hidden',
   },
   toggleBtn: {
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
   saveFormBtn: {
     height: Spacing.touch,
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -787,9 +787,9 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 4,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -810,16 +810,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     gap: Spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
   },
   rowLeft: {
     flex: 1,
@@ -841,7 +837,7 @@ const styles = StyleSheet.create({
   typeBadgeText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 10,
-    color: Colors.primary,
+    color: Colors.primaryDark,
   },
   typeBadgeTextH: {
     color: Colors.accentDark,
@@ -898,11 +894,11 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BorderRadius.md,
+    borderRadius: 20,
     backgroundColor: Colors.dangerLight,
   },
   archiveBtnDisabled: {
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
 
   // Unarchive button
@@ -911,7 +907,7 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BorderRadius.md,
+    borderRadius: 20,
     backgroundColor: Colors.primaryLight,
   },
 
@@ -929,7 +925,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 8,
     marginTop: Spacing.sm,
