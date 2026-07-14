@@ -7,17 +7,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import OTPInput, { OTPInputRef } from '../../components/ui/OTPInput';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
+
+// Web: pin the back button to the VIEWPORT (not the document). The auth forms are
+// taller than the viewport, so the page scrolls; position:absolute would ride the
+// scroll and slide the button off-screen. `fixed` keeps it edge-anchored. RN types
+// don't know 'fixed'; it's a harmless no-op on native (which scrolls internally).
+const webFixedBackBtn = Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as object) : null;
 
 type ResetState = 'email' | 'otp' | 'success';
 
@@ -33,6 +40,8 @@ function Wordmark() {
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const isWideWeb = useIsWideWeb();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
 
   const [state, setState] = useState<ResetState>('email');
   const [email, setEmail] = useState('');
@@ -116,7 +125,20 @@ export default function ResetPasswordScreen() {
 
   if (state === 'email') {
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      <View style={styles.screen}>
+        {/* Back button — fixed edge overlay, OUTSIDE the scrolled/centered content
+            so it can never be clipped above the scroll origin (A7 regression fix). */}
+        <TouchableOpacity
+          style={[styles.backBtn, webFixedBackBtn, { top: statusBarHeight + Spacing.sm }]}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+        </TouchableOpacity>
+
+        <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
         <View pointerEvents="none" style={styles.bgOrnamentA} />
         <View pointerEvents="none" style={styles.bgOrnamentB} />
         <KeyboardAvoidingView
@@ -129,16 +151,6 @@ export default function ResetPasswordScreen() {
             showsVerticalScrollIndicator={false}
           >
             <Screen variant="form">
-            <TouchableOpacity
-              style={styles.backBtn}
-              onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-            >
-              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
-            </TouchableOpacity>
-
             <View style={styles.card}>
             <Wordmark />
 
@@ -195,7 +207,8 @@ export default function ResetPasswordScreen() {
             </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     );
   }
 
@@ -204,7 +217,20 @@ export default function ResetPasswordScreen() {
   if (state === 'otp') {
     const allFilled = otp.every(d => d !== '');
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+      <View style={styles.screen}>
+        {/* Back button — fixed edge overlay (A7 regression fix); returns to the
+            email-entry state, not a route change. */}
+        <TouchableOpacity
+          style={[styles.backBtn, webFixedBackBtn, { top: statusBarHeight + Spacing.sm }]}
+          onPress={() => setState('email')}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+        </TouchableOpacity>
+
+        <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
         <View pointerEvents="none" style={styles.bgOrnamentA} />
         <View pointerEvents="none" style={styles.bgOrnamentB} />
         <KeyboardAvoidingView
@@ -217,16 +243,6 @@ export default function ResetPasswordScreen() {
             showsVerticalScrollIndicator={false}
           >
             <Screen variant="form">
-            <TouchableOpacity
-              style={styles.backBtn}
-              onPress={() => setState('email')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-            >
-              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
-            </TouchableOpacity>
-
             <View style={styles.card}>
             <Wordmark />
 
@@ -342,7 +358,8 @@ export default function ResetPasswordScreen() {
             </Screen>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     );
   }
 
@@ -377,6 +394,10 @@ export default function ResetPasswordScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.surfaceSubtle,
+  },
   root: {
     flex: 1,
     backgroundColor: Colors.surfaceSubtle,
@@ -426,6 +447,9 @@ const styles = StyleSheet.create({
   },
 
   backBtn: {
+    position: 'absolute',
+    left: Spacing.md,
+    zIndex: 50,
     width: 42,
     height: 42,
     borderRadius: 21,
@@ -434,8 +458,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
-    ...Shadows.sm,
+    ...Shadows.md,
   },
 
   wordmark: {

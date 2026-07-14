@@ -367,7 +367,7 @@ export default function NewCampaignScreen() {
         {/* Back link */}
         <TouchableOpacity
           style={styles.backLink}
-          onPress={() => router.back()}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))}
           accessibilityRole="button"
           accessibilityLabel="Back to Campaigns"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

@@ -7,18 +7,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Screen, { useIsWideWeb } from '../../components/layout/Screen';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useAuth } from '../../stores/auth.store';
 import { AuthUser } from '../../types';
 import { resolveAuthDestination } from '../../utils/authRouting';
+
+// Web: pin the back button to the VIEWPORT (not the document). Auth pages can scroll;
+// position:absolute would ride the scroll and slide the button off-screen. `fixed`
+// keeps it edge-anchored. No-op on native (which scrolls internally).
+const webFixedBackBtn = Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as object) : null;
 
 function Wordmark() {
   return (
@@ -49,6 +55,8 @@ function churchStatusMessage(user: AuthUser): string {
 export default function LoginScreen() {
   const router = useRouter();
   const isWideWeb = useIsWideWeb();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
   const { login, user } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -112,32 +120,34 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
-      {/* Decorative — oversized brand circles behind the card */}
-      <View pointerEvents="none" style={styles.bgOrnamentA} />
-      <View pointerEvents="none" style={styles.bgOrnamentB} />
-      <View pointerEvents="none" style={styles.bgOrnamentC} />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={styles.screen}>
+      {/* Back button — fixed edge overlay, OUTSIDE the scrolled/centered content (A7). */}
+      <TouchableOpacity
+        style={[styles.backBtn, webFixedBackBtn, { top: statusBarHeight + Spacing.sm }]}
+        onPress={handleBack}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
       >
-        <ScrollView
-          contentContainerStyle={[styles.content, isWideWeb && styles.contentWideCenter]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Screen variant="form">
-            <TouchableOpacity
-              style={styles.backBtn}
-              onPress={handleBack}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-            >
-              <Ionicons name="arrow-back" size={22} color={Colors.primary} />
-            </TouchableOpacity>
+        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
 
+      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        {/* Decorative — oversized brand circles behind the card */}
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
+        <View pointerEvents="none" style={styles.bgOrnamentC} />
+
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            contentContainerStyle={[styles.content, isWideWeb && styles.contentWideCenter]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Screen variant="form">
             <View style={styles.card}>
               <Wordmark />
 
@@ -245,13 +255,18 @@ export default function LoginScreen() {
               </View>
             </View>
           </Screen>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.surfaceSubtle,
+  },
   root: {
     flex: 1,
     backgroundColor: Colors.surfaceSubtle,
@@ -299,6 +314,9 @@ const styles = StyleSheet.create({
   },
 
   backBtn: {
+    position: 'absolute',
+    left: Spacing.md,
+    zIndex: 50,
     width: 42,
     height: 42,
     borderRadius: 21,
@@ -307,8 +325,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
-    ...Shadows.sm,
+    ...Shadows.md,
   },
 
   // The floating auth card

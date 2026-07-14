@@ -243,7 +243,7 @@ export default function TreasurerCampaignDetailScreen() {
   if (status === 'loading' && !data) {
     return (
       <SafeAreaView edges={['bottom']} style={styles.root}>
-        <BackBar onBack={() => router.back()} />
+        <BackBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))} />
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
@@ -254,7 +254,7 @@ export default function TreasurerCampaignDetailScreen() {
   if (status === 'error') {
     return (
       <SafeAreaView edges={['bottom']} style={styles.root}>
-        <BackBar onBack={() => router.back()} />
+        <BackBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))} />
         <View style={styles.notFound}>
           <View style={styles.stateIconCircle}>
             <Ionicons name="cloud-offline-outline" size={28} color={Colors.primary} />
@@ -278,7 +278,7 @@ export default function TreasurerCampaignDetailScreen() {
   if (!detail) {
     return (
       <SafeAreaView edges={['bottom']} style={styles.root}>
-        <BackBar onBack={() => router.back()} />
+        <BackBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))} />
         <View style={styles.notFound}>
           <View style={styles.stateIconCircle}>
             <Ionicons name="alert-circle-outline" size={28} color={Colors.primary} />
@@ -329,7 +329,7 @@ export default function TreasurerCampaignDetailScreen() {
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
-      <BackBar onBack={() => router.back()} status={displayStatus} />
+      <BackBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))} status={displayStatus} />
 
       <ScrollView
         style={styles.scroll}

@@ -194,8 +194,10 @@ export default function BrowseCampaignsScreen() {
     <SafeAreaView edges={['top']} style={styles.root}>
       {/* Sticky header: nav + search */}
       <View style={styles.stickyHeader}>
+        {/* Full-bleed nav so the back arrow anchors to the window edge on wide web
+            (the centered title is unaffected). */}
+        <NavBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <View style={isWideWeb && styles.wideCap}>
-          <NavBar onBack={() => router.back()} />
           <View style={styles.searchWrapper}>
             <SearchBar value={search} onChange={setSearch} />
           </View>

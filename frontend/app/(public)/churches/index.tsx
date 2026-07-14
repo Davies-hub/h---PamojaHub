@@ -205,8 +205,10 @@ export default function BrowseChurchesScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.root}>
       <View style={styles.stickyHeader}>
+        {/* Full-bleed nav so the back arrow anchors to the window edge on wide web
+            (the centered title is unaffected). */}
+        <NavBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <View style={isWideWeb && styles.wideCap}>
-          <NavBar onBack={() => router.back()} />
           <View style={styles.searchWrapper}>
             <SearchBar value={search} onChange={setSearch} />
           </View>

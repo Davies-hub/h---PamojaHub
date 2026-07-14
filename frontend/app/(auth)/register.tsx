@@ -9,17 +9,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Screen from '../../components/layout/Screen';
 import CountyPicker from '../../components/ui/CountyPicker';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
+
+// Web: pin the back button to the VIEWPORT (not the document). The auth forms are
+// taller than the viewport, so the page scrolls; position:absolute would ride the
+// scroll and slide the button off-screen. `fixed` keeps it edge-anchored. RN types
+// don't know 'fixed'; it's a harmless no-op on native (which scrolls internally).
+const webFixedBackBtn = Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as object) : null;
 
 interface FormErrors {
   churchName?: string;
@@ -124,6 +131,8 @@ function ProfilePhotoSection({
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
 
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [churchName, setChurchName] = useState('');
@@ -233,31 +242,34 @@ export default function RegisterScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
-      {/* Decorative — oversized brand circles behind the card */}
-      <View pointerEvents="none" style={styles.bgOrnamentA} />
-      <View pointerEvents="none" style={styles.bgOrnamentB} />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={styles.screen}>
+      {/* Back button — fixed edge overlay, OUTSIDE the scrolled/centered content
+          so it can never be clipped above the scroll origin (A7 regression fix). */}
+      <TouchableOpacity
+        style={[styles.backBtn, webFixedBackBtn, { top: statusBarHeight + Spacing.sm }]}
+        onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Screen variant="form">
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="arrow-back" size={22} color={Colors.primary} />
-          </TouchableOpacity>
+        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
 
+      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        {/* Decorative — oversized brand circles behind the card */}
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
+
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Screen variant="form">
           <View style={styles.card}>
           <ProfilePhotoSection uri={profilePhoto} onPress={handlePhotoPress} />
           <Wordmark />
@@ -410,16 +422,20 @@ export default function RegisterScreen() {
           </View>
           </View>
           </Screen>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.surfaceSubtle,
+  },
   root: {
     flex: 1,
     backgroundColor: Colors.surfaceSubtle,
@@ -453,6 +469,9 @@ const styles = StyleSheet.create({
   },
 
   backBtn: {
+    position: 'absolute',
+    left: Spacing.md,
+    zIndex: 50,
     width: 42,
     height: 42,
     borderRadius: 21,
@@ -461,8 +480,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
-    ...Shadows.sm,
+    ...Shadows.md,
   },
 
   // The floating auth card

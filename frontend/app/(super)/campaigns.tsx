@@ -134,7 +134,7 @@ export default function SuperCampaignsScreen() {
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       {/* Back bar */}
-      <View style={[styles.backBar, isWideWeb && styles.wideColumn]}>
+      <View style={styles.backBar}>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => router.navigate('/(super)/more' as any)}

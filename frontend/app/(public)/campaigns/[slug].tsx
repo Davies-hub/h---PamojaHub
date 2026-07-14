@@ -78,7 +78,7 @@ export default function CampaignDetailScreen() {
       {/* Back button — absolute overlay above content, present in every state */}
       <TouchableOpacity
         style={[styles.backBtn, { top: statusBarHeight + 8 }]}
-        onPress={() => router.back()}
+        onPress={() => (router.canGoBack() ? router.back() : router.replace('/campaigns'))}
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel="Go back"
