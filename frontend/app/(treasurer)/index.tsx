@@ -193,17 +193,19 @@ function SectionHeader({
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      <TouchableOpacity
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={linkLabel}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <View style={styles.seeAllRow}>
-          <Text style={styles.seeAll}>{linkLabel}</Text>
-          <Ionicons name="arrow-forward" size={13} color={Colors.primary} />
-        </View>
-      </TouchableOpacity>
+      {onPress ? (
+        <TouchableOpacity
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={linkLabel}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <View style={styles.seeAllRow}>
+            <Text style={styles.seeAll}>{linkLabel}</Text>
+            <Ionicons name="arrow-forward" size={13} color={Colors.primary} />
+          </View>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }
