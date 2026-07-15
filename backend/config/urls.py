@@ -14,6 +14,7 @@ All API surface lives under /api/v1/<resource>/.
   * /notifications/ — notifications.urls (Slice 1: recipient-scoped read API)
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
@@ -31,3 +32,24 @@ urlpatterns = [
     path('api/v1/subscriptions/', include('churches.subscription_urls')),
     path('api/v1/notifications/', include('notifications.urls')),
 ]
+
+# ── DEBUG-ONLY test helper ────────────────────────────────────────────────────
+# django-ratelimit uses the in-process locmem cache in dev (see
+# config/settings/development.py). Because locmem is per-process, a management
+# command in a separate process CANNOT clear the running server's counters — so
+# the e2e harness needs an endpoint the server itself handles. This route is
+# ONLY mounted when DEBUG is True; with DEBUG=False (production) the block is
+# skipped entirely and no such URL exists. It changes no rate-limit logic.
+if settings.DEBUG:
+    from django.core.cache import cache
+    from django.http import JsonResponse
+    from django.views.decorators.csrf import csrf_exempt
+
+    @csrf_exempt
+    def _dev_reset_ratelimit(request):
+        cache.clear()
+        return JsonResponse({'cleared': True})
+
+    urlpatterns += [
+        path('api/v1/dev/reset-ratelimit/', _dev_reset_ratelimit),
+    ]

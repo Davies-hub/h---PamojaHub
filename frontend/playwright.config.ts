@@ -9,13 +9,20 @@ import { defineConfig } from '@playwright/test';
 //       npx playwright test -g register   (just the register cases)
 export default defineConfig({
   testDir: './e2e',
-  timeout: 60_000,
+  // Clears the dev backend's locmem rate-limit cache once before the suite so
+  // repeated local runs don't trip the per-IP 3/h password-reset cap.
+  globalSetup: './e2e/global-setup.ts',
+  // 90s per test: the cold Metro bundle pushed genuinely-passing tests to 41-56s,
+  // so 60s left too little margin under load. The flake root cause (rate-limit
+  // 429 on the OTP test) is fixed test-side, so this is pure bundle headroom.
+  timeout: 90_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
-  // One retry absorbs the occasional readiness/timeout flake when the whole suite
-  // runs against a single local dev server under load (see the A7 notes).
-  retries: 1,
+  // retries:0 — the flake cause (per-IP/per-email 3/h throttle on the reset-OTP
+  // test) is removed at the harness level (unique email + globalSetup cache
+  // reset), so retries must not be allowed to mask any real regression.
+  retries: 0,
   reporter: [['list']],
   use: {
     baseURL: 'http://localhost:8081',

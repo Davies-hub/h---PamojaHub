@@ -342,8 +342,11 @@ test.describe('auth — reset-password', () => {
   test('otp state back returns to email state', async ({ page }) => {
     await clearAuth(page);
     await page.goto(BASE + '/reset-password'); await page.waitForTimeout(900);
-    // advance to OTP state (backend returns 200 for any email — enumeration-opaque)
-    await page.fill('input[placeholder*="church.org" i], input[type="email"]', 'e2e-otp-check@example.com');
+    // advance to OTP state (backend returns 200 for any email — enumeration-opaque).
+    // Use a UNIQUE email per run so the per-email 3/h reset-request cap
+    // (accounts/views.py) can never accumulate across repeated local runs.
+    const otpEmail = `e2e-otp-${Date.now()}@example.com`;
+    await page.fill('input[placeholder*="church.org" i], input[type="email"]', otpEmail);
     await clickText(page, 'Send OTP');
     // OTP state shows the 6-digit code inputs
     await expect.poll(async () =>
