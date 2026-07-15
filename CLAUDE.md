@@ -26,7 +26,7 @@ Backend: `j:\Pamoja_Hub\backend\` — Django 5 + DRF + PostgreSQL (Phase 2 compl
 7. **Net-Everywhere**: all church-facing amounts are NET (post 2.5% fee). Exception: donor post-donation success screen shows gross to match M-Pesa SMS; Super Admin Donations table shows gross/fee/net.
 8. **walletBalance is derived** — always `raisedAmount − Σ(PAID withdrawals)`; never hardcode it
 9. **UI strings use "Payout" not "Disbursement"** — backend `Withdrawal` model name is unchanged
-10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 499** (this number is the live `manage.py test tests` count — last run 2026-07-09, 499/499 OK; update it whenever the count changes).
+10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 499** (this number is the live `manage.py test tests` count — re-verified green post-merge 2026-07-15 on master `fab9e17`, 499/499 OK; update it whenever the count changes).
 11. **Decimals are STRINGS on the wire** — DRF serializes `DecimalField` as a string (`"80000.00"`); the frontend converts via `Number()` in `services/mappers.ts`. Mappers are explicit per-field (snake→camel), never a generic deep-convert.
 12. **Multi-tenant isolation** — treasurer read endpoints filter by `request.user.church`; every `/super/` endpoint is `[IsSuperAdmin]` (treasurer → 403). Never omit; never relax the money-safety invariants (lock-then-call: B2C/STK HTTP happens OUTSIDE the DB lock; idempotent callbacks keyed on the unique id).
 13. **Phase 4 slice discipline** — per slice: READ-ONLY contract trace (quote file:line, NO edits) → BUILD (restart backend `--noreload` on current code, ONE live checkpoint) → STOP for review. READS are wired before WRITES; money-write actions are their own later slices.
@@ -91,9 +91,9 @@ Route groups are transparent — `(public)` is not in the URL. `/campaigns` maps
 
 ---
 
-## Responsive web UI baseline (2026-07-12 — MANDATORY for all future screens)
+## Responsive web UI baseline (2026-07-12; aesthetic overhaul MERGED 2026-07-15 — MANDATORY for all future screens)
 
-The whole app is responsive on web ≥768px; phone rendering is identical by construction (all wide styles are gated). Two shared components carry the system — **all future screens must use them**:
+The whole app is responsive on web ≥768px; phone rendering is identical by construction (all wide styles are gated). The 2026-07-15 UI-redesign merge (`fab9e17`) layered a production-level aesthetic pass on top of this baseline (heroes, floating money cards, icon circles, status-coded rows) — see the "UI REDESIGN — MERGED" block above. The two shared components below still carry the responsive system. Two shared components carry the system — **all future screens must use them**:
 
 - **`components/layout/Screen.tsx`** — exports `useIsWideWeb()` (web AND width ≥ **768**) and a `<Screen>` wrapper with content-cap variants **480 / 760 / 1100**.
 - **`components/ui/ResponsiveSheet.tsx`** — the ONLY dialog wrapper: bottom sheet on phone/narrow, centered max-480 card on wide web. Props: `visible / onRequestClose / dismissable / keyboardOffset`. Never hand-roll a Modal+overlay+sheet again.
@@ -110,6 +110,17 @@ The whole app is responsive on web ≥768px; phone rendering is identical by con
 - The 4 old `components/layout/` sidebar/nav files (TopNav, NotificationBell, TreasurerSidebar, SuperAdminSidebar) are dead/unused — delete-candidates.
 
 ---
+
+## UI REDESIGN — MERGED TO MASTER 2026-07-15 (READ THIS FIRST)
+
+The production-level responsive/aesthetic UI overhaul is **merged to master and pushed** — it is no longer a branch experiment.
+
+- **Merge `fab9e17`** (`--no-ff`) brought the `ui-redesign` branch into master: **12 slices, aesthetic-only, palette locked, 48 files (+4108/-1793)**. Zero logic edits; every wide style stays gated on `useIsWideWeb()` so phone rendering is identical by construction. The `ui-redesign` branch is now merged history — **delete-candidate**. Rollback point: `97692a9`.
+- **Back-button arc (`183c3cb`):** the A6 live audit found a register/reset **clip regression** — back buttons rendered inside the flex-centered, overflowing ScrollView were carried off-screen (measured `y=-142`, unreachable). Fixed by moving them OUT of the scroll into a **web-only `position:fixed` edge overlay** (viewport-anchored; `absolute` on native). **STANDING CONVENTION: all back buttons anchor top-left at the window edge on wide web.** Accepted exceptions (owner decision): `treasurer/campaigns/new` + `groups` keep inline text back-links at the content-column top-left (integrated with their capped headers). The **guarded-back pattern** (`canGoBack() ? router.back() : router.replace(parent)`) was applied to the six former bare `router.back()` sites — deep-link no-ops fixed.
+- **Playwright e2e suite now exists:** `frontend/e2e/back-buttons.spec.ts` + `frontend/e2e/global-setup.ts` + `frontend/playwright.config.ts` (retries 0, 90s timeout, unique OTP email per run). Proven RED→GREEN on the clip bug; 3× clean at retries 0 after the harness fix (`09ffcc4` — unique OTP email + DEBUG-only throttle reset + globalSetup).
+- **DEBUG-only test endpoint (security-relevant):** `09ffcc4` added `POST /api/v1/dev/reset-ratelimit/` in `config/urls.py` — clears the rate-limit cache so e2e runs aren't throttled. **It is mounted ONLY when `settings.DEBUG` is True; the route does not exist when `DEBUG=False`.** ⚠ A prod deploy accidentally running `DEBUG=True` would expose it — this strengthens the case for a `validate_env` startup assert that `DEBUG` is False in prod (see open items in deploy_checklist_status.md).
+- **Dead-button sweep (`c77ec4b`):** a whole-frontend sweep found exactly ONE dead control — the treasurer Recent Donations "See all" label (pre-existing on both branches, no handler). Fixed by gating `SectionHeader`'s link render on `onPress`, so the component can no longer render a handler-less link.
+- **Test baseline: still 499**, re-verified green post-merge on master (`manage.py test tests`). tsc clean; 14/14 back-button specs.
 
 ## Current status — 2026-07-10 (READ THIS FIRST)
 

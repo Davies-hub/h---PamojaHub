@@ -10,7 +10,7 @@
 
 ## ⬛ CURRENT STATUS — ALL BUILDABLE CODE COMPLETE
 
-CURRENT VERIFIED BASELINE: 499 tests — `manage.py test tests`, all pass — reconciled 2026-07-09.
+CURRENT VERIFIED BASELINE: 499 tests — `manage.py test tests`, all pass — re-verified green post-merge 2026-07-15 (master `fab9e17`); reconciled 2026-07-09.
 
 Every [CODE] item that can be built **without a deployed environment is done and live-verified.** Tier 2 (resolve-paid, request-disbursement request-half), all of Tier 3, all of Tier 5 polish — closed. Three items the §0 list called "unbuilt" turned out already built (resolve-paid, billing tier-prices, church-tier-set).
 
@@ -248,6 +248,27 @@ Remaining buildable slices (pre-deploy):
 - **Prod-hardening cluster** (go-live ops): PH1-05 proxy-IP/rate-limit-cache, PH2-01's source-IP allowlist, PH2-03 transport headers, PH2-02 email HTML-escape **(✅ CLOSED — `resend_email.py` `html.escape`)**, PH1-06 donation throttle, PH1-01/04/07/08 token/lockout/throttle items, PH1-03 audit-REVOKE-as-migration.
 - **The original Tier-1 live gates**: STK success round-trip, OTP-over-real-SMS, production Daraja, prod DB REVOKE, sweep cron, the missing `b2c-queue/` route.
 - **Dead-code triage** (audit Appendix A): ✅ DELETED 2026-07-08 (commit `4709e88`) — `DisbursementRequestForm.tsx`, `CampaignCreationForm.tsx`, `donationsService.listForCampaign`, orphaned mock files. ⬜ STILL PRESENT (deferred, unused-status not re-confirmed this pass): `dayjs`, routed-but-unused `/campaigns/{slug}/updates/`.
+
+## ✅ UI REDESIGN — MERGED TO MASTER 2026-07-15 (`fab9e17`, pushed)
+
+The production-level responsive/aesthetic overhaul is merged to master — no longer a branch experiment.
+
+- **Merge `fab9e17`** (`--no-ff`): 12 slices, **aesthetic-only, palette locked, 48 files (+4108/-1793)**, zero logic edits. Rollback point `97692a9`. The `ui-redesign` branch is now merged history (delete-candidate). Baseline re-verified **499 green** post-merge.
+- **Back-button arc (`183c3cb`):** A6 live audit found the register/reset **clip regression** (`y=-142`, flex-centering overflow carried the buttons off-screen). Fixed via a **web-only `position:fixed` edge overlay** (`absolute` on native). **Standing convention: all back buttons top-left window edge on wide web.** Accepted exceptions (owner): `treasurer/campaigns/new` + `groups` inline text back-links. **Guarded-back** (`canGoBack() ? back : replace(parent)`) applied to the six former bare `router.back()` sites — deep-link no-ops fixed.
+- **Playwright e2e suite:** `frontend/e2e/back-buttons.spec.ts` + `global-setup.ts` + `playwright.config.ts` (retries 0, 90s timeout, unique OTP email/run). Proven RED→GREEN on the clip bug; 3× clean at retries 0 after the harness fix (`09ffcc4`).
+- **Dead-button sweep (`c77ec4b`):** whole-frontend sweep found exactly ONE dead control (treasurer Recent Donations "See all", pre-existing on both branches). Fixed by gating `SectionHeader`'s link on `onPress` — the component can no longer render a handler-less link.
+
+### ⚠ SECURITY NOTE — DEBUG-only test endpoint (`09ffcc4`)
+`POST /api/v1/dev/reset-ratelimit/` (in `config/urls.py`) clears the rate-limit cache for e2e runs. **Mounted ONLY under `if settings.DEBUG:` — the route does not exist when `DEBUG=False`.** A prod deploy accidentally running `DEBUG=True` WOULD expose it. **Strengthens the case for a `validate_env` startup assert that `DEBUG` is False in prod** (see OPEN ITEMS below).
+
+## ⬜ OPEN ITEMS — pre-deploy buildable + deferred (verified present 2026-07-16)
+
+- **DEBUG demo callback simulator** — the ONE buildable pre-deploy item (lets a demo drive a fake Safaricom success callback without a real handset). Not yet built.
+- **`validate_env` slice** — assert callback URLs contain `MPESA_CALLBACK_SECRET` **and** assert `DEBUG=False` in prod (would also fence the dev reset-ratelimit route above). Owner has deferred; reviewer flags it.
+- **Fee rounding** — `5 × 0.975 = 4.875` stored as `4.87`; rounding **direction never confirmed deliberate**. Decide before go-live.
+- **IntaSend payout capability for an unregistered account: UNPROVEN** — marketing claims only; needs one real third-party payout test before relying on it as the money-OUT path around the sandbox B2C 2040 wall.
+- **Production Daraja go-live paperwork** + all Tier-1 `[LIVE]`/`[OPS]` gates (see Tier 1 above): STK success round-trip, OTP-over-real-SMS, prod DB REVOKE, sweep cron, `b2c-queue/` route.
+- **Deferred debt:** `dayjs` dep (`frontend/package.json`), routed-but-FE-unused `/campaigns/{slug}/updates/` route, OTP-portal dashboard header deliberately uncapped, the 4 dead `components/layout/` sidebar/nav files.
 
 ## ✅ RESPONSIVE WEB UI BASELINE — DONE 2026-07-12 (slices 1–11, committed + pushed)
 

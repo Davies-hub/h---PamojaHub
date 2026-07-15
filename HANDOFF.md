@@ -1,6 +1,8 @@
 # Pamoja Hub — Developer Handoff
 
-_Last updated: 2026-06-24. This file is the orientation doc for a new contributor or a new chat. For the most granular live status read `CLAUDE.md` (loaded every session) → `PamojaHub_Compressed_v2.md` §0/§18 → the persistent memory index._
+_Last updated: 2026-07-16. This file is the orientation doc for a new contributor or a new chat. For the most granular live status read `CLAUDE.md` (loaded every session) → `PamojaHub_Compressed_v2.md` §0/§18 → the persistent memory index._
+
+> **UI redesign MERGED to master 2026-07-15 (`fab9e17`, pushed).** The production-level responsive/aesthetic UI overhaul is no longer a branch experiment: 12 slices, aesthetic-only, palette locked, 48 files, zero logic edits (rollback point `97692a9`; the `ui-redesign` branch is now merged history / delete-candidate). Back-button clip regression fixed with a web-only `position:fixed` edge overlay (`183c3cb`) — **standing convention: all back buttons top-left window edge on wide web** (except the `treasurer/new` + `groups` inline links). A Playwright e2e suite (`frontend/e2e/back-buttons.spec.ts`) now guards it. A DEBUG-only test route `POST /api/v1/dev/reset-ratelimit/` was added (absent when `DEBUG=False`). Backend baseline re-verified **499 green** post-merge. See `docs/deploy_checklist_status.md` for the full open-items list.
 
 ---
 
@@ -25,14 +27,14 @@ j:\Pamoja_Hub\
 
 ---
 
-## Build phases & where we are (2026-06-26)
+## Build phases & where we are (2026-07-16)
 
 Build order (per the BuildGuide): **Frontend (UI shells w/ mock) → Backend (API + logic) → Database (indexes/constraints) → Connect (wire FE↔BE).**
 
 | Phase | State |
 |---|---|
-| **Phase 1 — Frontend** | ✅ Complete. All public/auth/treasurer/super screens built. `tsc --noEmit` = 0; `npm test` (vitest) = 60/60. |
-| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **422 tests** green (live `manage.py test tests` count, 2026-06-26). |
+| **Phase 1 — Frontend** | ✅ Complete + responsive/aesthetic overhaul MERGED to master 2026-07-15 (`fab9e17`). All public/auth/treasurer/super screens built. `tsc --noEmit` = 0; `npm test` (vitest) = 60/60; Playwright e2e back-button spec added. |
+| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **499 tests** green (live `manage.py test tests` count — re-verified post-merge 2026-07-15; was 422 on 2026-06-26). |
 | **Phase 3 — DB hardening** | 🟡 Partial. Indexes/constraints + AuditLog `REVOKE UPDATE/DELETE` applied to **dev** DB. The prod REVOKE is **not a migration** — run manually before go-live (`backend/docs/production_db_hardening.md`). |
 | **Phase 4 — Connect FE↔BE** | ✅ Functionally complete. All reads + all writes wired & live-verified, incl. the two former launch-blockers (campaign-create + password-reset, closed 2026-06-26). Only a cosmetic mock greeting + one dead method remain. |
 
