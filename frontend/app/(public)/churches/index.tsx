@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../../components/layout/Screen';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import RemoteImage from '../../../components/ui/RemoteImage';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { churchesService } from '../../../services/churches.service';
 import { PublicChurch } from '../../../types';
 
@@ -94,9 +95,16 @@ function ChurchCard({
       accessibilityRole="button"
       accessibilityLabel={`View ${church.name}`}
     >
-      <View style={styles.logoCircle}>
-        <Text style={styles.logoText}>{initials}</Text>
-      </View>
+      <RemoteImage
+        uri={church.logoUrl}
+        style={styles.logoCircle}
+        resizeMode="cover"
+        fallback={
+          <View style={[styles.logoCircle, styles.logoFallback]}>
+            <Text style={styles.logoText}>{initials}</Text>
+          </View>
+        }
+      />
 
       <View style={styles.cardBody}>
         <Text style={styles.churchName} numberOfLines={2}>
@@ -120,7 +128,9 @@ function ChurchCard({
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <View style={styles.empty}>
-      <Ionicons name="business-outline" size={48} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="business-outline" size={30} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyTitle}>No churches found</Text>
       <Text style={styles.emptySubtext}>
         {hasFilters
@@ -134,7 +144,9 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <View style={styles.empty}>
-      <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="cloud-offline-outline" size={30} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyTitle}>Couldn’t load churches</Text>
       <Text style={styles.emptySubtext}>
         Please check your connection and try again.
@@ -193,8 +205,10 @@ export default function BrowseChurchesScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.root}>
       <View style={styles.stickyHeader}>
+        {/* Full-bleed nav so the back arrow anchors to the window edge on wide web
+            (the centered title is unaffected). */}
+        <NavBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <View style={isWideWeb && styles.wideCap}>
-          <NavBar onBack={() => router.back()} />
           <View style={styles.searchWrapper}>
             <SearchBar value={search} onChange={setSearch} />
           </View>
@@ -245,14 +259,10 @@ const styles = StyleSheet.create({
   // Sticky header
   stickyHeader: {
     backgroundColor: Colors.primary,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadows.md,
   },
   nav: {
-    height: 56,
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -277,9 +287,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    height: 44,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: Spacing.md + 2,
+    height: 46,
     gap: Spacing.sm,
   },
   searchIcon: {
@@ -329,31 +339,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
     gap: Spacing.md,
+    ...Shadows.sm,
   },
   logoCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: Colors.primary,
+    flexShrink: 0,
+  },
+  logoFallback: {
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0,
   },
   logoText: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.lg,
-    color: Colors.white,
+    color: Colors.primary,
   },
   cardBody: {
     flex: 1,
@@ -361,9 +369,9 @@ const styles = StyleSheet.create({
   },
   churchName: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   meta: {
     fontFamily: 'Poppins-Regular',
@@ -377,7 +385,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   campaignCountActive: {
-    color: Colors.primary,
+    fontFamily: 'Poppins-SemiBold',
+    color: Colors.primaryDark,
   },
 
   // Empty state
@@ -387,9 +396,17 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: Spacing.lg,
   },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     color: Colors.text,
     marginTop: Spacing.md,
     marginBottom: 6,
@@ -399,13 +416,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: FontSize.md * 1.5,
+    lineHeight: FontSize.md * 1.55,
+    maxWidth: 420,
   },
   retryBtn: {
-    marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

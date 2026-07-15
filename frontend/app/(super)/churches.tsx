@@ -537,7 +537,7 @@ export default function SuperChurchesScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Wide-web (≥768) only — list content and its outside-the-list siblings share
   // one centered 760 column.
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: BorderRadius.md,
     gap: 8,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
   auditBtnText: {
     fontFamily: 'Poppins-Medium',

@@ -114,7 +114,7 @@ export default function SuperAdminLayout() {
         tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopWidth: 1,
-          borderTopColor: Colors.border,
+          borderTopColor: Colors.borderLight,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 4,
           paddingTop: 6,

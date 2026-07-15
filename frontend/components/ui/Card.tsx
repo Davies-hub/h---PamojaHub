@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ViewProps } from 'react-native';
-import { BorderRadius, Colors, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, Shadows, Spacing } from '../../constants/theme';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;
@@ -18,13 +18,9 @@ export default function Card({ children, padding = Spacing.md, style, ...props }
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
+    borderColor: Colors.borderLight,
+    ...Shadows.sm,
   },
 });

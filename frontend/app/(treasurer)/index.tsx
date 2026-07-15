@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -11,13 +12,13 @@ import {
 } from 'react-native';
 import { useIsWideWeb } from '../../components/layout/Screen';
 import ProgressBar from '../../components/ui/ProgressBar';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { campaignsService } from '../../services/campaigns.service';
 import { dashboardService } from '../../services/dashboard.service';
 import { notificationsService } from '../../services/notifications.service';
-import { DashboardStats, RecentDonation, TreasurerCampaign } from '../../types';
 import { useAuth } from '../../stores/auth.store';
 import { useNotifications } from '../../stores/notifications.store';
+import { DashboardStats, RecentDonation, TreasurerCampaign } from '../../types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -42,27 +43,80 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-// ─── Summary card ─────────────────────────────────────────────────────────────
-
-interface SummaryCardProps {
-  label: string;
-  value: string;
-  variant?: 'default' | 'danger';
+function todayLine(): string {
+  return new Date().toLocaleDateString('en-KE', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
 }
 
-function SummaryCard({ label, value, variant = 'default' }: SummaryCardProps) {
-  const danger = variant === 'danger';
+// Display-only initials for the donor avatar ('?' for anonymous gifts).
+function donorInitials(name: string | null | undefined): string {
+  const trimmed = name?.trim();
+  if (!trimmed) return '?';
+  return trimmed
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase();
+}
+
+// ─── Hero money card ──────────────────────────────────────────────────────────
+
+function HeroStat({ value, label }: { value: string; label: string }) {
   return (
-    <View style={[styles.summaryCard, danger && styles.summaryCardDanger]}>
-      <Text
-        style={[styles.summaryValue, danger && styles.summaryValueDanger]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-      >
-        {value}
-      </Text>
-      <Text style={styles.summaryLabel}>{label}</Text>
+    <View style={styles.heroStat}>
+      <Text style={styles.heroStatValue} numberOfLines={1}>{value}</Text>
+      <Text style={styles.heroStatLabel} numberOfLines={1}>{label}</Text>
     </View>
+  );
+}
+
+// Phone: the three stats stack as ledger rows so long KES values never truncate.
+function HeroLedgerRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.heroLedgerRow}>
+      <Text style={styles.heroStatLabel}>{label}</Text>
+      <Text style={styles.heroLedgerValue} numberOfLines={1}>{value}</Text>
+    </View>
+  );
+}
+
+function MoneyHeroCard({ stats }: { stats: DashboardStats }) {
+  const isWideWeb = useIsWideWeb();
+  return (
+    <LinearGradient
+      colors={[Colors.primaryDark, Colors.primary]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.heroCard}
+    >
+      <View pointerEvents="none" style={styles.heroOrnamentA} />
+      <View pointerEvents="none" style={styles.heroOrnamentB} />
+
+      <Text style={styles.heroEyebrow}>TOTAL RAISED · ON RECORD</Text>
+      <Text style={styles.heroAmount} numberOfLines={1} adjustsFontSizeToFit>
+        {fmtKes(stats.totalRaised)}
+      </Text>
+
+      <View style={styles.heroDivider} />
+
+      {isWideWeb ? (
+        <View style={styles.heroStatsRow}>
+          <HeroStat value={fmtKes(stats.walletBalance)} label="Wallet balance" />
+          <View style={styles.heroStatDivider} />
+          <HeroStat value={String(stats.activeCampaigns)} label="Active campaigns" />
+          <View style={styles.heroStatDivider} />
+          <HeroStat value={String(stats.pendingDisbursements)} label="Pending payouts" />
+        </View>
+      ) : (
+        <View style={styles.heroLedgerStack}>
+          <HeroLedgerRow label="Wallet balance" value={fmtKes(stats.walletBalance)} />
+          <HeroLedgerRow label="Active campaigns" value={String(stats.activeCampaigns)} />
+          <HeroLedgerRow label="Pending payouts" value={String(stats.pendingDisbursements)} />
+        </View>
+      )}
+    </LinearGradient>
   );
 }
 
@@ -71,6 +125,9 @@ function SummaryCard({ label, value, variant = 'default' }: SummaryCardProps) {
 const DonationRow = React.memo(function DonationRow({ item }: { item: RecentDonation }) {
   return (
     <View style={styles.donationRow}>
+      <View style={styles.donorAvatar}>
+        <Text style={styles.donorAvatarText}>{donorInitials(item.donorName)}</Text>
+      </View>
       <View style={styles.donationLeft}>
         <Text style={styles.donorName} numberOfLines={1}>
           {item.donorName ?? 'Anonymous'}
@@ -92,11 +149,14 @@ const DonationRow = React.memo(function DonationRow({ item }: { item: RecentDona
 
 const CampaignQuickCard = React.memo(function CampaignQuickCard({
   item,
+  wide = false,
 }: {
   item: TreasurerCampaign;
+  /** Visual-only: full-width row variant for the wide-web column layout. */
+  wide?: boolean;
 }) {
   return (
-    <View style={styles.campaignCard}>
+    <View style={[styles.campaignCard, wide && styles.campaignCardWide]}>
       {item.groupLabelName ? (
         <View style={styles.groupBadge}>
           <Text style={styles.groupBadgeText}>{item.groupLabelName}</Text>
@@ -109,7 +169,7 @@ const CampaignQuickCard = React.memo(function CampaignQuickCard({
         <ProgressBar
           raised={item.walletBalance}
           goal={item.goalAmount}
-          height={4}
+          height={6}
           showLabels={false}
         />
       </View>
@@ -139,7 +199,10 @@ function SectionHeader({
         accessibilityLabel={linkLabel}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Text style={styles.seeAll}>{linkLabel}</Text>
+        <View style={styles.seeAllRow}>
+          <Text style={styles.seeAll}>{linkLabel}</Text>
+          <Ionicons name="arrow-forward" size={13} color={Colors.primary} />
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -166,7 +229,7 @@ export default function OverviewScreen() {
   const [campaignsState, setCampaignsState] = useState<'loading' | 'error' | 'ok'>('loading');
   const [campaignsReload, setCampaignsReload] = useState(0);
 
-  // Stats (the 4 cards + recent-donations feed) — authed GET /churches/me/stats/.
+  // Stats (hero card + pending banner + recent-donations feed) — authed GET /churches/me/stats/.
   useEffect(() => {
     let cancelled = false;
     setStatsState('loading');
@@ -232,6 +295,86 @@ export default function OverviewScreen() {
     router.navigate('/(treasurer)/campaigns' as any);
   }
 
+  // Shared section blocks (rendered once, placed by width below).
+
+  const donationsCard = stats ? (
+    <View style={styles.card}>
+      <SectionHeader title="Recent Donations" linkLabel="See all" />
+      {stats.recentDonations.length === 0 ? (
+        <View style={styles.emptyFeed}>
+          <View style={styles.emptyFeedIcon}>
+            <Ionicons name="heart-outline" size={22} color={Colors.primary} />
+          </View>
+          <Text style={styles.emptyInline}>
+            No donations yet — share a campaign to get started.
+          </Text>
+        </View>
+      ) : (
+        stats.recentDonations.map((item, index) => (
+          // Receipt is NOT guaranteed unique (a sandbox can repeat a receipt
+          // across rows), so the key is receipt + index — mirrors reports.tsx.
+          <React.Fragment key={`${item.mpesaReceipt}-${index}`}>
+            <DonationRow item={item} />
+            {index < stats.recentDonations.length - 1 ? (
+              <View style={styles.divider} />
+            ) : null}
+          </React.Fragment>
+        ))
+      )}
+    </View>
+  ) : null;
+
+  const campaignsCard = (
+    <View style={[styles.card, !isWideWeb && styles.cardNoPadBottom]}>
+      <SectionHeader
+        title="Your Campaigns"
+        linkLabel="Manage"
+        onPress={goToCampaigns}
+      />
+      {campaignsState === 'loading' ? (
+        <View style={styles.centerInline}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+        </View>
+      ) : campaignsState === 'error' ? (
+        <View style={styles.centerInline}>
+          <Text style={styles.emptyInline}>Couldn’t load campaigns.</Text>
+          <TouchableOpacity
+            onPress={() => setCampaignsReload(k => k + 1)}
+            accessibilityRole="button"
+            accessibilityLabel="Retry campaigns"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.retryInlineText}>Try again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : campaigns.length === 0 ? (
+        <View style={styles.emptyFeed}>
+          <View style={styles.emptyFeedIcon}>
+            <Ionicons name="megaphone-outline" size={22} color={Colors.primary} />
+          </View>
+          <Text style={styles.emptyInline}>No active campaigns</Text>
+        </View>
+      ) : isWideWeb ? (
+        // Wide web: vertical stack in the right column
+        <View style={styles.campaignsColumn}>
+          {campaigns.map((item) => (
+            <CampaignQuickCard key={item.id} item={item} wide />
+          ))}
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.campaignsScroll}
+        >
+          {campaigns.map((item) => (
+            <CampaignQuickCard key={item.id} item={item} />
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -241,9 +384,12 @@ export default function OverviewScreen() {
       >
         {/* ── Greeting + notifications bell ── */}
         <View style={styles.greetingRow}>
-          <Text style={styles.greeting} numberOfLines={1}>
-            {getGreeting()}{firstName ? `, ${firstName}` : ''}
-          </Text>
+          <View style={styles.greetingBlock}>
+            <Text style={styles.greeting} numberOfLines={1}>
+              {getGreeting()}{firstName ? `, ${firstName}` : ''}
+            </Text>
+            <Text style={styles.greetingDate}>{todayLine()}</Text>
+          </View>
           <TouchableOpacity
             style={styles.bellBtn}
             onPress={goToNotifications}
@@ -251,7 +397,7 @@ export default function OverviewScreen() {
             accessibilityRole="button"
             accessibilityLabel={`Notifications, ${unreadCount} unread`}
           >
-            <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
+            <Ionicons name="notifications-outline" size={22} color={Colors.primary} />
             {unreadCount > 0 ? (
               <View style={styles.bellBadge}>
                 <Text style={styles.bellBadgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
@@ -260,14 +406,16 @@ export default function OverviewScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── 1. Summary grid + 2. pending banner + 3. recent donations (all from stats) ── */}
+        {/* ── 1. Hero money card + 2. pending banner + 3. sections ── */}
         {statsState === 'loading' ? (
           <View style={styles.centerBlock}>
             <ActivityIndicator size="large" color={Colors.primary} />
           </View>
         ) : statsState === 'error' ? (
           <View style={styles.errorBlock}>
-            <Ionicons name="cloud-offline-outline" size={40} color={Colors.border} />
+            <View style={styles.errorIconCircle}>
+              <Ionicons name="cloud-offline-outline" size={30} color={Colors.primary} />
+            </View>
             <Text style={styles.errorText}>Couldn’t load your dashboard.</Text>
             <TouchableOpacity
               style={styles.retryBtn}
@@ -281,20 +429,7 @@ export default function OverviewScreen() {
           </View>
         ) : stats ? (
           <>
-            <View style={styles.summaryGrid}>
-              <View style={styles.summaryRow}>
-                <SummaryCard value={fmtKes(stats.totalRaised)} label="Total Raised" />
-                <SummaryCard value={fmtKes(stats.walletBalance)} label="Wallet Balance" />
-              </View>
-              <View style={styles.summaryRow}>
-                <SummaryCard value={String(stats.activeCampaigns)} label="Active Campaigns" />
-                <SummaryCard
-                  value={String(stats.pendingDisbursements)}
-                  label="Pending Payouts"
-                  variant={stats.pendingDisbursements > 0 ? 'danger' : 'default'}
-                />
-              </View>
-            </View>
+            <MoneyHeroCard stats={stats} />
 
             {stats.pendingDisbursements > 0 ? (
               <TouchableOpacity
@@ -304,74 +439,39 @@ export default function OverviewScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={`${stats.pendingDisbursements} payout requests need approval. Tap to review.`}
               >
-                <View style={styles.alertAccent} />
-                <View style={styles.alertBody}>
-                  <Text style={styles.alertText}>
-                    {stats.pendingDisbursements} payout request
-                    {stats.pendingDisbursements !== 1 ? 's' : ''} need your approval
-                  </Text>
-                  <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
+                <View style={styles.alertIconCircle}>
+                  <Ionicons name="alert" size={16} color={Colors.white} />
                 </View>
+                <Text style={styles.alertText}>
+                  {stats.pendingDisbursements} payout request
+                  {stats.pendingDisbursements !== 1 ? 's' : ''} need your approval
+                </Text>
+                <Ionicons name="chevron-forward" size={18} color={Colors.accentDark} />
               </TouchableOpacity>
             ) : null}
 
-            <View style={styles.card}>
-              <SectionHeader title="Recent Donations" linkLabel="See all" />
-              {stats.recentDonations.length === 0 ? (
-                <Text style={styles.emptyInline}>No donations yet</Text>
-              ) : (
-                stats.recentDonations.map((item, index) => (
-                  // Receipt is NOT guaranteed unique (a sandbox can repeat a receipt
-                  // across rows), so the key is receipt + index — mirrors reports.tsx.
-                  <React.Fragment key={`${item.mpesaReceipt}-${index}`}>
-                    <DonationRow item={item} />
-                    {index < stats.recentDonations.length - 1 ? (
-                      <View style={styles.divider} />
-                    ) : null}
-                  </React.Fragment>
-                ))
-              )}
-            </View>
+            {isWideWeb ? (
+              // Wide web: activity feed and campaigns side by side
+              <View style={styles.wideColumns}>
+                <View style={styles.wideColMain}>{donationsCard}</View>
+                <View style={styles.wideColSide}>{campaignsCard}</View>
+              </View>
+            ) : (
+              <>
+                {donationsCard}
+                {campaignsCard}
+              </>
+            )}
           </>
         ) : null}
 
-        {/* ── 4. Active campaigns quick view (independent fetch) ── */}
-        <View style={[styles.card, styles.cardNoPadBottom]}>
-          <SectionHeader
-            title="Your Campaigns"
-            linkLabel="Manage"
-            onPress={goToCampaigns}
-          />
-          {campaignsState === 'loading' ? (
-            <View style={styles.centerInline}>
-              <ActivityIndicator size="small" color={Colors.primary} />
-            </View>
-          ) : campaignsState === 'error' ? (
-            <View style={styles.centerInline}>
-              <Text style={styles.emptyInline}>Couldn’t load campaigns.</Text>
-              <TouchableOpacity
-                onPress={() => setCampaignsReload(k => k + 1)}
-                accessibilityRole="button"
-                accessibilityLabel="Retry campaigns"
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={styles.retryInlineText}>Try again</Text>
-              </TouchableOpacity>
-            </View>
-          ) : campaigns.length === 0 ? (
-            <Text style={styles.emptyInline}>No active campaigns</Text>
-          ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.campaignsScroll}
-            >
-              {campaigns.map((item) => (
-                <CampaignQuickCard key={item.id} item={item} />
-              ))}
-            </ScrollView>
-          )}
-        </View>
+        {/* Campaigns still render (own fetch) if stats failed on phone */}
+        {statsState !== 'ok' && !isWideWeb ? campaignsCard : null}
+        {statsState !== 'ok' && isWideWeb ? (
+          <View style={styles.wideColumns}>
+            <View style={styles.wideColSide}>{campaignsCard}</View>
+          </View>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -392,43 +492,59 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 4,
   },
-  greeting: {
+  greetingBlock: {
     flex: 1,
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.lg,
-    color: Colors.text,
     marginRight: Spacing.sm,
+  },
+  greeting: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.xl,
+    color: Colors.text,
+    lineHeight: FontSize.xl * 1.35,
+  },
+  greetingDate: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    marginTop: 1,
   },
   bellBtn: {
     width: 44,
     height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    ...Shadows.sm,
   },
   bellBadge: {
     position: 'absolute',
-    top: 4,
-    right: 2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
+    top: 2,
+    right: 0,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
     backgroundColor: Colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: Colors.white,
   },
   bellBadgeText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 9,
     color: Colors.white,
-    lineHeight: 14,
+    lineHeight: 13,
   },
 
   // Scroll
   scroll: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
   scrollContent: {
     padding: Spacing.md,
@@ -436,9 +552,107 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   wideCap: {
-    maxWidth: 760,
+    maxWidth: 1100,
     width: '100%',
     alignSelf: 'center',
+  },
+  wideColumns: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  wideColMain: {
+    flex: 1.45,
+    minWidth: 0,
+  },
+  wideColSide: {
+    flex: 1,
+    minWidth: 0,
+  },
+
+  // Hero money card
+  heroCard: {
+    borderRadius: BorderRadius.xl + 4,
+    padding: Spacing.lg,
+    overflow: 'hidden',
+    ...Shadows.lg,
+  },
+  heroOrnamentA: {
+    position: 'absolute',
+    top: -80,
+    right: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+  },
+  heroOrnamentB: {
+    position: 'absolute',
+    bottom: -90,
+    left: -70,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  heroEyebrow: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: 'rgba(255,255,255,0.75)',
+    marginBottom: 6,
+  },
+  heroAmount: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.title,
+    color: Colors.white,
+    lineHeight: FontSize.title * 1.25,
+  },
+  heroDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    marginVertical: Spacing.md,
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heroStat: {
+    flex: 1,
+    minWidth: 0,
+  },
+  heroStatValue: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.base,
+    color: Colors.white,
+    lineHeight: FontSize.base * 1.4,
+  },
+  heroStatLabel: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.72)',
+    marginTop: 1,
+  },
+  heroStatDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    marginHorizontal: Spacing.md,
+  },
+  heroLedgerStack: {
+    gap: 6,
+  },
+  heroLedgerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  heroLedgerValue: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.base,
+    color: Colors.white,
+    flexShrink: 0,
   },
 
   // Loading / error / empty (dashboard)
@@ -452,6 +666,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
+  errorIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   errorText: {
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
@@ -460,9 +682,9 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 4,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -476,8 +698,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
     color: Colors.textMuted,
-    paddingVertical: Spacing.md,
     textAlign: 'center',
+  },
+  emptyFeed: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.lg,
+  },
+  emptyFeedIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centerInline: {
     paddingVertical: Spacing.md,
@@ -490,86 +724,40 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Summary grid
-  summaryGrid: {
-    gap: 10,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  summaryCardDanger: {
-    backgroundColor: Colors.dangerLight,
-    borderColor: Colors.dangerLight,
-  },
-  summaryValue: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.xxl,
-    color: Colors.primary,
-    marginBottom: 4,
-  },
-  summaryValueDanger: {
-    color: Colors.danger,
-  },
-  summaryLabel: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-  },
-
   // Alert banner
   alertBanner: {
     flexDirection: 'row',
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.accentLight,
-    overflow: 'hidden',
-  },
-  alertAccent: {
-    width: 4,
-    backgroundColor: Colors.accent,
-    alignSelf: 'stretch',
-  },
-  alertBody: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 13,
+    gap: Spacing.sm + 2,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.accentLight,
+    paddingVertical: Spacing.sm + 4,
     paddingHorizontal: Spacing.md,
   },
+  alertIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
   alertText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.sm,
     color: Colors.accentDark,
     flex: 1,
-    marginRight: Spacing.sm,
   },
 
   // Cards (sections)
   card: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.sm,
   },
   cardNoPadBottom: {
     paddingBottom: Spacing.sm,
@@ -582,11 +770,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.text,
   },
+  seeAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   seeAll: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.sm,
     color: Colors.primary,
   },
@@ -594,15 +787,31 @@ const styles = StyleSheet.create({
   // Donation rows
   donationRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingVertical: 10,
+    gap: Spacing.sm + 2,
+  },
+  donorAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  donorAvatarText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: FontSize.xs,
+    color: Colors.primary,
   },
   donationLeft: {
     flex: 1,
-    marginRight: Spacing.md,
+    marginRight: Spacing.sm,
+    minWidth: 0,
   },
   donorName: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: FontSize.md,
     color: Colors.text,
   },
@@ -610,14 +819,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    marginTop: 2,
+    marginTop: 1,
   },
   donationReceipt: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 11,
-    color: Colors.border,
-    marginTop: 3,
-    letterSpacing: 0.4,
+    fontSize: 10,
+    color: Colors.textMuted,
+    opacity: 0.7,
+    marginTop: 2,
+    letterSpacing: 0.6,
   },
   donationRight: {
     alignItems: 'flex-end',
@@ -635,7 +845,8 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.borderLight,
+    marginLeft: 38 + Spacing.sm + 2,
   },
 
   // Campaign quick cards
@@ -643,19 +854,22 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingRight: Spacing.xs,
   },
+  campaignsColumn: {
+    gap: Spacing.sm + 2,
+  },
   campaignCard: {
-    width: 210,
+    width: 220,
     backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
     marginRight: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
+  },
+  campaignCardWide: {
+    width: '100%',
+    marginRight: 0,
   },
   groupBadge: {
     alignSelf: 'flex-start',
@@ -668,7 +882,7 @@ const styles = StyleSheet.create({
   groupBadgeText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 10,
-    color: Colors.primary,
+    color: Colors.primaryDark,
   },
   campaignCardTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -691,25 +905,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textMuted,
     marginTop: 1,
-  },
-  campaignDivider: {
-    height: 1,
-    backgroundColor: Colors.grey,
-    marginVertical: 10,
-  },
-  walletRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  walletLabel: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.xs,
-    color: Colors.textMuted,
-  },
-  walletAmount: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.sm,
-    color: Colors.success,
   },
 });

@@ -61,7 +61,7 @@ export default function Button({
 const styles = StyleSheet.create({
   base: {
     height: 48,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
@@ -69,6 +69,6 @@ const styles = StyleSheet.create({
   fullWidth: { width: '100%' },
   label: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.md,
   },
 });

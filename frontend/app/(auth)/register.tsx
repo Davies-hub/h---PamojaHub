@@ -9,16 +9,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Screen from '../../components/layout/Screen';
 import CountyPicker from '../../components/ui/CountyPicker';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { authService } from '../../services/auth.service';
+
+// Web: pin the back button to the VIEWPORT (not the document). The auth forms are
+// taller than the viewport, so the page scrolls; position:absolute would ride the
+// scroll and slide the button off-screen. `fixed` keeps it edge-anchored. RN types
+// don't know 'fixed'; it's a harmless no-op on native (which scrolls internally).
+const webFixedBackBtn = Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as object) : null;
 
 interface FormErrors {
   churchName?: string;
@@ -61,7 +69,9 @@ function Field({
 function SuccessScreen({ onHome }: { onHome: () => void }) {
   return (
     <View style={styles.successContainer}>
-      <Ionicons name="checkmark-circle" size={72} color={Colors.success} />
+      <View style={styles.successIconCircle}>
+        <Ionicons name="checkmark-circle" size={48} color={Colors.success} />
+      </View>
       <Text style={styles.successHeading}>Application submitted.</Text>
       <Text style={styles.successBody}>
         We will review your application and contact you within 2 business days.
@@ -121,6 +131,8 @@ function ProfilePhotoSection({
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
 
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [churchName, setChurchName] = useState('');
@@ -222,38 +234,52 @@ export default function RegisterScreen() {
   if (submitted) {
     return (
       <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
         <SuccessScreen onHome={() => router.replace('/')} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={styles.screen}>
+      {/* Back button — fixed edge overlay, OUTSIDE the scrolled/centered content
+          so it can never be clipped above the scroll origin (A7 regression fix). */}
+      <TouchableOpacity
+        style={[styles.backBtn, webFixedBackBtn, { top: statusBarHeight + Spacing.sm }]}
+        onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="arrow-back" size={22} color={Colors.text} />
-          </TouchableOpacity>
+        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
 
+      <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
+        {/* Decorative — oversized brand circles behind the card */}
+        <View pointerEvents="none" style={styles.bgOrnamentA} />
+        <View pointerEvents="none" style={styles.bgOrnamentB} />
+
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Screen variant="form">
+          <View style={styles.card}>
           <ProfilePhotoSection uri={profilePhoto} onPress={handlePhotoPress} />
           <Wordmark />
           <Text style={styles.heading}>Register Your Church</Text>
-          <Text style={styles.helperText}>
-            The person completing this form becomes the designated Church Treasurer — the primary contact for payouts and campaign management.
-          </Text>
+          <View style={styles.helperBox}>
+            <Ionicons name="information-circle-outline" size={18} color={Colors.primaryDark} style={styles.helperIcon} />
+            <Text style={styles.helperText}>
+              The person completing this form becomes the designated Church Treasurer — the primary contact for payouts and campaign management.
+            </Text>
+          </View>
 
           {/* Church name */}
           <Field label="Church name" error={errors.churchName}>
@@ -394,19 +420,25 @@ export default function RegisterScreen() {
               <Text style={styles.signInLink}>Sign in</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-    </SafeAreaView>
+          </View>
+          </Screen>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.surfaceSubtle,
+  },
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfaceSubtle,
   },
   flex: { flex: 1 },
   content: {
@@ -416,13 +448,50 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
 
+  // Background ornaments — oversized, very quiet
+  bgOrnamentA: {
+    position: 'absolute',
+    top: -130,
+    right: -110,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: 'rgba(5,124,138,0.06)',
+  },
+  bgOrnamentB: {
+    position: 'absolute',
+    bottom: -150,
+    left: -130,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(5,124,138,0.05)',
+  },
+
   backBtn: {
-    width: Spacing.touch,
-    height: Spacing.touch,
+    position: 'absolute',
+    left: Spacing.md,
+    zIndex: 50,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -Spacing.sm,
-    marginBottom: Spacing.md,
+    ...Shadows.md,
+  },
+
+  // The floating auth card
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    ...Shadows.lg,
   },
 
   // Profile photo
@@ -485,7 +554,8 @@ const styles = StyleSheet.create({
   wordmark: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.xxxl,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
   wordmarkPamoja: { color: Colors.primary },
   wordmarkHub: { color: Colors.accent },
@@ -494,18 +564,28 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.title,
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  helperBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 4,
+    marginBottom: Spacing.xl,
+  },
+  helperIcon: {
+    marginTop: 2,
   },
   helperText: {
+    flex: 1,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: Colors.primaryDark,
     lineHeight: FontSize.sm * 1.65,
-    marginBottom: Spacing.xl,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
   },
 
   fieldGroup: {
@@ -514,14 +594,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.base,
@@ -543,9 +623,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.white,
-    height: Spacing.touch,
+    height: 50,
   },
   passwordInput: {
     flex: 1,
@@ -567,7 +647,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingVertical: 10,
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
@@ -581,7 +661,7 @@ const styles = StyleSheet.create({
 
   primaryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -618,13 +698,31 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Success state
+  // Success state — floating card on the tinted page
   successContainer: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxl,
     gap: Spacing.md,
+    maxWidth: 480,
+    alignSelf: 'center',
+    marginHorizontal: Spacing.md,
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.lg,
+  },
+  successIconCircle: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: Colors.successLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   successHeading: {
     fontFamily: 'Poppins-Bold',

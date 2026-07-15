@@ -125,10 +125,10 @@ export default function CountyPicker({
 
 const styles = StyleSheet.create({
   trigger: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CampaignCard from '../../../components/campaign/CampaignCard';
 import { useIsWideWeb } from '../../../components/layout/Screen';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignCategory, PublicCampaign } from '../../../types';
 
@@ -113,7 +113,9 @@ function CategoryChips({
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <View style={styles.empty}>
-      <Ionicons name="search-outline" size={48} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="search-outline" size={30} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyTitle}>No campaigns found</Text>
       <Text style={styles.emptySubtext}>
         {hasFilters
@@ -127,7 +129,9 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <View style={styles.empty}>
-      <Ionicons name="cloud-offline-outline" size={48} color={Colors.border} />
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="cloud-offline-outline" size={30} color={Colors.primary} />
+      </View>
       <Text style={styles.emptyTitle}>Couldn’t load campaigns</Text>
       <Text style={styles.emptySubtext}>
         Please check your connection and try again.
@@ -190,8 +194,10 @@ export default function BrowseCampaignsScreen() {
     <SafeAreaView edges={['top']} style={styles.root}>
       {/* Sticky header: nav + search */}
       <View style={styles.stickyHeader}>
+        {/* Full-bleed nav so the back arrow anchors to the window edge on wide web
+            (the centered title is unaffected). */}
+        <NavBar onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <View style={isWideWeb && styles.wideCap}>
-          <NavBar onBack={() => router.back()} />
           <View style={styles.searchWrapper}>
             <SearchBar value={search} onChange={setSearch} />
           </View>
@@ -245,14 +251,10 @@ const styles = StyleSheet.create({
   // Sticky header
   stickyHeader: {
     backgroundColor: Colors.primary,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadows.md,
   },
   nav: {
-    height: 56,
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -277,9 +279,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    height: 44,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: Spacing.md + 2,
+    height: 46,
     gap: Spacing.sm,
   },
   searchIcon: {
@@ -302,7 +304,8 @@ const styles = StyleSheet.create({
   },
   chipList: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm + 2,
     gap: Spacing.sm,
     alignItems: 'center',
   },
@@ -311,8 +314,8 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderColor: Colors.borderLight,
+    backgroundColor: Colors.surfaceSubtle,
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
@@ -355,7 +358,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   gridRow: {
-    gap: Spacing.md,
+    gap: Spacing.lg,
   },
   gridItem: {
     flex: 1,
@@ -369,9 +372,17 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: Spacing.lg,
   },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     color: Colors.text,
     marginTop: Spacing.md,
     marginBottom: 6,
@@ -381,13 +392,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: FontSize.md * 1.5,
+    lineHeight: FontSize.md * 1.55,
+    maxWidth: 420,
   },
   retryBtn: {
-    marginTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     height: Spacing.touch,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

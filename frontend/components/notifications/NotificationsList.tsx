@@ -247,7 +247,7 @@ export function NotificationsList({
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.grey },
+  root: { flex: 1, backgroundColor: Colors.surfaceSubtle },
 
   // Wide-web (≥768) only — list content and its outside-the-list siblings share
   // one centered 760 column.
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     height: 48,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   backBtn: {
     flexDirection: 'row',
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   headerBarText: {
     fontFamily: 'Poppins-Medium',
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     minHeight: Spacing.touch,
     justifyContent: 'center',
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
 
   separator: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginLeft: 72,
   },
 
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   syncBarText: {
     flex: 1,

@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import { useIsWideWeb } from '../../../components/layout/Screen';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { groupsService } from '../../../services/groups.service';
 import { CampaignCategory } from '../../../types';
@@ -367,7 +367,7 @@ export default function NewCampaignScreen() {
         {/* Back link */}
         <TouchableOpacity
           style={styles.backLink}
-          onPress={() => router.back()}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(treasurer)/campaigns' as any))}
           accessibilityRole="button"
           accessibilityLabel="Back to Campaigns"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -637,7 +637,7 @@ export default function NewCampaignScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
   },
   scroll: {
     flex: 1,
@@ -670,15 +670,11 @@ const styles = StyleSheet.create({
   // Section card
   sectionCard: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     padding: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.sm,
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -693,8 +689,8 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: Spacing.sm,
     backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
   },
   sectionFields: {
     gap: Spacing.sm,
@@ -721,10 +717,10 @@ const styles = StyleSheet.create({
 
   // Text inputs
   textInput: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
     fontSize: FontSize.md,
@@ -759,10 +755,10 @@ const styles = StyleSheet.create({
 
   // Picker field (looks like a TextInput)
   pickerField: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
@@ -788,11 +784,11 @@ const styles = StyleSheet.create({
   uploadBox: {
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     paddingVertical: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.surfaceSubtle,
     gap: 6,
   },
   uploadBoxDashed: {
@@ -821,7 +817,7 @@ const styles = StyleSheet.create({
   saveBtn: {
     height: 52,
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.sm,
@@ -841,10 +837,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.danger,
-    padding: Spacing.sm,
+    padding: Spacing.sm + 2,
   },
   submitErrorText: {
     flex: 1,
@@ -901,7 +897,7 @@ const styles = StyleSheet.create({
   },
   pickerSep: {
     height: 1,
-    backgroundColor: Colors.grey,
+    backgroundColor: Colors.borderLight,
     marginHorizontal: Spacing.md,
   },
 });

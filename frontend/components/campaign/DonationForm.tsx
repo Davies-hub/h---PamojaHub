@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -8,12 +9,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { donationsService } from '../../services/donations.service';
 
 interface DonationFormProps {
   campaignSlug: string;
   campaignTitle: string;
+  /** Visual-only: drop the card chrome when embedded inside a parent card. */
+  flat?: boolean;
 }
 
 // 'submitting'  = initiate request in flight
@@ -51,7 +54,8 @@ function extractDetail(data: unknown): string | undefined {
   return undefined;
 }
 
-export default function DonationForm({ campaignSlug, campaignTitle: _campaignTitle }: DonationFormProps) {
+export default function DonationForm({ campaignSlug, campaignTitle: _campaignTitle, flat = false }: DonationFormProps) {
+  const cardStyle = [styles.card, flat && styles.cardFlat];
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [donorName, setDonorName] = useState('');
@@ -227,7 +231,7 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
   // ── Confirming (STK sent — polling for the PIN verdict) ────────────────────────
   if (donationState === 'confirming') {
     return (
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <View style={styles.confirmingBox}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.confirmingHeading}>Check your phone</Text>
@@ -242,8 +246,9 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
   // ── Success (driven ONLY by a SUCCESSFUL poll verdict) ─────────────────────────
   if (donationState === 'success') {
     return (
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <View style={styles.successBox}>
+          <Ionicons name="checkmark-circle" size={44} color={Colors.success} style={styles.stateIcon} />
           <Text style={styles.resultHeading}>Thank you!</Text>
           {result?.receipt ? (
             <Text style={styles.receiptText}>M-Pesa Receipt: {result.receipt}</Text>
@@ -268,8 +273,9 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
   // ── Failed (poll FAILED, or initiate 502/429/400-detail/404) ───────────────────
   if (donationState === 'failed') {
     return (
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <View style={styles.failedBox}>
+          <Ionicons name="close-circle" size={44} color={Colors.danger} style={styles.stateIcon} />
           <Text style={styles.failedHeading}>Payment not completed</Text>
           <Text style={styles.failedNote}>{failedMessage}</Text>
         </View>
@@ -289,8 +295,9 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
   // ── Unconfirmed (poll bound expired while PENDING — the honest unknown) ─────────
   if (donationState === 'unconfirmed') {
     return (
-      <View style={styles.card}>
+      <View style={cardStyle}>
         <View style={styles.unconfirmedBox}>
+          <Ionicons name="time-outline" size={44} color={Colors.warning} style={styles.stateIcon} />
           <Text style={styles.unconfirmedHeading}>Still confirming…</Text>
           <Text style={styles.unconfirmedNote}>
             We haven&apos;t confirmed your payment yet. If money left your M-Pesa, your
@@ -314,8 +321,11 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
   // ── Idle / Submitting ────────────────────────────────────────────────────────
   const busy = donationState === 'submitting';
   return (
-    <View style={styles.card}>
+    <View style={cardStyle}>
       <Text style={styles.formTitle}>Donate via M-Pesa</Text>
+      <Text style={styles.formCaption}>
+        You’ll get an M-Pesa prompt on your phone — no app needed.
+      </Text>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>M-Pesa Phone Number</Text>
@@ -397,32 +407,45 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
         }
       </TouchableOpacity>
 
-      <Text style={styles.finePrint}>
-        You will receive an M-Pesa prompt on your phone. Enter your PIN to complete.
-      </Text>
+      <View style={styles.finePrintRow}>
+        <Ionicons name="lock-closed" size={12} color={Colors.textMuted} />
+        <Text style={styles.finePrint}>
+          Secured by M-Pesa. Enter your PIN on your phone to complete.
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Margins removed — the screen owns outer spacing at both widths.
   card: {
     backgroundColor: Colors.white,
-    marginHorizontal: Spacing.md,
-    marginBottom: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderColor: Colors.borderLight,
+    ...Shadows.md,
+  },
+  // Embedded inside a parent card — chrome comes from the parent.
+  cardFlat: {
+    borderWidth: 0,
+    borderRadius: 0,
+    padding: 0,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   formTitle: {
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.lg,
-    color: Colors.primary,
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  formCaption: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    lineHeight: 17,
     marginBottom: Spacing.md,
   },
   inputGroup: {
@@ -431,17 +454,17 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: 6,
   },
   input: {
-    height: Spacing.touch,
+    height: 50,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     fontFamily: 'Poppins-Regular',
-    fontSize: FontSize.md,
+    fontSize: FontSize.base,
     color: Colors.text,
     backgroundColor: Colors.white,
   },
@@ -456,12 +479,12 @@ const styles = StyleSheet.create({
   },
   donateBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.xs,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.sm + 2,
   },
   donateBtnBusy: {
     opacity: 0.6,
@@ -471,12 +494,23 @@ const styles = StyleSheet.create({
     fontSize: FontSize.lg,
     color: Colors.white,
   },
+  finePrintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingHorizontal: Spacing.sm,
+  },
   finePrint: {
     fontFamily: 'Poppins-Regular',
     fontSize: 11,
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 16,
+    flexShrink: 1,
+  },
+  stateIcon: {
+    marginBottom: Spacing.xs,
   },
 
   // Confirming state
@@ -503,8 +537,8 @@ const styles = StyleSheet.create({
   // Success state
   successBox: {
     backgroundColor: Colors.successLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     marginBottom: Spacing.md,
     alignItems: 'center',
   },
@@ -528,7 +562,7 @@ const styles = StyleSheet.create({
   },
   againBtn: {
     backgroundColor: Colors.primaryLight,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
@@ -542,8 +576,8 @@ const styles = StyleSheet.create({
   // Failed state
   failedBox: {
     backgroundColor: Colors.dangerLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     marginBottom: Spacing.md,
     alignItems: 'center',
   },
@@ -562,7 +596,7 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     backgroundColor: Colors.accent,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.pill,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
@@ -571,8 +605,8 @@ const styles = StyleSheet.create({
   // Unconfirmed state
   unconfirmedBox: {
     backgroundColor: Colors.warningLight,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     marginBottom: Spacing.md,
     alignItems: 'center',
   },

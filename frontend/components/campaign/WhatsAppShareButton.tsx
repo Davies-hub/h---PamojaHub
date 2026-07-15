@@ -38,13 +38,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: WHATSAPP_GREEN,
-    borderRadius: BorderRadius.md,
-    height: 48,
+    borderRadius: BorderRadius.pill,
+    height: 52,
     gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
   label: {
     fontFamily: 'Poppins-Bold',
-    fontSize: FontSize.lg,
+    fontSize: FontSize.md,
     color: Colors.white,
   },
 });
