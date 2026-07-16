@@ -208,7 +208,25 @@ export default function CampaignDetailScreen() {
                 <ProgressBar raised={campaign.raisedAmount} goal={campaign.goalAmount} height={10} showLabels={false} />
               </View>
               <View style={styles.cardDivider} />
-              <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+              {/* Donate form only for ACTIVE campaigns — PAUSED/CLOSED show a notice
+                  instead (the backend initiate guard rejects non-ACTIVE anyway; this
+                  keeps the FE honest). Money/progress/share stay visible above. */}
+              {campaign.status === 'ACTIVE' ? (
+                <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+              ) : (
+                <View style={styles.statusNotice}>
+                  <Ionicons
+                    name={campaign.status === 'CLOSED' ? 'lock-closed-outline' : 'pause-circle-outline'}
+                    size={16}
+                    color={Colors.textSecondary}
+                  />
+                  <Text style={styles.statusNoticeText}>
+                    {campaign.status === 'CLOSED'
+                      ? 'This campaign has closed. Thank you to everyone who gave.'
+                      : 'This campaign is paused and not accepting donations right now.'}
+                  </Text>
+                </View>
+              )}
               <View style={styles.shareWrap}>
                 <WhatsAppShareButton campaignTitle={campaign.title} campaignUrl={campaignUrl} />
               </View>
@@ -566,6 +584,21 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.borderLight,
     marginVertical: Spacing.lg,
+  },
+  statusNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: Colors.grey,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+  },
+  statusNoticeText: {
+    flex: 1,
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 20,
   },
   shareWrap: {
     marginTop: Spacing.md,

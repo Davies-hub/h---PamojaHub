@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Linking,
   ScrollView,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
+import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignStatus, TreasurerCampaign } from '../../../types';
@@ -237,6 +237,10 @@ export default function TreasurerCampaignsScreen() {
   // banner is the feedback channel).
   const [actingSlug, setActingSlug] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  // Close is destructive → confirm first. ResponsiveSheet, NOT Alert.alert — Alert
+  // no-ops on react-native-web, which left the old confirm dead on web. Holds the
+  // campaign being confirmed (null = sheet hidden).
+  const [closeTarget, setCloseTarget] = useState<TreasurerCampaign | null>(null);
 
   // Authed GET /campaigns/mine/ (church-scoped server-side). Read-only here — the
   // pause/resume/close handlers below stay LOCAL-only (write/status slice is later).
@@ -294,24 +298,20 @@ export default function TreasurerCampaignsScreen() {
   function handleResume(slug: string) { runStatusAction(slug, 'resume'); }
 
   function handleClose(slug: string) {
-    if (actingSlug) return;             // re-entry guard before opening a second Alert
+    if (actingSlug) return;             // re-entry guard before opening a second confirm
     const campaign = campaigns.find(c => c.slug === slug);
     if (!campaign) return;
-    Alert.alert(
-      'Close Campaign',
-      `Close "${campaign.title}"?\n\nDonors will no longer be able to contribute. This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Close Campaign',
-          style: 'destructive',
-          // Routed through the SAME runner as pause/resume: no optimistic flip — the
-          // row only goes CLOSED after the server confirms (and the in-flight-money
-          // guard's 400 surfaces inline via actionError).
-          onPress: () => runStatusAction(slug, 'close'),
-        },
-      ],
-    );
+    setCloseTarget(campaign);           // opens the ResponsiveSheet confirm
+  }
+
+  // Routed through the SAME runner as pause/resume: no optimistic flip — the row
+  // only goes CLOSED after the server confirms (and the in-flight-money guard's 400
+  // surfaces inline via actionError).
+  async function confirmClose() {
+    if (!closeTarget || actingSlug) return;
+    const slug = closeTarget.slug;
+    await runStatusAction(slug, 'close');
+    setCloseTarget(null);
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -442,6 +442,43 @@ export default function TreasurerCampaignsScreen() {
           }
         />
       )}
+
+      {/* ── Close-campaign confirm (destructive → explicit web-safe confirm) ── */}
+      <ResponsiveSheet
+        visible={closeTarget !== null}
+        onRequestClose={() => setCloseTarget(null)}
+        dismissable={!actingSlug}
+      >
+        <Text style={styles.confirmTitle}>Close Campaign</Text>
+        <Text style={styles.confirmBody}>
+          Close “{closeTarget?.title}”?{'\n\n'}Donors will no longer be able to contribute.
+          This cannot be undone.
+        </Text>
+        <View style={styles.confirmActions}>
+          <TouchableOpacity
+            style={[styles.confirmCancelBtn, actingSlug && styles.btnDisabled]}
+            onPress={() => setCloseTarget(null)}
+            disabled={!!actingSlug}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel"
+          >
+            <Text style={styles.confirmCancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.confirmCloseBtn, actingSlug && styles.btnDisabled]}
+            onPress={confirmClose}
+            disabled={!!actingSlug}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Confirm close campaign"
+          >
+            <Text style={styles.confirmCloseText}>
+              {actingSlug ? 'Closing…' : 'Close Campaign'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ResponsiveSheet>
     </View>
   );
 }
@@ -452,6 +489,53 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: Colors.surfaceSubtle,
+  },
+
+  // Close-confirm sheet (mirrors the detail screen's confirm styles)
+  confirmTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.lg,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  confirmBody: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+    lineHeight: FontSize.md * 1.6,
+    marginBottom: Spacing.md,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  confirmCancelBtn: {
+    flex: 1,
+    height: Spacing.touch,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmCancelText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+  },
+  confirmCloseBtn: {
+    flex: 1,
+    height: Spacing.touch,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmCloseText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.md,
+    color: Colors.white,
   },
 
   // Filter bar
