@@ -26,6 +26,7 @@ from audit.models import AuditLog
 from campaigns.models import Campaign, CampaignCategory, CampaignStatus
 from churches.models import Church, ChurchStatus
 from donations.models import Donation, DonationStatus
+from donations.services import _compute_fee
 from integrations import daraja
 from notifications.models import Notification, NotificationType
 from superadmin.models import PlatformSettings
@@ -426,6 +427,14 @@ class LiveFeeTests(TestCase):
         d2 = self._confirm('ws_CO_FEE_3', 1000)
         self.assertEqual(d2.platform_fee, Decimal('100.00'))  # 10%
         self.assertEqual(d2.net_amount, Decimal('900.00'))
+
+    def test_half_cent_rounding_is_deliberate_round_half_up(self):
+        """Pins deliberate ROUND_HALF_UP: half-cent rounds to the
+        platform. Decided 2026-07-16. If this fails, someone changed money
+        rounding — stop and escalate."""
+        fee, net = _compute_fee(Decimal('5'), Decimal('2.5'))
+        self.assertEqual(fee, Decimal('0.13'))
+        self.assertEqual(net, Decimal('4.87'))
 
 
 # ═════════════════════════════════════════════════════════════════════════════

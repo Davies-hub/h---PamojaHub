@@ -31,6 +31,8 @@ def _compute_fee(gross, fee_percent):
     platform_fee rounded to cents (ROUND_HALF_UP); net = gross − fee so the two
     always reconcile exactly to gross.
     """
+    # ROUND_HALF_UP is deliberate (owner decision 2026-07-16): half-cent rounds
+    # toward the platform fee. Pinned by test.
     platform_fee = (gross * fee_percent / Decimal('100')).quantize(
         Decimal('0.01'), rounding=ROUND_HALF_UP
     )
