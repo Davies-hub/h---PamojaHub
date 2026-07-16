@@ -6,7 +6,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Linking,
   ScrollView,
   StyleSheet,
@@ -18,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import RemoteImage from '../../../components/ui/RemoteImage';
+import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
 import { campaignsService } from '../../../services/campaigns.service';
@@ -250,13 +250,14 @@ export default function TreasurerCampaignDetailScreen() {
   const detail = data?.campaign ?? null;
   const history = data?.history ?? [];
 
-  // Local-only status override for the still-mock Pause/Resume/Close actions (the
-  // write slice is later — these do NOT call the API). Reset whenever the server
-  // detail's identity/status changes so a real refetch re-establishes server truth.
-  const [statusOverride, setStatusOverride] = useState<CampaignStatus | null>(null);
-  useEffect(() => {
-    setStatusOverride(null);
-  }, [detail?.id, detail?.status]);
+  // Pause/Resume/Close write state (wired — mirrors the campaigns LIST screen's
+  // runner: write → refetch server truth, NO optimistic flip). `acting` names the
+  // action in flight so only that button shows its busy label; actionError is the
+  // inline feedback channel. Close confirms via ResponsiveSheet (web-safe — the
+  // list's Alert.alert confirm no-ops on web).
+  const [acting, setActing] = useState<'pause' | 'resume' | 'close' | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   // ── Banner upload state — the override reflects the upload RESPONSE (server
   // truth) immediately; any focus-refetch re-establishes it from the detail read.
@@ -363,33 +364,44 @@ export default function TreasurerCampaignDetailScreen() {
     );
   }
 
-  const displayStatus = statusOverride ?? detail.status;
+  const displayStatus = detail.status;
   const pct = pctFunded(detail.walletBalance, detail.goalAmount);
   const categoryIcon = detail.category ? (CATEGORY_ICON[detail.category] ?? 'pricetag-outline') : null;
 
-  // ── Actions (Pause/Resume/Close = LOCAL MOCK ONLY — write slice is later) ────
+  // ── Actions (Pause/Resume/Close — wired; same discipline as the list screen) ──
 
-  function handlePause() {
-    setStatusOverride('PAUSED');
+  async function runStatusAction(action: 'pause' | 'resume' | 'close') {
+    if (acting) return;                 // re-entry guard: one action in flight at a time
+    setActionError(null);
+    setActing(action);
+    try {
+      if (action === 'pause') await campaignsService.pauseCampaign(slug);
+      else if (action === 'resume') await campaignsService.resumeCampaign(slug);
+      else await campaignsService.closeCampaign(slug);
+      // SUCCESS (200): re-sync from server truth — the status flips only now,
+      // via the refetch. No optimistic mutation (matches the list screen).
+      retry();
+    } catch (err) {
+      // Do NOT flip. A 400 (detail present) — wrong-status race OR the in-flight-money
+      // guard ("…withdrawal in progress…") — gets shown and triggers a refetch so a
+      // stale status self-corrects. A bare network failure shows the generic message.
+      const detailMsg = extractDetail(err);
+      setActionError(detailMsg ?? "Couldn't update. Try again.");
+      if (detailMsg !== undefined) retry();
+    } finally {
+      setActing(null);
+      setShowCloseConfirm(false);
+    }
   }
 
-  function handleResume() {
-    setStatusOverride('ACTIVE');
-  }
-
+  function handlePause() { runStatusAction('pause'); }
+  function handleResume() { runStatusAction('resume'); }
+  // Close is destructive → confirm first via ResponsiveSheet (web-safe; Alert.alert
+  // no-ops on web).
   function handleClose() {
-    Alert.alert(
-      'Close Campaign',
-      `Close "${detail!.title}"?\n\nDonors will no longer be able to contribute. This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Close Campaign',
-          style: 'destructive',
-          onPress: () => setStatusOverride('CLOSED'),
-        },
-      ],
-    );
+    if (acting) return;
+    setActionError(null);
+    setShowCloseConfirm(true);
   }
 
   async function handleShare() {
@@ -595,44 +607,59 @@ export default function TreasurerCampaignDetailScreen() {
             <Text style={styles.whatsappBtnText}>Share on WhatsApp</Text>
           </TouchableOpacity>
 
-          {/* Pause / Resume / Close — LOCAL MOCK ONLY (write slice is later) */}
+          {/* Inline write-failure surface (wrong-status race / in-flight-money guard) */}
+          {actionError ? (
+            <View style={styles.actionErrorRow} accessibilityLiveRegion="polite">
+              <Ionicons name="alert-circle" size={15} color={Colors.danger} />
+              <Text style={styles.actionErrorText}>{actionError}</Text>
+            </View>
+          ) : null}
+
+          {/* Pause / Resume / Close — wired (write → refetch server truth) */}
           {displayStatus !== 'CLOSED' ? (
             <View style={styles.statusActions}>
               {displayStatus === 'ACTIVE' ? (
                 <TouchableOpacity
-                  style={styles.pauseBtn}
+                  style={[styles.pauseBtn, acting && styles.btnDisabled]}
                   onPress={handlePause}
+                  disabled={!!acting}
                   activeOpacity={0.8}
                   accessibilityRole="button"
                   accessibilityLabel="Pause campaign"
                 >
                   <Ionicons name="pause-circle-outline" size={16} color={Colors.textSecondary} />
-                  <Text style={styles.pauseBtnText}>Pause</Text>
+                  <Text style={styles.pauseBtnText}>{acting === 'pause' ? 'Pausing…' : 'Pause'}</Text>
                 </TouchableOpacity>
               ) : null}
 
               {displayStatus === 'PAUSED' ? (
                 <TouchableOpacity
-                  style={styles.resumeBtn}
+                  style={[styles.resumeBtn, acting && styles.btnDisabled]}
                   onPress={handleResume}
+                  disabled={!!acting}
                   activeOpacity={0.8}
                   accessibilityRole="button"
                   accessibilityLabel="Resume campaign"
                 >
                   <Ionicons name="play-circle-outline" size={16} color={Colors.primary} />
-                  <Text style={styles.resumeBtnText}>Resume Campaign</Text>
+                  <Text style={styles.resumeBtnText}>
+                    {acting === 'resume' ? 'Resuming…' : 'Resume Campaign'}
+                  </Text>
                 </TouchableOpacity>
               ) : null}
 
               <TouchableOpacity
-                style={styles.closeBtn}
+                style={[styles.closeBtn, acting && styles.btnDisabled]}
                 onPress={handleClose}
+                disabled={!!acting}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel="Close campaign"
               >
                 <Ionicons name="close-circle-outline" size={16} color={Colors.danger} />
-                <Text style={styles.closeBtnText}>Close Campaign</Text>
+                <Text style={styles.closeBtnText}>
+                  {acting === 'close' ? 'Closing…' : 'Close Campaign'}
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -643,6 +670,43 @@ export default function TreasurerCampaignDetailScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* ── Close-campaign confirm (destructive → explicit web-safe confirm) ── */}
+      <ResponsiveSheet
+        visible={showCloseConfirm}
+        onRequestClose={() => setShowCloseConfirm(false)}
+        dismissable={!acting}
+      >
+        <Text style={styles.confirmTitle}>Close Campaign</Text>
+        <Text style={styles.confirmBody}>
+          Close “{detail.title}”?{'\n\n'}Donors will no longer be able to contribute. This
+          cannot be undone.
+        </Text>
+        <View style={styles.confirmActions}>
+          <TouchableOpacity
+            style={[styles.confirmCancelBtn, acting && styles.btnDisabled]}
+            onPress={() => setShowCloseConfirm(false)}
+            disabled={!!acting}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel"
+          >
+            <Text style={styles.confirmCancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.confirmCloseBtn, acting && styles.btnDisabled]}
+            onPress={() => runStatusAction('close')}
+            disabled={!!acting}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Confirm close campaign"
+          >
+            <Text style={styles.confirmCloseText}>
+              {acting === 'close' ? 'Closing…' : 'Close Campaign'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ResponsiveSheet>
     </SafeAreaView>
   );
 }
@@ -1187,6 +1251,72 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.danger,
   },
+  btnDisabled: {
+    opacity: 0.55,
+  },
+  actionErrorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: Colors.dangerLight,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
+  },
+  actionErrorText: {
+    flex: 1,
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.xs,
+    color: Colors.danger,
+    lineHeight: 18,
+  },
+
+  // Close-confirm sheet
+  confirmTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.lg,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  confirmBody: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+    lineHeight: FontSize.md * 1.6,
+    marginBottom: Spacing.md,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  confirmCancelBtn: {
+    flex: 1,
+    height: Spacing.touch,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmCancelText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+  },
+  confirmCloseBtn: {
+    flex: 1,
+    height: Spacing.touch,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmCloseText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.md,
+    color: Colors.white,
+  },
+
   closedNotice: {
     flexDirection: 'row',
     alignItems: 'flex-start',
