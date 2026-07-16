@@ -10,7 +10,7 @@
 
 ## ⬛ CURRENT STATUS — ALL BUILDABLE CODE COMPLETE
 
-CURRENT VERIFIED BASELINE: 503 tests — `manage.py test tests`, all pass — verified 2026-07-16 (settings system-check tests added; was 500 earlier 2026-07-16 after the fee-rounding pin, 499 post-merge 2026-07-15, reconciled 2026-07-09).
+CURRENT VERIFIED BASELINE: 512 tests — `manage.py test tests`, all pass — verified 2026-07-16 (dev callback-simulator tests added; was 503 earlier 2026-07-16 after the settings system-check tests, 500 after the fee-rounding pin, 499 post-merge 2026-07-15, reconciled 2026-07-09).
 
 Every [CODE] item that can be built **without a deployed environment is done and live-verified.** Tier 2 (resolve-paid, request-disbursement request-half), all of Tier 3, all of Tier 5 polish — closed. Three items the §0 list called "unbuilt" turned out already built (resolve-paid, billing tier-prices, church-tier-set).
 
@@ -55,6 +55,7 @@ The principle: **do the highest-uncertainty, most-downstream-invalidating thing 
 ### 1.1 — Real STK SUCCESS callback parse [LIVE] — ✅ **CLOSED 2026-07-09**
 - Closed on the sandbox itself: a **real-SIM** donation (KES 5, real PIN prompt) produced a genuine `ResultCode: 0` Safaricom callback (receipt `UG9KTAG8ZR`), processed by the real shared donation/subscription parser — credited exactly once, NET of fee. (§14.1 record 2026-07-09/10.)
 - The gate had a hidden second half: **the `.env` callback URLs were missing the `MPESA_CALLBACK_SECRET` path segment**, so every real callback 404'd at the router since PH2-01. Fixed in `backend/.env`. **Carry-forward to go-live: the production URLs registered with Safaricom MUST include the production secret segment.**
+- **Manual go-live check: URLs registered on the Daraja portal must carry the same `MPESA_CALLBACK_SECRET` segment — no automated check can see the portal** (pamoja.E001 validates only the env-configured URLs, not what was typed into Safaricom's portal).
 - Facts learned: sandbox STK charges REAL money (M-Pesa auto-reverses); real payload confirms numeric `Amount`/`TransactionDate`/`PhoneNumber` and a `Balance` item with no `Value` — the parser handles all of it.
 
 ### 1.2 — Production Daraja go-live [OPS] — *likely the long pole*
@@ -263,7 +264,7 @@ The production-level responsive/aesthetic overhaul is merged to master — no lo
 
 ## ⬜ OPEN ITEMS — pre-deploy buildable + deferred (verified present 2026-07-16)
 
-- **DEBUG demo callback simulator** — the ONE buildable pre-deploy item (lets a demo drive a fake Safaricom success callback without a real handset). Not yet built.
+- **DEBUG demo callback simulator** — ✅ CLOSED 2026-07-16 — `config/dev_simulator.py` + `POST /api/v1/dev/simulate-callback/` (same `if settings.DEBUG:` gate as reset-ratelimit; live-gated only — the suite runs DEBUG=False so the route never exists in-suite). Caveat: shapes are SYNTHESIZED from §14.1 prose — the 2026-07-09 live capture is unrecoverable — so it proves handler behavior against our best shape model, NOT the live wire; delivery is front-door through the real secret-path routes. Demo rule: never run ngrok during a simulated demo (a real Safaricom callback for the same checkout id would race the simulated one).
 - **`validate_env` slice** — ✅ CLOSED 2026-07-16 — settings-level system check pamoja.E001/E002 — URL⊇secret containment + dev-module-in-prod guard; RED-proven live. (`config/checks.py`, registered via `donations/apps.py ready()`; also fences the dev reset-ratelimit route above, since dev settings can no longer run against production M-Pesa.)
 - **Fee rounding** — ✅ CLOSED 2026-07-16 — ROUND_HALF_UP confirmed deliberate, platform-favoring, pinned by test. (`5 × 2.5% = 0.125` rounds fee to `0.13`, net `4.87`; test in `tests/test_donations.py` `LiveFeeTests`, comment at the quantize call in `donations/services.py`.)
 - **IntaSend payout capability for an unregistered account: UNPROVEN** — marketing claims only; needs one real third-party payout test before relying on it as the money-OUT path around the sandbox B2C 2040 wall.

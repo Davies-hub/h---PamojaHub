@@ -45,6 +45,8 @@ if settings.DEBUG:
     from django.http import JsonResponse
     from django.views.decorators.csrf import csrf_exempt
 
+    from config.dev_simulator import simulate_callback
+
     @csrf_exempt
     def _dev_reset_ratelimit(request):
         cache.clear()
@@ -52,4 +54,8 @@ if settings.DEBUG:
 
     urlpatterns += [
         path('api/v1/dev/reset-ratelimit/', _dev_reset_ratelimit),
+        # Daraja callback SIMULATOR (config/dev_simulator.py) — synthesized
+        # shapes delivered through the real routed callbacks. DEBUG-only, same
+        # gate as reset-ratelimit: no such URL exists with DEBUG=False.
+        path('api/v1/dev/simulate-callback/', simulate_callback),
     ]

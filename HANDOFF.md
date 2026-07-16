@@ -34,7 +34,7 @@ Build order (per the BuildGuide): **Frontend (UI shells w/ mock) → Backend (AP
 | Phase | State |
 |---|---|
 | **Phase 1 — Frontend** | ✅ Complete + responsive/aesthetic overhaul MERGED to master 2026-07-15 (`fab9e17`). All public/auth/treasurer/super screens built. `tsc --noEmit` = 0; `npm test` (vitest) = 60/60; Playwright e2e back-button spec added. |
-| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **503 tests** green (live `manage.py test tests` count — settings system-check tests + fee-rounding pin added 2026-07-16; was 499 post-merge 2026-07-15, 422 on 2026-06-26). |
+| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **512 tests** green (live `manage.py test tests` count — dev callback-simulator tests added 2026-07-16; was 503 earlier the same day, 499 post-merge 2026-07-15, 422 on 2026-06-26). |
 | **Phase 3 — DB hardening** | 🟡 Partial. Indexes/constraints + AuditLog `REVOKE UPDATE/DELETE` applied to **dev** DB. The prod REVOKE is **not a migration** — run manually before go-live (`backend/docs/production_db_hardening.md`). |
 | **Phase 4 — Connect FE↔BE** | ✅ Functionally complete. All reads + all writes wired & live-verified, incl. the two former launch-blockers (campaign-create + password-reset, closed 2026-06-26). Zero mock imports / dead service methods remain (verified 2026-07-16). |
 
