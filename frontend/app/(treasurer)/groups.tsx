@@ -76,12 +76,14 @@ export default function GroupLabelsScreen() {
     retry();
   }, [showArchived, retry]);
 
-  // Hardware-back → Settings (hidden-tab pattern).
+  // Hardware-back → Campaigns (hidden-tab pattern; groups is a sibling TAB, so
+  // router.back() would jump to the first tab (Overview), not the opener —
+  // the only in-app entry point is the Campaigns screen, so target it directly).
   useFocusEffect(
     useCallback(() => {
       const sub = BackHandler.addEventListener('hardwareBackPress', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        router.navigate('/(treasurer)/settings' as any);
+        router.navigate('/(treasurer)/campaigns' as any);
         return true;
       });
       return () => sub.remove();
@@ -385,10 +387,10 @@ export default function GroupLabelsScreen() {
       <View style={[styles.pageHeader, isWideWeb && styles.wideColumn]}>
         <TouchableOpacity
           style={styles.backIconBtn}
-          onPress={() => router.navigate('/(treasurer)/settings' as any)}
+          onPress={() => router.navigate('/(treasurer)/campaigns' as any)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Go back to Settings"
+          accessibilityLabel="Go back to Campaigns"
         >
           <Ionicons name="arrow-back" size={22} color={Colors.primary} />
         </TouchableOpacity>

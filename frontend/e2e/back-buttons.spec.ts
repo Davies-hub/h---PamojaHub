@@ -385,10 +385,19 @@ test.describe('treasurer', () => {
     await clickBack(page, 'Back to Campaigns');
     await expectPath(page, '/campaigns');
 
-    // Groups (deep-link) → back to Settings (router.navigate, history-independent)
+    // Groups via the Campaigns "Group Labels" button → back to Campaigns
+    // (router.navigate, history-independent — groups is a sibling hidden tab,
+    // so router.back() would land on the FIRST tab, Overview, not the opener)
+    await clickTab(page, '/campaigns');
+    await clickText(page, 'Manage group labels');
+    await expectPath(page, '/groups');
+    await clickBack(page, 'Go back to Campaigns');
+    await expectPath(page, '/campaigns');
+
+    // Groups (deep-link) → same Campaigns target, history-independent
     await page.goto(BASE + '/groups'); await page.waitForTimeout(1500);
-    await clickBack(page, 'Go back to Settings');
-    await expectPath(page, '/settings');
+    await clickBack(page, 'Go back to Campaigns');
+    await expectPath(page, '/campaigns');
   });
 });
 

@@ -237,7 +237,7 @@ Single source of truth pattern. `campaigns.mock.ts` is the canonical master — 
 - `(treasurer)/payouts.tsx` — 10 withdrawals (all 6 statuses), pending count banner, 7-chip filter, masked phone, Approve → DisbursementApprovalDialog, Reject → bottom sheet with required reason, Retry for FAILED, red border for FAILED_FINAL
 - `(treasurer)/reports.tsx` — 4 report types, date range inputs, group filter modal, CSV/PDF toggle, download placeholder
 - `(treasurer)/notifications.tsx` — hidden tab; back bar (← Overview); **flat list** (wired to the live read API; the old grouped Today/Yesterday layout was dropped); type icons; teal border unread; tap to mark read (optimistic + soft sync-notice on bg-refetch fail); Mark all read
-- `(treasurer)/groups.tsx` — hidden tab; back arrow in page header (← Settings); inline rename; inline Add Group (flat/hierarchical toggle); archive with confirmation
+- `(treasurer)/groups.tsx` — hidden tab; back arrow in page header (← Campaigns); inline rename; inline Add Group (flat/hierarchical toggle); archive with confirmation
 - `(treasurer)/settings.tsx` — 4 Card sections: Church Profile (editable fields + county picker + save), Account (read-only), Subscription (tier badge), Danger Zone (mailto support link)
 
 ### Super Admin screens
@@ -258,7 +258,7 @@ All hidden tab screens (`href: null`) must have:
 1. `useFocusEffect` + `BackHandler` navigating to the parent tab
 2. A matching visible back control (back bar or back icon) with the same `onPress` target
 
-Current targets: super admin hidden → `/(super)/more`; treasurer notifications → `/(treasurer)/`; treasurer groups → `/(treasurer)/settings`.
+Current targets: super admin hidden → `/(super)/more`; treasurer notifications → `/(treasurer)/`; treasurer groups → `/(treasurer)/campaigns` (its only in-app entry point is the Campaigns screen; fixed 2026-07-16, was → settings — a leftover from when the entry lived on Settings. GOTCHA: don't use `router.back()` on hidden tabs — they're sibling TABS, so back jumps to the FIRST tab, not the opener).
 
 ---
 
