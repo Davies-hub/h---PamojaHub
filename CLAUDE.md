@@ -26,10 +26,11 @@ Backend: `j:\Pamoja_Hub\backend\` — Django 5 + DRF + PostgreSQL (Phase 2 compl
 7. **Net-Everywhere**: all church-facing amounts are NET (post 2.5% fee). Exception: donor post-donation success screen shows gross to match M-Pesa SMS; Super Admin Donations table shows gross/fee/net.
 8. **walletBalance is derived** — always `raisedAmount − Σ(PAID withdrawals)`; never hardcode it
 9. **UI strings use "Payout" not "Disbursement"** — backend `Withdrawal` model name is unchanged
-10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 500** (this number is the live `manage.py test tests` count — 500/500 OK 2026-07-16 after the fee-rounding pin test; update it whenever the count changes).
+10. **Backend tests** run from repo root via the `tests` package: `backend\venv\Scripts\python.exe backend\manage.py test tests` — bare `manage.py test` discovers **0**. Keep the suite green. **Baseline = 503** (this number is the live `manage.py test tests` count — 503/503 OK 2026-07-16 after the settings system-check tests; was 500 earlier the same day after the fee-rounding pin test; update it whenever the count changes).
 11. **Decimals are STRINGS on the wire** — DRF serializes `DecimalField` as a string (`"80000.00"`); the frontend converts via `Number()` in `services/mappers.ts`. Mappers are explicit per-field (snake→camel), never a generic deep-convert.
 12. **Multi-tenant isolation** — treasurer read endpoints filter by `request.user.church`; every `/super/` endpoint is `[IsSuperAdmin]` (treasurer → 403). Never omit; never relax the money-safety invariants (lock-then-call: B2C/STK HTTP happens OUTSIDE the DB lock; idempotent callbacks keyed on the unique id).
 13. **Phase 4 slice discipline** — per slice: READ-ONLY contract trace (quote file:line, NO edits) → BUILD (restart backend `--noreload` on current code, ONE live checkpoint) → STOP for review. READS are wired before WRITES; money-write actions are their own later slices.
+14. **Callback-URL config is guarded by a system check** — settings-level system check pamoja.E001/E002 (`config/checks.py`) — URL⊇secret containment + dev-module-in-prod guard; RED-proven live 2026-07-16. `manage.py check` / server start fails if a Daraja callback URL lacks the `/<MPESA_CALLBACK_SECRET>/` segment or dev settings run with `MPESA_ENVIRONMENT=production`.
 
 ---
 
@@ -120,14 +121,14 @@ The production-level responsive/aesthetic UI overhaul is **merged to master and 
 - **Playwright e2e suite now exists:** `frontend/e2e/back-buttons.spec.ts` + `frontend/e2e/global-setup.ts` + `frontend/playwright.config.ts` (retries 0, 90s timeout, unique OTP email per run). Proven RED→GREEN on the clip bug; 3× clean at retries 0 after the harness fix (`09ffcc4` — unique OTP email + DEBUG-only throttle reset + globalSetup).
 - **DEBUG-only test endpoint (security-relevant):** `09ffcc4` added `POST /api/v1/dev/reset-ratelimit/` in `config/urls.py` — clears the rate-limit cache so e2e runs aren't throttled. **It is mounted ONLY when `settings.DEBUG` is True; the route does not exist when `DEBUG=False`.** ⚠ A prod deploy accidentally running `DEBUG=True` would expose it. Note `validate_env()` EXISTS (`config/settings/base.py:253`, called at import time :296): it already requires `MPESA_CALLBACK_SECRET` (+15 other vars) whenever `DEBUG=False`, and rejects `DEBUG=True` when `MPESA_ENVIRONMENT=production`. The remaining open slice is narrower: (i) assert each `MPESA_*` callback URL actually CONTAINS the `MPESA_CALLBACK_SECRET` segment, and (ii) an unconditional `DEBUG=False` guard in prod (today's guard only fires when `MPESA_ENVIRONMENT=production`) — see open items in deploy_checklist_status.md.
 - **Dead-button sweep (`c77ec4b`):** a whole-frontend sweep found exactly ONE dead control — the treasurer Recent Donations "See all" label (pre-existing on both branches, no handler). Fixed by gating `SectionHeader`'s link render on `onPress`, so the component can no longer render a handler-less link.
-- **Test baseline: was 499 post-merge, now 500** (fee-rounding pin test added 2026-07-16; `manage.py test tests`). tsc clean; 14/14 back-button specs.
+- **Test baseline: was 499 post-merge → 500 (fee-rounding pin, 2026-07-16) → now 503** (settings system-check tests added 2026-07-16; `manage.py test tests`). tsc clean; 14/14 back-button specs.
 - **npm test (vitest) excludes `e2e/**`** — the Playwright back-button suite NEVER runs under `npm test`; it must be run separately (`frontend/vitest.config.ts`, added 2026-07-16).
 
 ## Current status — 2026-07-10 (READ THIS FIRST)
 
 **Frontend Phase 1:** ✅ complete (screen inventory in the next section). `npx tsc --noEmit` = 0 errors; `npm test` (vitest) = **60/60** (mock-consistency + reducer suites).
 
-**Backend Phase 2:** ✅ complete. Django apps: `audit, accounts, churches, campaigns, donations, withdrawals, notifications, treasurer_portal, superadmin, integrations, common`. Steps 2.1 → 2.12b. **Suite: 500 tests** (live `manage.py test tests` count, 2026-07-16 — run command in critical rule #10).
+**Backend Phase 2:** ✅ complete. Django apps: `audit, accounts, churches, campaigns, donations, withdrawals, notifications, treasurer_portal, superadmin, integrations, common`. Steps 2.1 → 2.12b. **Suite: 503 tests** (live `manage.py test tests` count, 2026-07-16 — run command in critical rule #10).
 
 **Phase 3 (DB hardening):** partial — indexes/constraints + AuditLog `REVOKE UPDATE/DELETE` applied to the **dev** DB only. The prod REVOKE is NOT a migration — run manually before go-live (`backend/docs/production_db_hardening.md`).
 

@@ -10,7 +10,7 @@
 
 ## ⬛ CURRENT STATUS — ALL BUILDABLE CODE COMPLETE
 
-CURRENT VERIFIED BASELINE: 500 tests — `manage.py test tests`, all pass — verified 2026-07-16 (fee-rounding pin test added; was 499 post-merge 2026-07-15, reconciled 2026-07-09).
+CURRENT VERIFIED BASELINE: 503 tests — `manage.py test tests`, all pass — verified 2026-07-16 (settings system-check tests added; was 500 earlier 2026-07-16 after the fee-rounding pin, 499 post-merge 2026-07-15, reconciled 2026-07-09).
 
 Every [CODE] item that can be built **without a deployed environment is done and live-verified.** Tier 2 (resolve-paid, request-disbursement request-half), all of Tier 3, all of Tier 5 polish — closed. Three items the §0 list called "unbuilt" turned out already built (resolve-paid, billing tier-prices, church-tier-set).
 
@@ -264,7 +264,7 @@ The production-level responsive/aesthetic overhaul is merged to master — no lo
 ## ⬜ OPEN ITEMS — pre-deploy buildable + deferred (verified present 2026-07-16)
 
 - **DEBUG demo callback simulator** — the ONE buildable pre-deploy item (lets a demo drive a fake Safaricom success callback without a real handset). Not yet built.
-- **`validate_env` slice** — assert callback URLs contain `MPESA_CALLBACK_SECRET` **and** assert `DEBUG=False` in prod (would also fence the dev reset-ratelimit route above). Owner has deferred; reviewer flags it.
+- **`validate_env` slice** — ✅ CLOSED 2026-07-16 — settings-level system check pamoja.E001/E002 — URL⊇secret containment + dev-module-in-prod guard; RED-proven live. (`config/checks.py`, registered via `donations/apps.py ready()`; also fences the dev reset-ratelimit route above, since dev settings can no longer run against production M-Pesa.)
 - **Fee rounding** — ✅ CLOSED 2026-07-16 — ROUND_HALF_UP confirmed deliberate, platform-favoring, pinned by test. (`5 × 2.5% = 0.125` rounds fee to `0.13`, net `4.87`; test in `tests/test_donations.py` `LiveFeeTests`, comment at the quantize call in `donations/services.py`.)
 - **IntaSend payout capability for an unregistered account: UNPROVEN** — marketing claims only; needs one real third-party payout test before relying on it as the money-OUT path around the sandbox B2C 2040 wall.
 - **Production Daraja go-live paperwork** + all Tier-1 `[LIVE]`/`[OPS]` gates (see Tier 1 above): STK success round-trip, OTP-over-real-SMS, prod DB REVOKE, sweep cron, `b2c-queue/` route.
