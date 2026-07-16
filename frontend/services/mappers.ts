@@ -248,6 +248,7 @@ export interface BackendTreasurerCampaign {
   group_label_name: string | null;
   donor_count: number;            // SerializerMethodField — plain int (SUCCESSFUL donations), NOT money
   created_at: string;
+  banner_image_url: string | null;  // server-set only (banner upload endpoint)
   // (other __all__ fields exist on the wire — treasurer_phone, etc. — unused here)
 }
 
@@ -265,6 +266,7 @@ export function mapTreasurerCampaign(b: BackendTreasurerCampaign): TreasurerCamp
     groupLabelName: b.group_label_name ?? undefined,   // now provided by the backend
     donorCount: b.donor_count,                 // plain int — NO toMoneyNumber (count, not money)
     createdAt: b.created_at,
+    bannerImageUrl: b.banner_image_url ?? undefined,   // null (pre-upload rows) → undefined
   };
 }
 

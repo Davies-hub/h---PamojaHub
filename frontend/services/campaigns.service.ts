@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { PaginatedResponse, PublicCampaign, TreasurerCampaign } from '../types';
 import { api } from './api';
 import {
@@ -9,9 +10,11 @@ import {
 
 // Writable-fields-only create input (camelCase). The backend SERVER-FORCES
 // church / created_by / status=ACTIVE / raised=0 / wallet=0 and auto-generates the
-// slug — those are never sent. group_label / banner_image_url / document_url are
-// optional and OMITTED when empty (image upload is a later feature; "no group" is
-// church-wide). goal_amount stays a STRING on the wire (DRF DecimalField).
+// slug — those are never sent. group_label / document_url are optional and
+// OMITTED when empty ("no group" is church-wide). banner_image_url is NOT here:
+// it is server-set-only (read_only at the serializer) — banners are added via
+// uploadBanner() on the campaign detail screen AFTER creation.
+// goal_amount stays a STRING on the wire (DRF DecimalField).
 export interface CreateCampaignInput {
   title: string;
   description: string;
@@ -20,7 +23,6 @@ export interface CreateCampaignInput {
   treasurerName: string;
   treasurerPhone: string;
   groupLabelId?: string | null;
-  bannerImageUrl?: string;
   documentUrl?: string;
 }
 
@@ -95,8 +97,7 @@ export const campaignsService = {
     };
     // group_label: send the id, or OMIT entirely for "no group / church-wide".
     if (input.groupLabelId) body.group_label = input.groupLabelId;
-    // banner/document: optional; OMIT when empty (no URL collected yet).
-    if (input.bannerImageUrl) body.banner_image_url = input.bannerImageUrl;
+    // document: optional; OMIT when empty (no URL collected yet).
     if (input.documentUrl) body.document_url = input.documentUrl;
 
     const { data } = await api.post<BackendTreasurerCampaign>('/campaigns/mine/create/', body);
@@ -169,6 +170,42 @@ export const campaignsService = {
     // so the screen can show a distinct not-found state.
     const { data } = await api.get<BackendPublicCampaign>(`/campaigns/${slug}/`);
     return mapPublicCampaign(data);
+  },
+
+  // Authed WRITE: POST /campaigns/mine/{slug}/banner/ (multipart) — upload/replace
+  // the banner for an OWNED campaign. Mirrors churchesService.uploadLogo EXACTLY.
+  // The wire field name is 'file' (campaigns/views.py request.FILES.get('file')).
+  // The 200 body is AdminCampaignSerializer with the server-set banner_image_url,
+  // so we map via mapTreasurerCampaign and the caller reflects server truth.
+  // Errors PROPAGATE (axios throws): a 400 carries {"detail": ...} from the
+  // DoS/content gate (too large / bad format / re-encode reject / closed campaign);
+  // a 403 = suspended church or cross-church slug.
+  //
+  // Cross-platform FormData: on WEB the picker uri is a blob/data URL — it MUST be
+  // fetched into a real Blob or the multipart body is empty; on NATIVE RN's FormData
+  // uploads the {uri,name,type} triple directly. The instance default Content-Type is
+  // JSON, so we blank it here to let the platform set the multipart boundary, and
+  // pass-through transformRequest so axios doesn't JSON-stringify the FormData.
+  async uploadBanner(
+    slug: string,
+    asset: { uri: string; fileName?: string; mimeType?: string },
+  ): Promise<TreasurerCampaign> {
+    const form = new FormData();
+    const name = asset.fileName || 'banner.jpg';
+    const type = asset.mimeType || 'image/jpeg';
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(asset.uri)).blob();
+      form.append('file', blob, name);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      form.append('file', { uri: asset.uri, name, type } as any);
+    }
+    const { data } = await api.post<BackendTreasurerCampaign>(
+      `/campaigns/mine/${slug}/banner/`, form, {
+        headers: { 'Content-Type': undefined },   // CRITICAL: platform sets the multipart boundary
+        transformRequest: (d) => d,                // don't let axios JSON-stringify the FormData
+      });
+    return mapTreasurerCampaign(data);
   },
 
   // Authed WRITE: POST /campaigns/mine/{slug}/pause/ — ACTIVE → PAUSED. No-body POST,

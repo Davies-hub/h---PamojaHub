@@ -255,6 +255,7 @@ export interface TreasurerCampaign {
   groupLabelName?: string;
   donorCount?: number;
   createdAt: string;
+  bannerImageUrl?: string;
 }
 
 export interface PaginatedResponse<T> {

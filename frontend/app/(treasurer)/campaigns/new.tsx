@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Modal as RNModal,
@@ -90,26 +89,18 @@ function UploadBox({
   label,
   sublabel,
   dashed,
-  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   sublabel: string;
   dashed?: boolean;
-  onPress: () => void;
 }) {
   return (
-    <TouchableOpacity
-      style={[styles.uploadBox, dashed && styles.uploadBoxDashed]}
-      onPress={onPress}
-      activeOpacity={0.7}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
+    <View style={[styles.uploadBox, dashed && styles.uploadBoxDashed]}>
       <Ionicons name={icon} size={30} color={Colors.primary} />
       <Text style={styles.uploadLabel}>{label}</Text>
       <Text style={styles.uploadSublabel}>{sublabel}</Text>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -498,36 +489,16 @@ export default function NewCampaignScreen() {
           </View>
         </SectionCard>
 
-        {/* ── Section: Media (optional, upload coming soon) ── */}
+        {/* ── Section: Media (banner is uploaded post-create on the campaign page) ── */}
         <SectionCard
           title="Media (optional)"
-          helper="Image and document upload are coming soon. Your campaign is created without a banner for now — you can add one once upload is available."
+          helper="Add a banner from the campaign page after creating."
         >
           <UploadBox
             icon="image-outline"
-            label="Add banner image (coming soon)"
+            label="Banner image — added after creation"
             sublabel="JPG or PNG · Recommended 1200 × 630 px · Max 5 MB"
             dashed
-            onPress={() =>
-              Alert.alert(
-                'Coming soon',
-                'Image upload isn’t available yet. You can create the campaign now without a banner and add one later.',
-                [{ text: 'OK' }],
-              )
-            }
-          />
-          <View style={styles.fieldSpacer} />
-          <UploadBox
-            icon="document-attach-outline"
-            label="Add supporting document (coming soon)"
-            sublabel="PDF format · Max 10 MB"
-            onPress={() =>
-              Alert.alert(
-                'Coming soon',
-                'Document upload isn’t available yet. You can create the campaign now and add a document later.',
-                [{ text: 'OK' }],
-              )
-            }
           />
         </SectionCard>
 

@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -15,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
+import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
 import { campaignsService } from '../../../services/campaigns.service';
@@ -38,6 +41,20 @@ const CAMPAIGN_BASE_URL = 'https://pamojahub.co.ke/campaigns';
 function maskPhone(phone: string): string {
   if (!phone || phone.length < 4) return '****';
   return `0*** ***${phone.slice(-4)}`;
+}
+
+// Pull the server's error message out of a 400/403 so the banner card can show
+// the REAL reason. The banner endpoint answers in TWO shapes: its own guards return
+// {"detail": "..."} but the image validator raises DRF ValidationError, which
+// serializes as a bare LIST (["Unsupported image type."]) — handle both.
+function extractDetail(err: unknown): string | undefined {
+  if (axios.isAxiosError(err) && err.response) {
+    const data = err.response.data as unknown;
+    const d = (data as { detail?: unknown })?.detail;
+    if (typeof d === 'string' && d.trim()) return d;
+    if (Array.isArray(data) && typeof data[0] === 'string' && data[0].trim()) return data[0];
+  }
+  return undefined;
 }
 
 // A 403 (cross-church) or 404 (no such slug) is NOT an error to retry — it's a
@@ -238,6 +255,60 @@ export default function TreasurerCampaignDetailScreen() {
     setStatusOverride(null);
   }, [detail?.id, detail?.status]);
 
+  // ── Banner upload state — the override reflects the upload RESPONSE (server
+  // truth) immediately; any focus-refetch re-establishes it from the detail read.
+  const [bannerOverride, setBannerOverride] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  useEffect(() => {
+    setBannerOverride(null);
+    setBannerError(null);
+  }, [detail?.id, detail?.bannerImageUrl]);
+
+  // Pick an image → upload to /campaigns/mine/{slug}/banner/ (multipart) → show the
+  // server-set banner_image_url from the response. All FE checks here are UX ONLY —
+  // the backend re-validates permission/size/format/re-encode regardless. Failures
+  // render INLINE (not Alert.alert — it no-ops on web).
+  async function handleUploadBanner() {
+    if (uploadingBanner) return;
+    setBannerError(null);
+
+    // Permission gate (UX): on web this resolves granted; on native it prompts.
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setBannerError('Allow photo access to add a banner image.');
+      return;
+    }
+
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+    });
+    if (res.canceled) return;
+    const asset = res.assets[0];
+
+    // UX-only pre-check — a friendly early reject; the server re-checks the real size.
+    if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+      setBannerError('Image must be under 5 MB.');
+      return;
+    }
+
+    setUploadingBanner(true);
+    try {
+      const updated = await campaignsService.uploadBanner(slug, {
+        uri: asset.uri,
+        fileName: asset.fileName ?? undefined,
+        mimeType: asset.mimeType ?? undefined,
+      });
+      setBannerOverride(updated.bannerImageUrl ?? null);   // server truth from the response
+    } catch (e) {
+      // Surface the server's 400 detail (too large / bad format / re-encode reject).
+      setBannerError(extractDetail(e) ?? 'Could not upload the banner. Please try again.');
+    } finally {
+      setUploadingBanner(false);
+    }
+  }
+
   // ── Loading / error / not-found states ─────────────────────────────────────
 
   if (status === 'loading' && !data) {
@@ -420,6 +491,66 @@ export default function TreasurerCampaignDetailScreen() {
             <Text style={styles.description}>{detail.description}</Text>
           </View>
         ) : null}
+
+        {/* ── Banner image — upload/replace (server-validated; closed = read-only) ── */}
+        <View style={styles.card}>
+          <Text style={styles.sectionEyebrow}>BANNER IMAGE</Text>
+          {(bannerOverride ?? detail.bannerImageUrl) ? (
+            <>
+              <RemoteImage
+                uri={bannerOverride ?? detail.bannerImageUrl}
+                style={styles.bannerImage}
+                resizeMode="cover"
+                fallback={
+                  <View style={styles.bannerPlaceholder}>
+                    <Ionicons name="image-outline" size={28} color={Colors.primary} />
+                  </View>
+                }
+              />
+              {displayStatus !== 'CLOSED' ? (
+                <TouchableOpacity
+                  style={styles.bannerReplaceBtn}
+                  onPress={handleUploadBanner}
+                  disabled={uploadingBanner}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Replace banner"
+                >
+                  {uploadingBanner ? (
+                    <ActivityIndicator size="small" color={Colors.primary} />
+                  ) : (
+                    <>
+                      <Ionicons name="image-outline" size={16} color={Colors.primary} />
+                      <Text style={styles.bannerReplaceBtnText}>Replace banner</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              ) : null}
+            </>
+          ) : displayStatus !== 'CLOSED' ? (
+            <TouchableOpacity
+              style={styles.bannerUploadBox}
+              onPress={handleUploadBanner}
+              disabled={uploadingBanner}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Add banner image"
+            >
+              {uploadingBanner ? (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              ) : (
+                <Ionicons name="image-outline" size={30} color={Colors.primary} />
+              )}
+              <Text style={styles.bannerUploadLabel}>Add banner image</Text>
+              <Text style={styles.bannerUploadSublabel}>
+                JPG or PNG · Recommended 1200 × 630 px · Max 5 MB
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.bannerNone}>No banner image.</Text>
+          )}
+          {bannerError ? <Text style={styles.bannerError}>{bannerError}</Text> : null}
+        </View>
 
         {/* ── Payout history ── */}
         <PayoutHistorySection history={history} />
@@ -774,6 +905,70 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.text,
     lineHeight: FontSize.md * 1.7,
+  },
+
+  // Banner image card
+  bannerImage: {
+    width: '100%',
+    aspectRatio: 1200 / 630,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.grey,
+  },
+  bannerPlaceholder: {
+    width: '100%',
+    aspectRatio: 1200 / 630,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannerReplaceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 42,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
+  },
+  bannerReplaceBtnText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.primary,
+  },
+  bannerUploadBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: Colors.border,
+    backgroundColor: Colors.surfaceSubtle,
+  },
+  bannerUploadLabel: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.md,
+    color: Colors.text,
+  },
+  bannerUploadSublabel: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  bannerNone: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+  },
+  bannerError: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.danger,
   },
 
   // Payout history
