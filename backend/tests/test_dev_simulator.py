@@ -231,3 +231,31 @@ class B2CSimulatedDeliveryTests(TestCase):
         self.assertEqual(wd.status, WithdrawalStatus.FAILED)
         self.campaign.refresh_from_db()
         self.assertEqual(self.campaign.wallet_balance, Decimal('5000'))
+
+    def test_failed_row_late_success_finalizes_paid(self):
+        """Pins deliberate design: FAILED is never permanent; a genuine late
+        success must finalize PAID or a treasurer retry double-pays. Owner
+        decision 2026-07-17. If this fails, someone added FAILED to
+        RESULT_CALLBACK_IGNORED_STATUSES — stop and escalate.
+        """
+        wd = Withdrawal.objects.create(
+            campaign=self.campaign, requested_by_phone='254712345678',
+            destination_phone='254712345678', destination_name='Treas Urer',
+            amount=Decimal('1000'), reason='materials',
+            status=WithdrawalStatus.FAILED, retry_count=0,
+            b2c_conversation_id='AG_SIM_LATE_1',
+            failure_reason='M-Pesa reported the payout failed.',
+        )
+        body = build_b2c_result_success(wd.b2c_conversation_id, '', wd.amount)
+        resp = self._post(body)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        wd.refresh_from_db()
+        self.assertEqual(wd.status, WithdrawalStatus.PAID)
+        self.assertTrue(wd.payout_reference.startswith('SIM-'))
+        self.campaign.refresh_from_db()
+        self.assertEqual(self.campaign.wallet_balance, Decimal('4000'))
+
+        resp = self._post(body)  # replay — PAID is in the ignored tuple
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.campaign.refresh_from_db()
+        self.assertEqual(self.campaign.wallet_balance, Decimal('4000'))
