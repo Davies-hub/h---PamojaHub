@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Modal as RNModal,
   Platform,
@@ -89,18 +91,34 @@ function UploadBox({
   label,
   sublabel,
   dashed,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   sublabel: string;
   dashed?: boolean;
+  onPress?: () => void;
 }) {
-  return (
-    <View style={[styles.uploadBox, dashed && styles.uploadBoxDashed]}>
+  const inner = (
+    <>
       <Ionicons name={icon} size={30} color={Colors.primary} />
       <Text style={styles.uploadLabel}>{label}</Text>
       <Text style={styles.uploadSublabel}>{sublabel}</Text>
-    </View>
+    </>
+  );
+  if (!onPress) {
+    return <View style={[styles.uploadBox, dashed && styles.uploadBoxDashed]}>{inner}</View>;
+  }
+  return (
+    <TouchableOpacity
+      style={[styles.uploadBox, dashed && styles.uploadBoxDashed]}
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      {inner}
+    </TouchableOpacity>
   );
 }
 
@@ -173,6 +191,40 @@ export default function NewCampaignScreen() {
 
   // ── Create state ────────────────────────────────────────────────────────
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Deferred-upload banner: picked LOCALLY here, uploaded only AFTER create succeeds.
+  const [pickedBanner, setPickedBanner] =
+    useState<{ uri: string; fileName?: string; mimeType?: string } | null>(null);
+  const [bannerPickError, setBannerPickError] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+
+  // Pick an image for the banner — LOCAL ONLY, no network. Duplicated from the
+  // campaign-detail picker ([slug].tsx handleUploadBanner) minus the upload call;
+  // all FE checks are UX ONLY — the backend re-validates size/format on upload.
+  async function handlePickBanner() {
+    setBannerPickError(null);
+    // Permission gate (UX): on web this resolves granted; on native it prompts.
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setBannerPickError('Allow photo access to add a banner image.');
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+    });
+    if (res.canceled) return;
+    const asset = res.assets[0];
+    // UX-only pre-check — a friendly early reject; the server re-checks the real size.
+    if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+      setBannerPickError('Image must be under 5 MB.');
+      return;
+    }
+    setPickedBanner({
+      uri: asset.uri,
+      fileName: asset.fileName ?? undefined,
+      mimeType: asset.mimeType ?? undefined,
+    });
+  }
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // ── Group labels (fetched live from /group-labels/) ───────────────────────
@@ -328,16 +380,34 @@ export default function NewCampaignScreen() {
         treasurerName: treasurerName.trim(),
         treasurerPhone: treasurerPhone.trim(),
         groupLabelId: selectedGroup.id,   // null → omitted by the service
-        // banner/document URLs are not collected yet — omitted (now optional server-side).
+        // banner is NOT part of create — it is uploaded to the banner endpoint below.
       });
+
+      // From here on the create HAS SUCCEEDED and must NEVER look failed — showing
+      // an error on the form now would invite a retry that DUPLICATE-CREATES the
+      // campaign. A banner-upload failure is carried to the detail screen instead.
+      let bannerFailed = false;
+      if (pickedBanner) {
+        setUploadingBanner(true);
+        try {
+          await campaignsService.uploadBanner(created.slug, pickedBanner);
+        } catch {
+          bannerFailed = true;   // non-blocking: the detail banner block is the retry path
+        }
+      }
+
       // Navigate to the REAL created campaign by its SERVER-allocated slug (not a
       // lowercased-title guess). replace() so Back doesn't return to the form.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      router.replace(`/(treasurer)/campaigns/${created.slug}` as any);
+      router.replace(
+        `/(treasurer)/campaigns/${created.slug}${bannerFailed ? '?bannerFailed=1' : ''}` as any,
+      );
     } catch (err) {
-      // Surface server 400s (field-errors AND {detail}); stay on the form.
+      // CREATE failed (nothing was made) — surface server 400s (field-errors AND
+      // {detail}); stay on the form.
       handleCreateError(err);
       setIsSubmitting(false);
+      setUploadingBanner(false);
     }
   }
 
@@ -489,17 +559,44 @@ export default function NewCampaignScreen() {
           </View>
         </SectionCard>
 
-        {/* ── Section: Media (banner is uploaded post-create on the campaign page) ── */}
+        {/* ── Section: Media — banner picked LOCALLY here, uploaded after create ── */}
         <SectionCard
           title="Media (optional)"
-          helper="Add a banner from the campaign page after creating."
+          helper="Optional — you can also add or change the banner later from the campaign page."
         >
-          <UploadBox
-            icon="image-outline"
-            label="Banner image — added after creation"
-            sublabel="JPG or PNG · Recommended 1200 × 630 px · Max 5 MB"
-            dashed
-          />
+          {pickedBanner ? (
+            <View style={styles.bannerPreviewWrap}>
+              <Image
+                source={{ uri: pickedBanner.uri }}
+                style={styles.bannerPreview}
+                resizeMode="cover"
+              />
+              <View style={styles.bannerPreviewMeta}>
+                <Text style={styles.bannerPreviewName} numberOfLines={1}>
+                  {pickedBanner.fileName ?? 'banner.jpg'}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setPickedBanner(null)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove banner image"
+                >
+                  <Text style={styles.bannerRemoveText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <UploadBox
+              icon="image-outline"
+              label="Add banner image"
+              sublabel="JPG or PNG · Recommended 1200 × 630 px · Max 5 MB"
+              dashed
+              onPress={handlePickBanner}
+            />
+          )}
+          {bannerPickError ? (
+            <Text style={styles.fieldError}>{bannerPickError}</Text>
+          ) : null}
         </SectionCard>
 
         {/* ── Section: Campaign Treasurer ── */}
@@ -569,7 +666,9 @@ export default function NewCampaignScreen() {
           accessibilityLabel="Save campaign"
         >
           {isSubmitting ? (
-            <Text style={styles.saveBtnText}>Creating campaign…</Text>
+            <Text style={styles.saveBtnText}>
+              {uploadingBanner ? 'Uploading banner…' : 'Creating campaign…'}
+            </Text>
           ) : (
             <Text style={styles.saveBtnText}>Save Campaign</Text>
           )}
@@ -782,6 +881,34 @@ const styles = StyleSheet.create({
 
   fieldSpacer: {
     height: Spacing.xs,
+  },
+
+  // Picked-banner local preview (no upload yet)
+  bannerPreviewWrap: {
+    gap: Spacing.sm,
+  },
+  bannerPreview: {
+    width: '100%',
+    aspectRatio: 1200 / 630,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.grey,
+  },
+  bannerPreviewMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  bannerPreviewName: {
+    flex: 1,
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+  },
+  bannerRemoveText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: FontSize.sm,
+    color: Colors.danger,
   },
 
   // Save button

@@ -224,7 +224,10 @@ function PayoutHistorySection({ history }: { history: Withdrawal[] }) {
 export default function TreasurerCampaignDetailScreen() {
   const isWideWeb = useIsWideWeb();
   const router = useRouter();
-  const { slug } = useLocalSearchParams<{ slug: string }>();
+  // bannerFailed=1 arrives from the create form when the campaign was CREATED but
+  // its deferred banner upload failed — a non-blocking notice; this banner block is
+  // the retry path.
+  const { slug, bannerFailed } = useLocalSearchParams<{ slug: string; bannerFailed?: string }>();
 
   // ── Live data: detail + history, refetched on every focus ──────────────────
   // getMine is SLUG-keyed; its returned id (UUID) keys the history filter. A
@@ -495,6 +498,14 @@ export default function TreasurerCampaignDetailScreen() {
         {/* ── Banner image — upload/replace (server-validated; closed = read-only) ── */}
         <View style={styles.card}>
           <Text style={styles.sectionEyebrow}>BANNER IMAGE</Text>
+          {bannerFailed === '1' && !bannerOverride ? (
+            <View style={styles.bannerFailedNotice} accessibilityLiveRegion="polite">
+              <Ionicons name="information-circle-outline" size={16} color={Colors.warning} />
+              <Text style={styles.bannerFailedNoticeText}>
+                Campaign created. Banner upload failed — add it below.
+              </Text>
+            </View>
+          ) : null}
           {(bannerOverride ?? detail.bannerImageUrl) ? (
             <>
               <RemoteImage
@@ -969,6 +980,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: FontSize.sm,
     color: Colors.danger,
+  },
+  bannerFailedNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: Colors.warningLight,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm + 2,
+  },
+  bannerFailedNoticeText: {
+    flex: 1,
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.xs,
+    color: Colors.warning,
+    lineHeight: 18,
   },
 
   // Payout history
