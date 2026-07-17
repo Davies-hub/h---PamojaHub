@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -70,6 +70,21 @@ export default function CampaignDetailScreen() {
       cancelled = true;
     };
   }, [slug, reloadKey]);
+
+  // BACKGROUND refresh after a successful donation — deliberately NOT reloadKey:
+  // that path sets state('loading'), whose branch replaces the whole page with a
+  // spinner and would UNMOUNT the DonationForm success card (receipt and all).
+  // Silent swap instead: new snapshot on success, keep last-good on any failure
+  // (same keep-last-good discipline as useFocusRefetch).
+  const refreshCampaign = useCallback(async () => {
+    try {
+      const data = await campaignsService.getBySlug(slug);
+      setCampaign(data);
+    } catch {
+      // Background only — the donor already has their success card; stale progress
+      // self-corrects on the next visit.
+    }
+  }, [slug]);
 
   return (
     <View style={styles.root}>
@@ -212,7 +227,14 @@ export default function CampaignDetailScreen() {
                   instead (the backend initiate guard rejects non-ACTIVE anyway; this
                   keeps the FE honest). Money/progress/share stay visible above. */}
               {campaign.status === 'ACTIVE' ? (
-                <DonationForm flat campaignSlug={campaign.slug} campaignTitle={campaign.title} />
+                <DonationForm
+                  flat
+                  campaignSlug={campaign.slug}
+                  campaignTitle={campaign.title}
+                  // Donor sees their own shilling land: refresh raised/progress in the
+                  // background on the SUCCESS verdict only.
+                  onSuccess={refreshCampaign}
+                />
               ) : (
                 <View style={styles.statusNotice}>
                   <Ionicons

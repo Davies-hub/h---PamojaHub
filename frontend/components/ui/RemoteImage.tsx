@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, ImageProps, ImageStyle, StyleProp } from 'react-native';
 
 interface RemoteImageProps {
@@ -14,12 +14,12 @@ interface RemoteImageProps {
 // Thin house-style wrapper (RN Image, per register.tsx). Shows a real remote
 // image when a url exists and loads; otherwise the caller's existing placeholder.
 export default function RemoteImage({ uri, style, resizeMode, fallback }: RemoteImageProps) {
-  const [errored, setErrored] = useState(false);
-
-  // A new uri is a fresh attempt — clear any prior load failure.
-  useEffect(() => {
-    setErrored(false);
-  }, [uri]);
+  // error must not latch across URI changes — a once-failed component would ignore
+  // every future valid image (caused the phone 'stale logo' symptom 2026-07-17).
+  // The failure is keyed to the uri it happened for, so a changed uri is a fresh
+  // attempt by construction (synchronous — no fallback flash while an effect resets).
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const errored = uri !== undefined && uri === failedUri;
 
   if (!uri || errored) {
     return <>{fallback}</>;
@@ -30,7 +30,7 @@ export default function RemoteImage({ uri, style, resizeMode, fallback }: Remote
       source={{ uri }}
       style={style}
       resizeMode={resizeMode}
-      onError={() => setErrored(true)}
+      onError={() => setFailedUri(uri)}
     />
   );
 }

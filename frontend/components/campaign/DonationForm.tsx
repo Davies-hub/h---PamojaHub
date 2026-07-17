@@ -17,6 +17,9 @@ interface DonationFormProps {
   campaignTitle: string;
   /** Visual-only: drop the card chrome when embedded inside a parent card. */
   flat?: boolean;
+  /** Fired ONCE on the SUCCESSFUL poll verdict (never on failed/unconfirmed) so the
+   *  parent can refresh the campaign it renders around this form. */
+  onSuccess?: () => void;
 }
 
 // 'submitting'  = initiate request in flight
@@ -54,7 +57,7 @@ function extractDetail(data: unknown): string | undefined {
   return undefined;
 }
 
-export default function DonationForm({ campaignSlug, campaignTitle: _campaignTitle, flat = false }: DonationFormProps) {
+export default function DonationForm({ campaignSlug, campaignTitle: _campaignTitle, flat = false, onSuccess }: DonationFormProps) {
   const cardStyle = [styles.card, flat && styles.cardFlat];
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
@@ -140,6 +143,10 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
         clearTimer();
         setResult({ amount: verdict.amount, receipt: verdict.mpesaReceiptNumber });
         setDonationState('success');
+        // SUCCESS only: let the parent refresh its campaign so the donor sees their
+        // own shilling land in the progress bar without leaving the screen. Failed/
+        // unconfirmed terminals moved no confirmed money — nothing to refresh.
+        onSuccess?.();
         return;
       }
       if (verdict && verdict.status === 'FAILED') {
@@ -159,7 +166,7 @@ export default function DonationForm({ campaignSlug, campaignTitle: _campaignTit
       pollTimerRef.current = setTimeout(tick, POLL_INTERVAL_MS);
     };
     pollTimerRef.current = setTimeout(tick, POLL_INTERVAL_MS);
-  }, [clearTimer]);
+  }, [clearTimer, onSuccess]);
 
   // Map an initiate failure to a terminal. Field-keyed 400 (phone/amount) returns to
   // the form with inline errors; every other failure lands on 'failed' with copy.
