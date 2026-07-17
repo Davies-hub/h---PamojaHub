@@ -47,7 +47,8 @@ def _stub_put(mock_cls):
     return mock_cls.return_value.put_object
 
 
-@override_settings(S3_BUCKET_NAME='pamoja-media')
+@override_settings(S3_BUCKET_NAME='pamoja-media',
+                   S3_PUBLIC_URL_BASE='http://test.local/pamoja-media')
 class BannerUploadTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -170,9 +171,12 @@ class BannerUploadTests(APITestCase):
         self.assertEqual(asset.size_bytes, len(call_data))
         self.assertEqual(asset.uploaded_by_id, self.treasurer_a.id)
 
+        # Storage contract (2026-07-18): the ROW stores the bare object key; the WIRE
+        # still emits the absolute URL, minted at serialization time (media_url).
         self.campaign_a.refresh_from_db()
+        self.assertEqual(self.campaign_a.banner_image_url, call_key)
         self.assertEqual(
-            self.campaign_a.banner_image_url,
+            resp.data['banner_image_url'],
             f'http://test.local/pamoja-media/{call_key}',
         )
         self.assertTrue(
@@ -233,7 +237,7 @@ class BannerUploadTests(APITestCase):
         self.campaign_a.refresh_from_db()
         self.assertEqual(
             self.campaign_a.banner_image_url,
-            f'http://test.local/pamoja-media/{put_spy.call_args.args[0]}',   # the NEW url
+            put_spy.call_args.args[0],   # the NEW key (rows store keys since 2026-07-18)
         )
         # Delete failed → OLD row left for the sweep → 2 assets (old + new).
         self.assertEqual(MediaAsset.objects.filter(campaign=self.campaign_a, kind='BANNER').count(), 2)

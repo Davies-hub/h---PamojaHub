@@ -240,7 +240,10 @@ class ChurchLogoUploadView(APIView):
                 content_type=content_type, size_bytes=len(clean_bytes),
                 uploaded_by=request.user,
             )
-            church.logo_url = result['url']
+            # Store the bare OBJECT KEY (2026-07-18) — the absolute URL is minted at
+            # serialization time (media_url), so the browser-facing base can change
+            # without a DB rewrite. Pre-key rows hold absolute URLs forever (passthrough).
+            church.logo_url = result['key']
             church.save(update_fields=['logo_url'])
             AuditLog.objects.create(
                 actor=request.user, action='CHURCH_LOGO_UPLOADED',

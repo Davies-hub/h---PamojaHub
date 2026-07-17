@@ -159,3 +159,22 @@ class ObjectStorageClient:
     def public_url(self, key):
         """Path-style public URL for an object key. No double slash at the join."""
         return f"{self.public_url_base.rstrip('/')}/{key}"
+
+
+def media_url(value):
+    """Mint the browser-facing URL for a stored media reference at READ time.
+
+    Three cases:
+      * None / ''            -> returned unchanged (no media).
+      * absolute http(s) URL -> returned unchanged, byte-identical. Old rows stored
+        the full URL at upload time and are absolute forever — no backfill by
+        design (2026-07-18); re-upload is the only way an old row gets a key.
+      * bare object key      -> prefixed with settings.S3_PUBLIC_URL_BASE (read at
+        call time, so changing the base re-points every key-holding row without
+        any DB rewrite — the point of storing keys).
+    """
+    if not value:
+        return value
+    if value.startswith('http://') or value.startswith('https://'):
+        return value
+    return f"{settings.S3_PUBLIC_URL_BASE.rstrip('/')}/{value}"

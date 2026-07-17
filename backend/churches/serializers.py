@@ -14,6 +14,7 @@ from rest_framework import serializers
 
 from campaigns.models import Campaign, CampaignStatus
 from churches.models import Church, SubscriptionTier
+from common.serializers import MediaURLRepresentationMixin
 from common.validators import validate_safaricom_phone
 
 
@@ -73,7 +74,7 @@ class ChurchRegistrationSerializer(serializers.Serializer):
         return value
 
 
-class PublicChurchSerializer(serializers.ModelSerializer):
+class PublicChurchSerializer(MediaURLRepresentationMixin, serializers.ModelSerializer):
     """Used by GET /churches/ and GET /churches/{id}/. Allowlist only.
 
     MUST NOT include: official_email, phone, address, status, subscription_tier,
@@ -82,6 +83,8 @@ class PublicChurchSerializer(serializers.ModelSerializer):
     """
 
     active_campaign_count = serializers.SerializerMethodField()
+
+    media_url_fields = ('logo_url',)   # key rows minted, absolute rows passthrough
 
     class Meta:
         model = Church
@@ -99,7 +102,7 @@ class PublicChurchSerializer(serializers.ModelSerializer):
         return Campaign.objects.filter(church=obj, status=CampaignStatus.ACTIVE).count()
 
 
-class AdminChurchSerializer(serializers.ModelSerializer):
+class AdminChurchSerializer(MediaURLRepresentationMixin, serializers.ModelSerializer):
     """Authenticated Church Treasurer's own church (GET/PATCH /churches/me/).
 
     Full fields appropriate here, but: official_email is read-only on PATCH
@@ -119,6 +122,8 @@ class AdminChurchSerializer(serializers.ModelSerializer):
 
     active_campaign_count = serializers.SerializerMethodField()
     total_raised = serializers.SerializerMethodField()
+
+    media_url_fields = ('logo_url',)   # key rows minted, absolute rows passthrough
 
     class Meta:
         model = Church

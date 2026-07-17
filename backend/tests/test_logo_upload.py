@@ -47,7 +47,8 @@ def _stub_put(mock_cls):
     return mock_cls.return_value.put_object
 
 
-@override_settings(S3_BUCKET_NAME='pamoja-media')
+@override_settings(S3_BUCKET_NAME='pamoja-media',
+                   S3_PUBLIC_URL_BASE='http://test.local/pamoja-media')
 class LogoUploadTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -195,9 +196,12 @@ class LogoUploadTests(APITestCase):
         self.assertEqual(asset.size_bytes, len(data_arg))
         self.assertEqual(asset.uploaded_by_id, self.treasurer_a.id)
 
+        # Storage contract (2026-07-18): the ROW stores the bare object key; the WIRE
+        # still emits the absolute URL, minted at serialization time (media_url).
         self.church_a.refresh_from_db()
+        self.assertEqual(self.church_a.logo_url, key_arg)
         self.assertEqual(
-            self.church_a.logo_url,
+            resp.data['logo_url'],
             f'http://test.local/pamoja-media/{key_arg}',
         )
 

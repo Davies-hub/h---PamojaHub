@@ -6,6 +6,7 @@ wallet_balance, checkout_request_id, b2c_conversation_id.
 import bleach
 from rest_framework import serializers
 
+from common.serializers import MediaURLRepresentationMixin
 from common.validators import validate_safaricom_phone
 from campaigns.models import Campaign, CampaignUpdate, GroupLabel
 from donations.models import Donation, DonationStatus
@@ -19,7 +20,7 @@ ALLOWED_ATTRS = {'a': ['href']}
 ALLOWED_PROTOCOLS = ['http', 'https']
 
 
-class PublicCampaignSerializer(serializers.ModelSerializer):
+class PublicCampaignSerializer(MediaURLRepresentationMixin, serializers.ModelSerializer):
     """GET /campaigns/ and GET /campaigns/{slug}/. Allowlist only.
 
     raised_amount here is the NET figure per Net-Everywhere (model stores net at write
@@ -37,6 +38,8 @@ class PublicCampaignSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     donor_count = serializers.SerializerMethodField()
+
+    media_url_fields = ('banner_image_url',)   # key rows minted, absolute rows passthrough
 
     class Meta:
         model = Campaign
@@ -63,7 +66,7 @@ class PublicCampaignSerializer(serializers.ModelSerializer):
         ).count()
 
 
-class AdminCampaignSerializer(serializers.ModelSerializer):
+class AdminCampaignSerializer(MediaURLRepresentationMixin, serializers.ModelSerializer):
     """Church Treasurer's own campaign management surface. '__all__' is appropriate —
     treasurer_phone / treasurer_name / wallet_balance are the user's own data.
 
@@ -103,6 +106,8 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
     # on the declaration makes DRF silently DROP any client value (no 400), so create/edit
     # bodies that still include the key keep working — the URL is just ignored.
     banner_image_url = serializers.URLField(read_only=True)  # server-set only (upload endpoint); never client-writable
+
+    media_url_fields = ('banner_image_url',)   # key rows minted, absolute rows passthrough
 
     class Meta:
         model = Campaign
@@ -151,7 +156,7 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
         return validate_safaricom_phone(value)
 
 
-class SuperCampaignSerializer(serializers.ModelSerializer):
+class SuperCampaignSerializer(MediaURLRepresentationMixin, serializers.ModelSerializer):
     """READ-ONLY serializer for the Super Admin campaigns LIST (/super/campaigns/).
 
     D1: AdminCampaignSerializer ('__all__') is the treasurer create/edit WRITE
@@ -175,6 +180,8 @@ class SuperCampaignSerializer(serializers.ModelSerializer):
     )
     church_name = serializers.CharField(source='church.name', read_only=True)
     donor_count = serializers.SerializerMethodField()
+
+    media_url_fields = ('banner_image_url',)   # key rows minted, absolute rows passthrough
 
     class Meta:
         model = Campaign

@@ -849,7 +849,10 @@ class CampaignBannerUploadView(_CampaignActionBase):
                 content_type=content_type, size_bytes=len(clean_bytes),
                 uploaded_by=request.user,
             )
-            campaign.banner_image_url = result['url']
+            # Store the bare OBJECT KEY (2026-07-18) — the absolute URL is minted at
+            # serialization time (media_url), so the browser-facing base can change
+            # without a DB rewrite. Pre-key rows hold absolute URLs forever (passthrough).
+            campaign.banner_image_url = result['key']
             campaign.save(update_fields=['banner_image_url'])
             AuditLog.objects.create(
                 actor=request.user, action='CAMPAIGN_BANNER_UPLOADED',
