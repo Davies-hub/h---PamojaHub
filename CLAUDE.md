@@ -133,6 +133,7 @@ The production-level responsive/aesthetic UI overhaul is **merged to master and 
 - Media URLs on the phone: stored banner/logo URLs bake in `S3_PUBLIC_URL_BASE` at upload time (`integrations/object_storage.py:public_url`). For phone-visible images set `S3_PUBLIC_URL_BASE=http://<laptop LAN IP>:9000/pamoja-media` in `backend/.env` (alongside `EXPO_PUBLIC_API_URL`), start MinIO with `--address 0.0.0.0:9000` (its default start was loopback-only), and allow inbound TCP 9000 (firewall rule "MinIO9000-dev" exists on the dev laptop). URLs are stored, not derived: banners uploaded under the old `127.0.0.1` base stay broken on the phone until re-uploaded.
 - Historical note: phone gates before 2026-07-17 could not have exercised the API (localhost base); UI-render verification only.
 - UI gates: flows that open native dialogs (file chooser, camera, share) MUST be gated by a human click in a real browser. Playwright chooser-interception does not enforce user-activation and passes flows real Chrome suppresses (proven 2026-07-17, create-banner tile). Automation supplements, never substitutes.
+- adb reverse tcp:8081 tcp:8081 silently resets on every USB reconnect — if the app hangs on splash, re-run it and reopen. Firewall rule Metro8081-dev (TCP 8081) must exist.
 
 ## Current status — 2026-07-10 (READ THIS FIRST)
 
