@@ -216,7 +216,7 @@ export default function NewCampaignScreen() {
     const asset = res.assets[0];
     // UX-only pre-check — a friendly early reject; the server re-checks the real size.
     if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
-      setBannerPickError('Image must be under 5 MB.');
+      setBannerPickError('Image is over 5 MB — choose a smaller one.');
       return;
     }
     setPickedBanner({
@@ -391,7 +391,10 @@ export default function NewCampaignScreen() {
         setUploadingBanner(true);
         try {
           await campaignsService.uploadBanner(created.slug, pickedBanner);
-        } catch {
+        } catch (e) {
+          // Deliberate swallow (anti-duplicate-create — see comment above), but the
+          // failure must never be invisible in the console again (2026-07-17 bug).
+          console.warn('banner upload failed after create; carried to detail screen:', e);
           bannerFailed = true;   // non-blocking: the detail banner block is the retry path
         }
       }

@@ -126,6 +126,13 @@ The production-level responsive/aesthetic UI overhaul is **merged to master and 
 - **B2C simulator live-gate ✅ CLOSED 2026-07-16:** staged for real (portal request KES 200 → treasurer approve → real sandbox ack `AG_…`, PROCESSING), then simulator drove 2040→FAILED (wallet untouched), success-by-id on the FAILED row→PAID `SIM-…` (wallet −200 exactly once), replay + failure-on-PAID both ignored. See critical rule #12 for the FAILED→success pin.
 - **npm test (vitest) excludes `e2e/**`** — the Playwright back-button suite NEVER runs under `npm test`; it must be run separately (`frontend/vitest.config.ts`, added 2026-07-16).
 
+## Physical-device dev setup (2026-07-17)
+
+- **API base is BAKE-TIME:** set `$env:EXPO_PUBLIC_API_URL = "http://<laptop LAN IP>:8000/api/v1"` in the shell BEFORE starting Metro (`npx expo run:android` / `npx expo start --clear`) — it's inlined into the bundle; the `localhost` fallback points at the PHONE itself. See `frontend/.env.example` and `startup project.md`.
+- Backend must run `runserver 0.0.0.0:8000 --noreload` and the laptop's LAN IP must be in `ALLOWED_HOSTS` (`config/settings/development.py`).
+- MinIO image URLs are `127.0.0.1:9000`, so banner/logo RENDERING on the phone may show broken images even when the upload succeeded — expected in dev.
+- Historical note: phone gates before 2026-07-17 could not have exercised the API (localhost base); UI-render verification only.
+
 ## Current status — 2026-07-10 (READ THIS FIRST)
 
 **Frontend Phase 1:** ✅ complete (screen inventory in the next section). `npx tsc --noEmit` = 0 errors; `npm test` (vitest) = **60/60** (mock-consistency + reducer suites).

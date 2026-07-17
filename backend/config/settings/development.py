@@ -5,7 +5,8 @@ from .base import *  # noqa: F401,F403
 DEBUG = True
 # '.ngrok-free.dev' is a leading-dot wildcard for the ephemeral ngrok tunnel used
 # in live Daraja sandbox callback testing (subdomain recycles each session). Dev-only.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev']
+# LAN IPs for physical-device dev testing. Add your laptop's LAN IP here when testing on a real phone.
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev', '192.168.150.202']
 
 # Non-empty in dev so the secret-path callback routes are active locally and the
 # test suite exercises them (reverse() yields the secret path). Override via env

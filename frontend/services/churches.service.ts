@@ -168,7 +168,10 @@ export const churchesService = {
       form.append('file', { uri: asset.uri, name, type } as any);
     }
     const { data } = await api.post<BackendMyChurch>('/churches/me/logo/', form, {
-      headers: { 'Content-Type': undefined },   // CRITICAL: platform sets the multipart boundary
+      // Platform-split: web MUST stay undefined so the browser sets the multipart
+      // boundary; native MUST be explicit — RN's networking errors ERR_NETWORK
+      // (request never sent) without it, and appends the boundary itself.
+      headers: { 'Content-Type': Platform.OS === 'web' ? undefined : 'multipart/form-data' },
       transformRequest: (d) => d,                // don't let axios JSON-stringify the FormData
     });
     return mapMyChurch(data);

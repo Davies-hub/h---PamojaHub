@@ -293,7 +293,7 @@ export default function TreasurerCampaignDetailScreen() {
 
     // UX-only pre-check — a friendly early reject; the server re-checks the real size.
     if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
-      setBannerError('Image must be under 5 MB.');
+      setBannerError('Image is over 5 MB — choose a smaller one.');
       return;
     }
 
