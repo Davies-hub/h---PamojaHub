@@ -216,15 +216,19 @@ export default function SettingsScreen() {
   async function handleChangeLogo() {
     if (uploadingLogo) return;
 
-    // Permission gate (UX): on web this resolves granted; on native it prompts.
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo access to change your church logo.', [{ text: 'OK' }]);
-      return;
+    // web: picker must be first await in the click handler — an intervening await
+    // burns transient user activation and Chrome silently refuses the file dialog
+    // (promise never settles). Permission gate is native-only (web always grants).
+    if (Platform.OS !== 'web') {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permission needed', 'Allow photo access to change your church logo.', [{ text: 'OK' }]);
+        return;
+      }
     }
 
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 0.9,
     });
     if (res.canceled) return;

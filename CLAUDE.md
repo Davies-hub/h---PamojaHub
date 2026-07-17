@@ -132,6 +132,7 @@ The production-level responsive/aesthetic UI overhaul is **merged to master and 
 - Backend must run `runserver 0.0.0.0:8000 --noreload` and the laptop's LAN IP must be in `ALLOWED_HOSTS` (`config/settings/development.py`).
 - MinIO image URLs are `127.0.0.1:9000`, so banner/logo RENDERING on the phone may show broken images even when the upload succeeded — expected in dev.
 - Historical note: phone gates before 2026-07-17 could not have exercised the API (localhost base); UI-render verification only.
+- UI gates: flows that open native dialogs (file chooser, camera, share) MUST be gated by a human click in a real browser. Playwright chooser-interception does not enforce user-activation and passes flows real Chrome suppresses (proven 2026-07-17, create-banner tile). Automation supplements, never substitutes.
 
 ## Current status — 2026-07-10 (READ THIS FIRST)
 

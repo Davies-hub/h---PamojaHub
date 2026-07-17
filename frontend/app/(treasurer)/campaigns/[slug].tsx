@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -277,15 +278,19 @@ export default function TreasurerCampaignDetailScreen() {
     if (uploadingBanner) return;
     setBannerError(null);
 
-    // Permission gate (UX): on web this resolves granted; on native it prompts.
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      setBannerError('Allow photo access to add a banner image.');
-      return;
+    // web: picker must be first await in the click handler — an intervening await
+    // burns transient user activation and Chrome silently refuses the file dialog
+    // (promise never settles). Permission gate is native-only (web always grants).
+    if (Platform.OS !== 'web') {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        setBannerError('Allow photo access to add a banner image.');
+        return;
+      }
     }
 
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 0.9,
     });
     if (res.canceled) return;
