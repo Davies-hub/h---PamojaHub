@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  AppState,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,9 +18,15 @@ import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constant
 import { campaignsService } from '../../services/campaigns.service';
 import { dashboardService } from '../../services/dashboard.service';
 import { notificationsService } from '../../services/notifications.service';
+import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { useAuth } from '../../stores/auth.store';
 import { useNotifications } from '../../stores/notifications.store';
 import { DashboardStats, RecentDonation, TreasurerCampaign } from '../../types';
+
+// Focused-poll cadence — a deliberate freshness/cost tradeoff: fresh enough that a
+// treasurer watching the dashboard sees new donations hands-off, cheap enough that
+// two lightweight GETs per tick don't strain the backend or a phone's data plan.
+const POLL_INTERVAL_MS = 45_000;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -223,43 +231,81 @@ export default function OverviewScreen() {
   // (top bar) comes from /auth/me and is reliable.
   const firstName = user?.firstName?.trim();
 
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [statsState, setStatsState] = useState<'loading' | 'error' | 'ok'>('loading');
-  const [statsReload, setStatsReload] = useState(0);
+  // Stats (hero card + pending banner + recent-donations feed) — authed GET
+  // /churches/me/stats/ — and the active-campaigns quick view — independent authed
+  // GET /campaigns/mine/. Both refetch on every screen FOCUS (shared hook): first
+  // focus shows the spinner, every return refetches in the BACKGROUND with
+  // keep-last-good semantics (a failed background refresh never blanks the screen).
+  const {
+    data: stats,
+    status: statsState,
+    retry: retryStats,
+  } = useFocusRefetch(() => dashboardService.getStats());
 
-  const [campaigns, setCampaigns] = useState<TreasurerCampaign[]>([]);
-  const [campaignsState, setCampaignsState] = useState<'loading' | 'error' | 'ok'>('loading');
-  const [campaignsReload, setCampaignsReload] = useState(0);
+  const {
+    data: allCampaigns,
+    status: campaignsState,
+    retry: retryCampaigns,
+  } = useFocusRefetch(() => campaignsService.listMine());
 
-  // Stats (hero card + pending banner + recent-donations feed) — authed GET /churches/me/stats/.
-  useEffect(() => {
-    let cancelled = false;
-    setStatsState('loading');
-    (async () => {
-      try {
-        const data = await dashboardService.getStats();
-        if (!cancelled) { setStats(data); setStatsState('ok'); }
-      } catch {
-        if (!cancelled) setStatsState('error');
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [statsReload]);
+  const campaigns = useMemo(
+    () => (allCampaigns ?? []).filter(c => c.status === 'ACTIVE'),
+    [allCampaigns],
+  );
 
-  // Active campaigns quick view — independent authed GET /campaigns/mine/.
-  useEffect(() => {
-    let cancelled = false;
-    setCampaignsState('loading');
-    (async () => {
-      try {
-        const data = await campaignsService.listMine();
-        if (!cancelled) { setCampaigns(data.filter(c => c.status === 'ACTIVE')); setCampaignsState('ok'); }
-      } catch {
-        if (!cancelled) setCampaignsState('error');
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [campaignsReload]);
+  // Pull-to-refresh: RefreshControl owns its own spinner; both retries run as
+  // background refetches (data present), so nothing else flashes.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([retryStats(), retryCampaigns()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [retryStats, retryCampaigns]);
+
+  // Whether each fetch currently holds data — read inside the poll tick without
+  // being effect deps. Polling a section that has NO data yet would run retry() as
+  // a FOREGROUND fetch and flash the full-screen spinner every tick; skip it instead
+  // (the manual Try-again control owns that path).
+  const hasStatsRef = useRef(false);
+  hasStatsRef.current = stats !== null;
+  const hasCampaignsRef = useRef(false);
+  hasCampaignsRef.current = allCampaigns !== null;
+
+  // Focused polling (this screen ONLY): refresh every POLL_INTERVAL_MS, active only
+  // while the screen is FOCUSED **and** the app is FOREGROUNDED — both conditions,
+  // because a blurred tab or a backgrounded app would otherwise keep burning battery,
+  // data, and backend requests for a dashboard nobody is looking at. The interval is
+  // cleared on blur (useFocusEffect cleanup) and on background (AppState listener).
+  // Errors are silent by construction: retry() with data present is a background
+  // refetch — last-good data stays on screen, no spinner, no toast.
+  useFocusEffect(
+    useCallback(() => {
+      let timer: ReturnType<typeof setInterval> | null = null;
+      const start = () => {
+        if (timer) return;
+        if (__DEV__) console.log('[overview-poll] started');
+        timer = setInterval(() => {
+          if (hasStatsRef.current) retryStats();
+          if (hasCampaignsRef.current) retryCampaigns();
+        }, POLL_INTERVAL_MS);
+      };
+      const stop = () => {
+        if (!timer) return;
+        if (__DEV__) console.log('[overview-poll] stopped');
+        clearInterval(timer);
+        timer = null;
+      };
+      if (AppState.currentState === 'active') start();
+      const sub = AppState.addEventListener('change', s => {
+        if (s === 'active') start();
+        else stop();
+      });
+      return () => { stop(); sub.remove(); };
+    }, [retryStats, retryCampaigns]),
+  );
 
   // Bell unread count (Slice 2b, A-plain): refetch on Overview focus — useFocusEffect
   // fires on the FIRST focus (initial mount-focus, so a fresh login shows the real
@@ -341,7 +387,7 @@ export default function OverviewScreen() {
         <View style={styles.centerInline}>
           <Text style={styles.emptyInline}>Couldn’t load campaigns.</Text>
           <TouchableOpacity
-            onPress={() => setCampaignsReload(k => k + 1)}
+            onPress={retryCampaigns}
             accessibilityRole="button"
             accessibilityLabel="Retry campaigns"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -383,6 +429,14 @@ export default function OverviewScreen() {
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, isWideWeb && styles.wideCap]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
       >
         {/* ── Greeting + notifications bell ── */}
         <View style={styles.greetingRow}>
@@ -421,7 +475,7 @@ export default function OverviewScreen() {
             <Text style={styles.errorText}>Couldn’t load your dashboard.</Text>
             <TouchableOpacity
               style={styles.retryBtn}
-              onPress={() => setStatsReload(k => k + 1)}
+              onPress={retryStats}
               activeOpacity={0.8}
               accessibilityRole="button"
               accessibilityLabel="Try again"

@@ -16,6 +16,7 @@ import DisbursementApprovalDialog from '../../components/disbursement/Disburseme
 import Modal from '../../components/ui/Modal';
 import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
+import { useFocusRefetch } from '../../hooks/useFocusRefetch';
 import { withdrawalsService } from '../../services/withdrawals.service';
 import { Withdrawal, WithdrawalStatus } from '../../types';
 import { fmtKes, timeAgo } from '../../utils/formatters';
@@ -250,30 +251,24 @@ const FILTER_ORDER: FilterStatus[] = [
 
 export default function PayoutsScreen() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('ALL');
 
-  // Authed GET /withdrawals/ (church-scoped server-side). A hard 401 is handled by
-  // the api interceptor (refresh → else logout). approve/reject are real writes;
-  // retry remains a LOCAL-only stub (a later slice).
+  // Authed GET /withdrawals/ (church-scoped server-side; hard 401 handled by the api
+  // interceptor). Refetch-on-focus via the shared hook, MIRROR-class (super Queue
+  // pattern): approve/reject/verdict-poll below mutate the local `withdrawals`
+  // in place, so the hook's data is re-synced into local state on every fetch —
+  // keep-last-good on a failed background refresh, fresh server truth on every focus.
+  const {
+    data: fetchedWithdrawals,
+    status: listStatus,
+    retry: refetchList,
+  } = useFocusRefetch(() => withdrawalsService.list());
+  const loading = listStatus === 'loading';
+  const error = listStatus === 'error';
+
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    (async () => {
-      try {
-        const data = await withdrawalsService.list();
-        if (!cancelled) setWithdrawals(data);
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [reloadKey]);
+    if (fetchedWithdrawals) setWithdrawals(fetchedWithdrawals);
+  }, [fetchedWithdrawals]);
 
   const [approvalTarget, setApprovalTarget] = useState<Withdrawal | null>(null);
   const [approveSubmitting, setApproveSubmitting] = useState(false);
@@ -308,8 +303,8 @@ export default function PayoutsScreen() {
     };
   }, [clearPollTimer]);
 
-  // Silent verdict poll: calls list() directly (no setLoading/setReloadKey — must
-  // never flash the global spinner). Stops on PAID / FAILED / FAILED_FINAL /
+  // Silent verdict poll: calls list() directly and writes rows into the local mirror
+  // (bypasses the focus-refetch hook — must never flash the global spinner). Stops on PAID / FAILED / FAILED_FINAL /
   // NEEDS_RECONCILIATION for the polled row; exhausting attempts while still
   // PROCESSING is an honest terminal too (leaves the row PROCESSING, never marks it
   // failed or paid).
@@ -397,7 +392,7 @@ export default function PayoutsScreen() {
       if (detail === 'Only pending requests can be approved.') {
         // Double-approve / wrong-status race — close the dialog, refetch to correct the stale row.
         setApprovalTarget(null);
-        setReloadKey(k => k + 1);
+        refetchList();
       }
     } finally {
       setApproveSubmitting(false);
@@ -437,7 +432,7 @@ export default function PayoutsScreen() {
           setRejectTarget(null);
           setRejectReason('');
           setRejectAttempted(false);
-          setReloadKey(k => k + 1);
+          refetchList();
         }
       } else {
         setRejectApiError("Couldn't reject. Try again.");
@@ -483,7 +478,7 @@ export default function PayoutsScreen() {
         // Row changed under us (race) — close, refetch so the row re-renders correctly
         // (the Retry button may now correctly disappear).
         setRetryTarget(null);
-        setReloadKey(k => k + 1);
+        refetchList();
       }
     } finally {
       setRetrySubmitting(false);
@@ -536,7 +531,7 @@ export default function PayoutsScreen() {
           <Text style={styles.emptySubtitle}>Please check your connection and try again.</Text>
           <TouchableOpacity
             style={styles.retryBtnState}
-            onPress={() => setReloadKey(k => k + 1)}
+            onPress={refetchList}
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityLabel="Try again"

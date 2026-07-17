@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Keyboard,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -114,6 +115,18 @@ export default function RegistrationQueueScreen() {
   const [approveTarget, setApproveTarget] = useState<Church | null>(null);
   const [approveError, setApproveError] = useState<string | null>(null);
   const [kbOffset, setKbOffset] = useState(0);
+
+  // Pull-to-refresh: RefreshControl owns its own spinner; retry() with data present
+  // is a background refetch (keep-last-good), so nothing else flashes.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await retry();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [retry]);
 
   // Local mirror: re-sync queue/total/truncated whenever a fetch lands. The PENDING
   // subset is scoped SERVER-SIDE (no client re-filter); keeping local state lets the
@@ -294,6 +307,14 @@ export default function RegistrationQueueScreen() {
               />
             )}
             contentContainerStyle={[styles.listContent, isWideWeb && styles.wideColumn]}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+                colors={[Colors.primary]}
+              />
+            }
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListHeaderComponent={
               queue.length > 0 ? (

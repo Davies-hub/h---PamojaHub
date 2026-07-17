@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -166,11 +167,31 @@ export default function SuperAnalyticsScreen() {
     () => superadminService.getAnalytics(),
   );
 
+  // Pull-to-refresh: RefreshControl owns its own spinner; retry() with data present
+  // is a background refetch (keep-last-good), so nothing else flashes.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await retry();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [retry]);
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       <ScrollView
         contentContainerStyle={[styles.content, isWideWeb && styles.wideContent]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
       >
         {/* Time range filter */}
         <ScrollView

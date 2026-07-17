@@ -8,8 +8,12 @@ export interface FocusRefetchResult<T> {
   status: FetchStatus;
   /** True after a BACKGROUND refetch fails — data is still last-good and stays on screen. */
   refetchError: boolean;
-  /** Re-run the fetch; from the error state this returns to 'loading'. */
-  retry: () => void;
+  /**
+   * Re-run the fetch; from the error state this returns to 'loading'. Resolves when
+   * the fetch settles (never rejects — failures land in status/refetchError), so
+   * pull-to-refresh can await it to clear its own spinner.
+   */
+  retry: () => Promise<void>;
 }
 
 /**
@@ -46,12 +50,12 @@ export function useFocusRefetch<T>(fetcher: () => Promise<T>): FocusRefetchResul
   // Monotonic run id: only the newest run may commit its result.
   const seqRef = useRef(0);
 
-  const run = useCallback((isActive: () => boolean) => {
+  const run = useCallback((isActive: () => boolean): Promise<void> => {
     const foreground = !hasDataRef.current;   // first load → spinner; otherwise background
     if (foreground) setStatus('loading');
     setRefetchError(false);
     const mySeq = ++seqRef.current;
-    fetcherRef.current()
+    return fetcherRef.current()
       .then((result) => {
         if (!isActive() || mySeq !== seqRef.current) return;   // stale / blurred → drop
         setData(result);
@@ -79,7 +83,7 @@ export function useFocusRefetch<T>(fetcher: () => Promise<T>): FocusRefetchResul
 
   const retry = useCallback(() => {
     // Invoked from the focused error state; run as foreground (returns to 'loading').
-    run(() => true);
+    return run(() => true);
   }, [run]);
 
   return { data, status, refetchError, retry };
