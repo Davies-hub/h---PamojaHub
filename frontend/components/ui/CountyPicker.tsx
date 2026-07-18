@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  Modal,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -10,6 +10,16 @@ import {
   View,
 } from 'react-native';
 import { BorderRadius, Colors, FontSize, Spacing } from '../../constants/theme';
+import ResponsiveSheet from './ResponsiveSheet';
+
+// Fixed cap on the results list. ResponsiveSheet has no maxHeight of its own, and
+// its narrow-mode keyboard lift is a marginBottom — it shifts the sheet up without
+// shrinking it, so an unbounded 47-row list would be pushed off the TOP of the
+// screen once the soft keyboard opens. A fixed value is deliberate: it is sized for
+// the worst case (keyboard open) and is therefore trivially safe keyboard-closed.
+// Do NOT swap this for a viewport percentage or a live height-minus-kbOffset
+// calculation — both reintroduce the overflow this constant exists to prevent.
+const LIST_MAX_HEIGHT = 340;
 
 export const KENYA_COUNTIES = [
   'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta',
@@ -37,6 +47,14 @@ export default function CountyPicker({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [kbOffset, setKbOffset] = useState(0);
+
+  useEffect(() => {
+    if (!open) { setKbOffset(0); return; }
+    const show = Keyboard.addListener('keyboardDidShow', e => setKbOffset(e.endCoordinates.height));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbOffset(0));
+    return () => { show.remove(); hide.remove(); };
+  }, [open]);
 
   const filtered = search.trim()
     ? KENYA_COUNTIES.filter(c => c.toLowerCase().includes(search.toLowerCase()))
@@ -62,63 +80,59 @@ export default function CountyPicker({
         <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
       </TouchableOpacity>
 
-      <Modal
+      <ResponsiveSheet
         visible={open}
-        animationType="slide"
-        transparent
         onRequestClose={close}
+        keyboardOffset={kbOffset}
       >
-        <View style={styles.overlay}>
-          <View style={styles.sheet}>
-            <View style={styles.header}>
-              <Text style={styles.title}>Select County</Text>
-              <TouchableOpacity
-                onPress={close}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel="Close county picker"
-              >
-                <Ionicons name="close" size={24} color={Colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.searchRow}>
-              <Ionicons name="search-outline" size={16} color={Colors.textMuted} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search county…"
-                placeholderTextColor={Colors.textMuted}
-                value={search}
-                onChangeText={setSearch}
-                accessibilityLabel="Search county"
-              />
-            </View>
-
-            <FlatList
-              data={filtered}
-              keyExtractor={item => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.item, item === value && styles.itemSelected]}
-                  onPress={() => { onChange(item); close(); }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={item}
-                >
-                  <Text style={[styles.itemText, item === value && styles.itemTextSelected]}>
-                    {item}
-                  </Text>
-                  {item === value
-                    ? <Ionicons name="checkmark" size={18} color={Colors.primary} />
-                    : null}
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            />
-          </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>Select County</Text>
+          <TouchableOpacity
+            onPress={close}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Close county picker"
+          >
+            <Ionicons name="close" size={24} color={Colors.text} />
+          </TouchableOpacity>
         </View>
-      </Modal>
+
+        <View style={styles.searchRow}>
+          <Ionicons name="search-outline" size={16} color={Colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search county…"
+            placeholderTextColor={Colors.textMuted}
+            value={search}
+            onChangeText={setSearch}
+            accessibilityLabel="Search county"
+          />
+        </View>
+
+        <FlatList
+          style={styles.list}
+          data={filtered}
+          keyExtractor={item => item}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.item, item === value && styles.itemSelected]}
+              onPress={() => { onChange(item); close(); }}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={item}
+            >
+              <Text style={[styles.itemText, item === value && styles.itemTextSelected]}>
+                {item}
+              </Text>
+              {item === value
+                ? <Ionicons name="checkmark" size={18} color={Colors.primary} />
+                : null}
+            </TouchableOpacity>
+          )}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        />
+      </ResponsiveSheet>
     </>
   );
 }
@@ -148,24 +162,15 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     flex: 1,
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    maxHeight: '80%',
-    paddingBottom: Spacing.xl,
-  },
+  // No overlay/sheet styles: ResponsiveSheet owns the scrim, the narrow bottom-sheet
+  // and the wide centered max-480 card.
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    // No paddingHorizontal/paddingTop — ResponsiveSheet's card already pads md on
+    // every side; adding our own here would double-inset the title.
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: Spacing.md,
+    // No margin — ResponsiveSheet's card padding + its gap:sm supply the inset.
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -192,6 +197,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     height: '100%',
   },
+  list: { maxHeight: LIST_MAX_HEIGHT },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
