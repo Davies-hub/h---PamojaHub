@@ -22,14 +22,17 @@ Rate limits (django-ratelimit, locmem cache in dev — see config/settings/devel
 """
 
 import logging
+import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -47,12 +50,15 @@ from audit.models import AuditLog
 from churches.models import Church, ChurchStatus
 from churches.serializers import ChurchRegistrationSerializer
 from common.masking import mask_email
+from integrations.object_storage import ObjectStorageClient, ObjectStorageError
 from integrations.resend_email import (
     EmailDeliveryError,
     send_password_changed,
     send_password_reset_otp,
     send_registration_received,
 )
+from media.models import MediaAsset, MediaKind
+from media.validation import MAX_UPLOAD_BYTES, validate_and_reencode
 
 logger = logging.getLogger(__name__)
 
@@ -104,11 +110,85 @@ def _auth_user_payload(user):
 # ───────────────────────── 3.1 Register ──────────────────────────────────────
 
 
+def _attach_registration_logo(request, church, user, uploaded):
+    """Validate + store an OPTIONAL registration logo — POST-COMMIT and orphan-safe.
+
+    Returns True if the logo was stored (church.logo_url set to the BARE object key),
+    False on ANY failure. The church is ALREADY COMMITTED when this runs, so a logo
+    failure must degrade softly (the caller flags logo_failed=True) and must NEVER
+    raise or roll back the registration.
+
+    This mirrors ChurchLogoUploadView.post EXACTLY — one validation path, one orphan
+    story: DoS size gate → validate_and_reencode (magic-byte + Pillow decode + re-
+    encode; the RE-ENCODED bytes are stored) → put_object BEFORE the metadata commit
+    (a failed commit leaves at worst a harmless orphan object, never a dangling
+    logo_url) → a short atomic() writing MediaAsset + church.logo_url (bare key, per
+    the 2026-07-18 key-storage slice) + AuditLog. A brand-new church has no prior
+    logo, so delete_prior_assets is intentionally not called here.
+    """
+    # DoS gate — declared size, then capped read (identical to the logo view).
+    if uploaded.size > MAX_UPLOAD_BYTES:
+        return False
+    raw = uploaded.read(MAX_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_UPLOAD_BYTES:
+        return False
+
+    # Content gate — validate_and_reencode raises ValidationError on a non-image /
+    # corrupt / out-of-bounds upload. We SWALLOW it (soft-degrade), never surface 400.
+    try:
+        clean_bytes, content_type = validate_and_reencode(raw)
+    except ValidationError:
+        return False
+
+    ext = 'jpg' if content_type == 'image/jpeg' else 'png'
+    key = f'church/{church.id}/logo/{uuid.uuid4().hex}.{ext}'   # server keygen
+
+    client = ObjectStorageClient()
+    try:
+        result = client.put_object(key, clean_bytes, content_type)   # PUT before commit
+    except ObjectStorageError:
+        return False
+
+    with transaction.atomic():                          # metadata AFTER confirmed PUT
+        asset = MediaAsset.objects.create(
+            kind=MediaKind.LOGO, church=church, campaign=None,
+            object_key=result['key'], bucket=settings.S3_BUCKET_NAME,
+            content_type=content_type, size_bytes=len(clean_bytes),
+            uploaded_by=user,
+        )
+        # Bare OBJECT KEY — the absolute URL is minted at serialization time (media_url).
+        church.logo_url = result['key']
+        church.save(update_fields=['logo_url'])
+        AuditLog.objects.create(
+            actor=user, action='CHURCH_LOGO_UPLOADED',
+            entity_type='Church', entity_id=church.id,
+            details={'church_id': str(church.id), 'object_key': result['key'],
+                     'asset_id': str(asset.id)},
+            ip_address=_client_ip(request) or None,
+        )
+    return True
+
+
+@method_decorator(
+    ratelimit(key='ip', rate='3/h', method='POST', block=True),
+    name='post',
+)
 class RegisterView(APIView):
     """POST /api/v1/auth/register/ — create Church (PENDING) + Church Treasurer user.
 
     Wrapped in transaction.atomic() so either both rows commit or neither does.
     No orphan church if user creation fails (e.g. duplicate email at the user layer).
+
+    Rate limit: 3/h per IP (block=True → 429). Registration is a once-ever action, so
+    this is a hard cap on register spam AND on the now-more-expensive optional-logo
+    path (an anonymous Pillow re-encode + storage PUT per POST) — the guard fires
+    BEFORE post() runs, so a blocked request never reaches the transaction or the image.
+
+    Optional logo (multipart field `logo`): accepted via the DRF DEFAULT parsers
+    (JSON + form + multipart — no parser_classes needed). It is handled POST-COMMIT
+    by _attach_registration_logo, OUTSIDE the church/user transaction: the church is
+    committed first, then a logo failure degrades softly to logo_failed=True in the
+    201 body — it can NEVER roll back a successful registration.
     """
 
     permission_classes = [AllowAny]
@@ -168,18 +248,30 @@ class RegisterView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Optional logo — POST-COMMIT, orphan-safe. The church is already committed;
+        # a logo failure must NEVER roll back a successful registration. So we attach
+        # OUTSIDE the transaction and degrade softly: on any logo problem (missing/
+        # oversized/bad-format/re-encode reject/storage down) church.logo_url stays
+        # NULL and the 201 body carries logo_failed=True. The field is present ONLY
+        # when a logo was actually submitted, so the pure-JSON (no-logo) response
+        # shape is unchanged.
+        logo_failed = None
+        uploaded = request.FILES.get('logo')
+        if uploaded is not None:
+            logo_failed = not _attach_registration_logo(request, church, user, uploaded)
+
         # Onboarding acknowledgement — courtesy, OUTSIDE the transaction (it has
         # already committed). send_registration_received swallows delivery failures,
         # so a bad email send can never undo a successful registration.
         send_registration_received(email=church.official_email, church_name=church.name)
 
-        return Response(
-            {
-                'user': UserSerializer(user).data,
-                'church_status': church.status,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        body = {
+            'user': UserSerializer(user).data,
+            'church_status': church.status,
+        }
+        if logo_failed is not None:
+            body['logo_failed'] = logo_failed
+        return Response(body, status=status.HTTP_201_CREATED)
 
 
 # ───────────────────────── 3.2 Login ─────────────────────────────────────────

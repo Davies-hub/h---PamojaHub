@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -20,7 +21,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Screen from '../../components/layout/Screen';
 import CountyPicker from '../../components/ui/CountyPicker';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
-import { authService } from '../../services/auth.service';
+import { authService, RegisterLogo } from '../../services/auth.service';
 
 // Web: pin the back button to the VIEWPORT (not the document). The auth forms are
 // taller than the viewport, so the page scrolls; position:absolute would ride the
@@ -66,7 +67,7 @@ function Field({
   );
 }
 
-function SuccessScreen({ onHome }: { onHome: () => void }) {
+function SuccessScreen({ onHome, logoFailed }: { onHome: () => void; logoFailed: boolean }) {
   return (
     <View style={styles.successContainer}>
       <View style={styles.successIconCircle}>
@@ -76,6 +77,17 @@ function SuccessScreen({ onHome }: { onHome: () => void }) {
       <Text style={styles.successBody}>
         We will review your application and contact you within 2 business days.
       </Text>
+      {/* Non-blocking: the church WAS registered; only the logo upload failed.
+          Registration still proceeds — the treasurer can add it in Settings later. */}
+      {logoFailed ? (
+        <View style={styles.logoNotice}>
+          <Ionicons name="image-outline" size={18} color={Colors.warning} style={styles.logoNoticeIcon} />
+          <Text style={styles.logoNoticeText}>
+            Your church was registered. The logo didn’t upload — you can add it in
+            Settings after logging in.
+          </Text>
+        </View>
+      ) : null}
       <TouchableOpacity
         style={[styles.primaryBtn, styles.successHomeBtn]}
         onPress={onHome}
@@ -134,7 +146,8 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
 
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [logo, setLogo] = useState<RegisterLogo | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [churchName, setChurchName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -148,12 +161,36 @@ export default function RegisterScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  function handlePhotoPress() {
-    Alert.alert(
-      'Church Profile Photo',
-      'Photo upload will be available once the backend is connected. You can add your church logo at that time.',
-      [{ text: 'OK' }],
-    );
+  // Pick an OPTIONAL church logo. It is NOT uploaded here — it's held in state and
+  // sent with the register POST as one multipart request (auth.service.register).
+  async function handlePickLogo() {
+    // web: the picker MUST be the first await in the click handler — an intervening
+    // await burns transient user activation and Chrome silently refuses the file
+    // dialog. Permission gate is native-only (web always grants).
+    if (Platform.OS !== 'web') {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permission needed', 'Allow photo access to add your church logo.', [{ text: 'OK' }]);
+        return;
+      }
+    }
+
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9 });
+    if (res.canceled) return;
+    const asset = res.assets[0];
+
+    // UX-only pre-check — a friendly early reject; the server re-checks the real size
+    // and soft-degrades (logo_failed) if it slips through.
+    if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+      Alert.alert('Image too large', 'Please choose an image under 5 MB.', [{ text: 'OK' }]);
+      return;
+    }
+
+    setLogo({
+      uri: asset.uri,
+      fileName: asset.fileName ?? undefined,
+      mimeType: asset.mimeType ?? undefined,
+    });
   }
 
   function clearError(field: keyof FormErrors) {
@@ -188,15 +225,21 @@ export default function RegisterScreen() {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      await authService.register({
-        churchName: churchName.trim(),
-        email: email.trim(),
-        phone: phone.replace(/\s/g, ''),   // 0712… as typed; backend normalizes to 254…
-        address: address.trim(),
-        county: county.trim(),             // optional — mapper omits it when blank
-        denomination: denomination.trim(),
-        password,
-      });
+      const result = await authService.register(
+        {
+          churchName: churchName.trim(),
+          email: email.trim(),
+          phone: phone.replace(/\s/g, ''),   // 0712… as typed; backend normalizes to 254…
+          address: address.trim(),
+          county: county.trim(),             // optional — mapper omits it when blank
+          denomination: denomination.trim(),
+          password,
+        },
+        logo ?? undefined,                   // optional; JSON path when absent
+      );
+      // Church is committed even if the logo failed (post-commit, server-side). Flag
+      // it so the success screen shows the non-blocking "add it in Settings" notice.
+      setLogoFailed(result.logoFailed);
       setSubmitted(true);   // 201 → await-approval screen (no auto-login, church PENDING)
     } catch (err) {
       // Surface the REAL backend errors. Field errors arrive as {field:[msg,...]};
@@ -236,7 +279,7 @@ export default function RegisterScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
         <View pointerEvents="none" style={styles.bgOrnamentA} />
         <View pointerEvents="none" style={styles.bgOrnamentB} />
-        <SuccessScreen onHome={() => router.replace('/')} />
+        <SuccessScreen onHome={() => router.replace('/')} logoFailed={logoFailed} />
       </SafeAreaView>
     );
   }
@@ -271,7 +314,7 @@ export default function RegisterScreen() {
           >
             <Screen variant="form">
           <View style={styles.card}>
-          <ProfilePhotoSection uri={profilePhoto} onPress={handlePhotoPress} />
+          <ProfilePhotoSection uri={logo?.uri ?? null} onPress={handlePickLogo} />
           <Wordmark />
           <Text style={styles.heading}>Register Your Church</Text>
           <View style={styles.helperBox}>
@@ -737,5 +780,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: FontSize.md * 1.7,
     marginBottom: Spacing.sm,
+  },
+  logoNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    backgroundColor: Colors.warningLight,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    marginBottom: Spacing.sm,
+  },
+  logoNoticeIcon: {
+    marginTop: 2,
+  },
+  logoNoticeText: {
+    flex: 1,
+    fontFamily: 'Poppins-Regular',
+    fontSize: FontSize.sm,
+    color: Colors.warning,
+    lineHeight: FontSize.sm * 1.6,
   },
 });

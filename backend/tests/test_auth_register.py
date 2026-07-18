@@ -7,6 +7,7 @@ inserted, so no orphan church rows survive a half-failed registration.
 
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -42,6 +43,11 @@ MINIMAL_PAYLOAD = {
 
 class RegisterEndpointTest(TestCase):
     def setUp(self):
+        # Register is now 3/h per IP (block=True → 429). LocMemCache is process-global
+        # and Django does NOT reset it between tests, so consecutive register POSTs from
+        # 127.0.0.1 accumulate into a 429. Clear it per test — the same isolation
+        # test_auth_login / test_auth_me / test_email already use for this reason.
+        cache.clear()
         self.client = APIClient()
         self.url = reverse('auth-register')
 
