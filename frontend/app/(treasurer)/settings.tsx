@@ -20,6 +20,7 @@ import { useIsWideWeb } from '../../components/layout/Screen';
 import SubscriptionCard from '../../components/treasurer/SubscriptionCard';
 import Card from '../../components/ui/Card';
 import CountyPicker from '../../components/ui/CountyPicker';
+import ImageViewer from '../../components/ui/ImageViewer';
 import RemoteImage from '../../components/ui/RemoteImage';
 import Spinner from '../../components/ui/Spinner';
 import Toast from '../../components/ui/Toast';
@@ -126,6 +127,8 @@ export default function SettingsScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  // Full-size logo overlay (tap the circle → see the whole frame uncropped).
+  const [logoViewerOpen, setLogoViewerOpen] = useState(false);
   // One toast surface shared by profile-save AND logo-upload (success OR error).
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   // Per-field 400 errors keyed by backend field name (phone/name/…); a non-field
@@ -274,6 +277,21 @@ export default function SettingsScreen() {
     .map(w => w[0].toUpperCase())
     .join('');
 
+  // The 76px circle itself — declared once and shared by the tappable and
+  // non-tappable branches below, so the fallback markup isn't duplicated.
+  const logoThumbnail = (
+    <RemoteImage
+      uri={church?.logoUrl}
+      style={styles.logoCircle}
+      resizeMode="cover"
+      fallback={
+        <View style={styles.logoCircle}>
+          <Text style={styles.logoInitials}>{initials}</Text>
+        </View>
+      }
+    />
+  );
+
   return (
     <SafeAreaView edges={['bottom']} style={styles.root}>
       <KeyboardAvoidingView
@@ -315,16 +333,23 @@ export default function SettingsScreen() {
               <>
                 {/* Logo — real image if uploaded, initials circle otherwise */}
                 <View style={styles.logoRow}>
-                  <RemoteImage
-                    uri={church?.logoUrl}
-                    style={styles.logoCircle}
-                    resizeMode="cover"
-                    fallback={
-                      <View style={styles.logoCircle}>
-                        <Text style={styles.logoInitials}>{initials}</Text>
-                      </View>
-                    }
-                  />
+                  {/* Tappable ONLY when a logo url exists: the initials circle is a
+                      synthetic placeholder, so opening a full-size viewer on it would
+                      show nothing. (A truthy-but-dead url still reaches the viewer —
+                      that case is caught by ImageViewer's own onError, since
+                      RemoteImage swallows load failures internally.) */}
+                  {church?.logoUrl ? (
+                    <TouchableOpacity
+                      onPress={() => setLogoViewerOpen(true)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel="View church logo full size"
+                    >
+                      {logoThumbnail}
+                    </TouchableOpacity>
+                  ) : (
+                    logoThumbnail
+                  )}
                   <TouchableOpacity
                     onPress={handleChangeLogo}
                     disabled={uploadingLogo}
@@ -488,6 +513,16 @@ export default function SettingsScreen() {
           <View style={styles.bottomSpacer} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Full-size logo overlay — outside the ScrollView so the Modal isn't nested
+          in a scrolling subtree. Dismisses on back arrow, Android hardware back
+          (Modal onRequestClose) and tap-scrim. */}
+      <ImageViewer
+        visible={logoViewerOpen}
+        uri={church?.logoUrl}
+        title={church?.name}
+        onRequestClose={() => setLogoViewerOpen(false)}
+      />
     </SafeAreaView>
   );
 }
