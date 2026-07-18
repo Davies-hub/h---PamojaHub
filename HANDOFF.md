@@ -1,8 +1,10 @@
 # Pamoja Hub — Developer Handoff
 
-_Last updated: 2026-07-16. This file is the orientation doc for a new contributor or a new chat. For the most granular live status read `CLAUDE.md` (loaded every session) → `PamojaHub_Compressed_v2.md` §0/§18 → the persistent memory index._
+_Last updated: 2026-07-18. This file is the orientation doc for a new contributor or a new chat. For the most granular live status read `CLAUDE.md` (loaded every session) → `PamojaHub_Compressed_v2.md` §0/§18 → the persistent memory index._
 
-> **UI redesign MERGED to master 2026-07-15 (`fab9e17`, pushed).** The production-level responsive/aesthetic UI overhaul is no longer a branch experiment: 12 slices, aesthetic-only, palette locked, 48 files, zero logic edits (rollback point `97692a9`; the `ui-redesign` branch is now merged history / delete-candidate). Back-button clip regression fixed with a web-only `position:fixed` edge overlay (`183c3cb`) — **standing convention: all back buttons top-left window edge on wide web** (except the `treasurer/new` + `groups` inline links). A Playwright e2e suite (`frontend/e2e/back-buttons.spec.ts`) now guards it. A DEBUG-only test route `POST /api/v1/dev/reset-ratelimit/` was added (absent when `DEBUG=False`). Backend baseline re-verified **499 green** post-merge (now **500** — fee-rounding pin test added 2026-07-16). See `docs/deploy_checklist_status.md` for the full open-items list.
+> **Where the repo is right now (2026-07-18):** `master` at **`d3f4270`**, tree **clean**, **`origin/master` synced**. Backend suite **528 green** (`manage.py test tests`). Recent arc: optional **church logo at registration** (`d3f4270` — anonymous multipart, post-commit orphan-safe, 3/h per-IP), **media key-storage** (`45f7c2d` — bare object keys stored, URLs minted at serialization), **fresh dashboards** (`6566765` — focus-refetch everywhere, pull-to-refresh, 45s focused polling on treasurer Overview), and campaign **pause/resume/close wired on the detail screen** (`23f1bf7`, was local-mock). Banner + logo upload now work on **laptop AND Android**.
+
+> **UI redesign MERGED to master 2026-07-15 (`fab9e17`, pushed).** The production-level responsive/aesthetic UI overhaul is no longer a branch experiment: 12 slices, aesthetic-only, palette locked, 48 files, zero logic edits (rollback point `97692a9`; the `ui-redesign` branch is now merged history / delete-candidate). Back-button clip regression fixed with a web-only `position:fixed` edge overlay (`183c3cb`) — **standing convention: all back buttons top-left window edge on wide web** (except the `treasurer/new` + `groups` inline links). A Playwright e2e suite (`frontend/e2e/back-buttons.spec.ts`) now guards it. A DEBUG-only test route `POST /api/v1/dev/reset-ratelimit/` was added (absent when `DEBUG=False`). Backend baseline was re-verified **499 green** post-merge on 2026-07-15 (historical — the live number is **528**, above). See `docs/deploy_checklist_status.md` for the full open-items list.
 
 ---
 
@@ -27,14 +29,14 @@ j:\Pamoja_Hub\
 
 ---
 
-## Build phases & where we are (2026-07-16)
+## Build phases & where we are (2026-07-18)
 
 Build order (per the BuildGuide): **Frontend (UI shells w/ mock) → Backend (API + logic) → Database (indexes/constraints) → Connect (wire FE↔BE).**
 
 | Phase | State |
 |---|---|
-| **Phase 1 — Frontend** | ✅ Complete + responsive/aesthetic overhaul MERGED to master 2026-07-15 (`fab9e17`). All public/auth/treasurer/super screens built. `tsc --noEmit` = 0; `npm test` (vitest) = 60/60; Playwright e2e back-button spec added. |
-| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **512 tests** green (live `manage.py test tests` count — dev callback-simulator tests added 2026-07-16; was 503 earlier the same day, 499 post-merge 2026-07-15, 422 on 2026-06-26). |
+| **Phase 1 — Frontend** | ✅ Complete + responsive/aesthetic overhaul MERGED to master 2026-07-15 (`fab9e17`). All public/auth/treasurer/super screens built. `tsc --noEmit` = 0; `npm test` (vitest) = 60/60. Playwright e2e back-button spec exists but **`npm test` excludes `e2e/**`** — it never runs under vitest; run it separately. |
+| **Phase 2 — Backend** | ✅ Complete. 11 Django apps, Steps 2.1 → 2.12b. **528 tests** green (live `manage.py test tests` count, verified 2026-07-18 — registration-logo slice; was 522 after media key-storage 2026-07-18, 513 on 2026-07-16, 499 post-merge 2026-07-15, 422 on 2026-06-26). |
 | **Phase 3 — DB hardening** | 🟡 Partial. Indexes/constraints + AuditLog `REVOKE UPDATE/DELETE` applied to **dev** DB. The prod REVOKE is **not a migration** — run manually before go-live (`backend/docs/production_db_hardening.md`). |
 | **Phase 4 — Connect FE↔BE** | ✅ Functionally complete. All reads + all writes wired & live-verified, incl. the two former launch-blockers (campaign-create + password-reset, closed 2026-06-26). Zero mock imports / dead service methods remain (verified 2026-07-16). |
 
@@ -58,8 +60,11 @@ backend\venv\Scripts\python.exe backend\manage.py test tests
 cd j:\Pamoja_Hub\frontend
 npx expo start --clear          # web + Expo Go QR
 npx tsc --noEmit                # typecheck (must be 0)
-npm test                        # vitest (60)
+npm test                        # vitest (60) — EXCLUDES e2e/**
+npx playwright test             # back-button e2e — separate run, never part of npm test
 ```
+
+**Physical-device (Android) dev:** `EXPO_PUBLIC_API_URL` is **bake-time** — export `http://<laptop LAN IP>:8000/api/v1` in the shell *before* starting Metro (the `localhost` fallback resolves to the phone itself). Backend runs `runserver 0.0.0.0:8000 --noreload` with the LAN IP in `ALLOWED_HOSTS`; MinIO binds `0.0.0.0:9000` with a LAN-IP `S3_PUBLIC_URL_BASE`. See `CLAUDE.md` → "Physical-device dev setup".
 
 **Critical npm rule:** always install with `--legacy-peer-deps` — React **19.2.3** is exact-pinned and most Expo packages declare peer deps for older React. Never let `npx expo install` change the React version.
 
@@ -84,6 +89,8 @@ npm test                        # vitest (60)
 - **Multi-tenant isolation:** treasurer reads filter by `request.user.church`; every `/super/` endpoint is `[IsSuperAdmin]` (treasurer → 403).
 - **Serializer split is a security boundary:** public serializers are strict allowlists (never expose `treasurerPhone/treasurerName/walletBalance/platformFee/checkoutRequestId`); admin/super serializers over-emit (D1) and the **frontend mappers allowlist** drops the surplus at the boundary.
 - **The wire boundary:** DRF serializes `DecimalField` as a **string**; `services/mappers.ts` converts money via `Number()`, per-field snake→camel (never a generic deep-convert).
+- **Media is key-storage (since 2026-07-18):** uploads persist the **bare object key**, never an absolute URL; the browser-facing URL is minted at **serialization** time by `media_url()` (`integrations/object_storage.py:164`) through `MediaURLRepresentationMixin`. `S3_PUBLIC_URL_BASE` is read at call time, so re-pointing the base re-points every key-holding row with no DB rewrite. Rows written before the refactor hold absolute URLs and **pass through unchanged** (no backfill by design) — they only gain a key on re-upload. Banner + logo upload are live-gated on **laptop and Android**; for phone-visible images dev needs a **LAN-IP** `S3_PUBLIC_URL_BASE` and MinIO bound to `0.0.0.0:9000`.
+- **`Alert.alert` is a no-op on web** — use `ResponsiveSheet` for every confirm/destructive dialog. (Two known stragglers remain: super churches suspend/reactivate.)
 - **Net-Everywhere:** all church-facing amounts are NET (post 2.5% fee). Exceptions: donor success screen shows gross (matches M-Pesa SMS); Super Admin Donations table shows gross/fee/net.
 - **UI says "Payout", backend model is `Withdrawal`** — do not rename backend identifiers.
 
@@ -91,7 +98,7 @@ npm test                        # vitest (60)
 
 ## API surface (Base: `/api/v1/`)
 
-`/auth/` (register, login, me, token/refresh, logout, password-reset) · `/treasurer/` (OTP portal: request-otp, verify-otp, campaigns, report, request-disbursement, disbursements) · `/churches/` (public list/detail, me GET+PATCH, me/stats, me/donations) · `/campaigns/` (public browse/detail, mine list, mine/create, mine/{slug} + pause/resume/close, updates) · `/group-labels/` (CRUD + archive/unarchive) · `/donations/` (initiate, callback, {id}/status) · `/subscriptions/` (initiate, cancel, callback, {id}/status) · `/withdrawals/` (list, approve, reject, retry, b2c-result) · `/notifications/` (list, unread-count, {id}/read, read-all) · `/super/` (all 8 reads + church approve/reject/suspend/reactivate/set-tier + withdrawal force-retry/resolve-paid/resolve-retry + billing).
+`/auth/` (register — optionally **multipart** with a `logo` file; login, me, token/refresh, logout, password-reset) · `/treasurer/` (OTP portal: request-otp, verify-otp, campaigns, report, request-disbursement, disbursements) · `/churches/` (public list/detail, me GET+PATCH, me/stats, me/donations) · `/campaigns/` (public browse/detail, mine list, mine/create, mine/{slug} + pause/resume/close, updates) · `/group-labels/` (CRUD + archive/unarchive) · `/donations/` (initiate, callback, {id}/status) · `/subscriptions/` (initiate, cancel, callback, {id}/status) · `/withdrawals/` (list, approve, reject, retry, b2c-result) · `/notifications/` (list, unread-count, {id}/read, read-all) · `/super/` (all 8 reads + church approve/reject/suspend/reactivate/set-tier + withdrawal force-retry/resolve-paid/resolve-retry + billing).
 
 ---
 
@@ -105,12 +112,12 @@ frontend/
 │   ├── (treasurer)/ overview, campaigns (list/new/[slug]), payouts, reports, settings, +hidden: notifications, groups
 │   └── (super)/     queue, churches, withdrawals, analytics, billing, more, +hidden: campaigns, donations, audit-log
 ├── components/      ui/, campaign/, layout/, disbursement/, treasurer/ (SubscriptionCard)
-├── services/        api.ts, portalClient.ts, mappers.ts + per-domain services (all wired except create/password-reset)
+├── services/        api.ts, portalClient.ts, mappers.ts + per-domain services (ALL wired to the real API — create + password-reset included)
 ├── hooks/           useFocusRefetch.ts (background refetch-on-focus, keep last-good)
 ├── stores/          auth.store, notifications.store, pendingQueue.store (React Context)
 ├── constants/       theme.ts (all brand tokens)
 ├── types/           index.ts (every interface)
-└── mock/            kept until the last consumer is wired (campaigns/groups still referenced by new.tsx)
+└── mock/            fixtures for the vitest consistency suite ONLY — zero `mock/` imports remain under app/**
 ```
 
 Route groups are transparent — `(public)` is not in the URL. `/campaigns` → `app/(public)/campaigns/index.tsx`.
