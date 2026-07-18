@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   ScrollView,
@@ -134,6 +133,22 @@ function ChurchDetailSheet({
     setPendingTier(church.subscriptionTier);
   }, [church.id, church.subscriptionTier]);
 
+  // Arm→confirm state for the two status writes, mirroring pendingTier's shape: the
+  // first tap ARMS, the second performs. Alert.alert is a no-op on react-native-web,
+  // which left both buttons dead there; this is the same in-sheet idiom the tier
+  // selector below already uses, so no second Modal is needed.
+  // ONE shared value — suspend/reactivate are status-mutually-exclusive, so at most
+  // one of the two buttons is ever mounted.
+  const [armed, setArmed] = useState<null | 'suspend' | 'reactivate'>(null);
+  // Disarm on any server-truth re-seed. church.status is the dep that matters: after a
+  // successful flip setSelected(updated) changes it, and without this a stale 'suspend'
+  // would survive a SUSPENDED→ACTIVE round-trip and leave the button pre-armed — one
+  // tap from an unconfirmed suspend. Kept a SEPARATE effect from pendingTier's so the
+  // tier selector's re-seed semantics are untouched by this slice.
+  useEffect(() => {
+    setArmed(null);
+  }, [church.id, church.status]);
+
   return (
     <View style={styles.sheet}>
       <View style={styles.sheetHandle} />
@@ -175,36 +190,110 @@ function ChurchDetailSheet({
             </View>
           ) : null}
 
+          {/* Suspend — arm→confirm (see `armed` above). Unarmed the row holds only the
+              button, so it still stretches full width exactly as before; armed, it shares
+              the row with a Cancel escape. */}
           {church.status === 'ACTIVE' ? (
-            <TouchableOpacity
-              style={[styles.suspendBtn, actionInFlight && styles.btnDisabled]}
-              onPress={() => onSuspend(church.id)}
-              disabled={actionInFlight}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-              accessibilityLabel="Suspend church"
-            >
-              <Ionicons name="ban-outline" size={16} color={Colors.danger} />
-              <Text style={styles.suspendBtnText}>
-                {actionInFlight ? 'Suspending…' : 'Suspend Church'}
-              </Text>
-            </TouchableOpacity>
+            <>
+              {/* Carries the consequence the old Alert's prose used to state. Armed-only:
+                  unarmed there is nothing to warn about, and Reactivate is non-destructive
+                  so it gets no warning. Sits as a sibling of the row so sheetActions' own
+                  column gap spaces it — no extra wrapper needed. */}
+              {armed === 'suspend' ? (
+                <Text style={styles.armedWarnText}>Loses access immediately</Text>
+              ) : null}
+              <View style={styles.armedRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.suspendBtn,
+                    styles.armedRowBtn,
+                    armed === 'suspend' && styles.suspendBtnArmed,
+                    actionInFlight && styles.btnDisabled,
+                  ]}
+                  onPress={() => (armed === 'suspend' ? onSuspend(church.id) : setArmed('suspend'))}
+                  disabled={actionInFlight}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    armed === 'suspend' ? 'Confirm suspend church' : 'Suspend church'
+                  }
+                >
+                  <Ionicons
+                    name="ban-outline"
+                    size={16}
+                    color={armed === 'suspend' ? Colors.white : Colors.danger}
+                  />
+                  <Text style={[styles.suspendBtnText, armed === 'suspend' && styles.armedBtnText]}>
+                    {actionInFlight
+                      ? 'Suspending…'
+                      : armed === 'suspend'
+                        ? 'Tap again to confirm'
+                        : 'Suspend Church'}
+                  </Text>
+                </TouchableOpacity>
+                {armed === 'suspend' ? (
+                  <TouchableOpacity
+                    style={[styles.armedCancelBtn, actionInFlight && styles.btnDisabled]}
+                    onPress={() => setArmed(null)}
+                    disabled={actionInFlight}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel suspend"
+                  >
+                    <Text style={styles.armedCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </>
           ) : null}
 
           {church.status === 'SUSPENDED' ? (
-            <TouchableOpacity
-              style={[styles.reactivateBtn, actionInFlight && styles.btnDisabled]}
-              onPress={() => onReactivate(church.id)}
-              disabled={actionInFlight}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-              accessibilityLabel="Reactivate church"
-            >
-              <Ionicons name="checkmark-circle-outline" size={16} color={Colors.primary} />
-              <Text style={styles.reactivateBtnText}>
-                {actionInFlight ? 'Reactivating…' : 'Reactivate Church'}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.armedRow}>
+              <TouchableOpacity
+                style={[
+                  styles.reactivateBtn,
+                  styles.armedRowBtn,
+                  armed === 'reactivate' && styles.reactivateBtnArmed,
+                  actionInFlight && styles.btnDisabled,
+                ]}
+                onPress={() =>
+                  armed === 'reactivate' ? onReactivate(church.id) : setArmed('reactivate')
+                }
+                disabled={actionInFlight}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  armed === 'reactivate' ? 'Confirm reactivate church' : 'Reactivate church'
+                }
+              >
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={16}
+                  color={armed === 'reactivate' ? Colors.white : Colors.primary}
+                />
+                <Text
+                  style={[styles.reactivateBtnText, armed === 'reactivate' && styles.armedBtnText]}
+                >
+                  {actionInFlight
+                    ? 'Reactivating…'
+                    : armed === 'reactivate'
+                      ? 'Tap again to confirm'
+                      : 'Reactivate Church'}
+                </Text>
+              </TouchableOpacity>
+              {armed === 'reactivate' ? (
+                <TouchableOpacity
+                  style={[styles.armedCancelBtn, actionInFlight && styles.btnDisabled]}
+                  onPress={() => setArmed(null)}
+                  disabled={actionInFlight}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel reactivate"
+                >
+                  <Text style={styles.armedCancelText}>Cancel</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
           ) : null}
 
           {/* Subscription tier — a plain choice among 3 values (NOT a money write),
@@ -318,43 +407,34 @@ export default function SuperChurchesScreen() {
     });
   }, [churches, search, statusF, tierF]);
 
+  // Called only AFTER the sheet's arm→confirm second tap (the old Alert.alert confirm
+  // was a no-op on web, so this never fired there). Fires the write directly, same
+  // void-async-IIFE shape as handleSetTier below.
   function handleSuspend(id: string) {
     // Re-entry guard: ignore the tap if any suspend/reactivate is already in flight.
     if (actionInFlight) return;
     const church = churches.find(c => c.id === id);
     if (!church) return;
-    Alert.alert(
-      'Suspend Church',
-      `Suspend "${church.name}"? They will lose access to the platform immediately.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Suspend',
-          style: 'destructive',
-          onPress: async () => {
-            if (actionInFlight) return;   // belt-and-braces
-            setDetailError(null);
-            setActionInFlight(true);
-            try {
-              // No optimistic status write — the church only changes on server truth.
-              const updated = await superadminService.suspendChurch(id);
-              setSelected(updated);       // open sheet flips to "Reactivate" from server
-              retry();                    // re-sync the list row
-              showToast(`${church.name} suspended.`);
-            } catch (err) {
-              // Keep status unchanged everywhere; surface the reason inline in the sheet.
-              // A 400 wrong-status race (someone else acted) → refetch so the list/sheet
-              // self-correct, and still show why. Do NOT close the sheet on error.
-              const detail = extractDetail(err);
-              if (detail === 'Only ACTIVE churches can be suspended.') retry();
-              setDetailError(detail ?? "Couldn't update. Try again.");
-            } finally {
-              setActionInFlight(false);
-            }
-          },
-        },
-      ]
-    );
+    void (async () => {
+      setDetailError(null);
+      setActionInFlight(true);
+      try {
+        // No optimistic status write — the church only changes on server truth.
+        const updated = await superadminService.suspendChurch(id);
+        setSelected(updated);       // open sheet flips to "Reactivate" from server
+        retry();                    // re-sync the list row
+        showToast(`${church.name} suspended.`);
+      } catch (err) {
+        // Keep status unchanged everywhere; surface the reason inline in the sheet.
+        // A 400 wrong-status race (someone else acted) → refetch so the list/sheet
+        // self-correct, and still show why. Do NOT close the sheet on error.
+        const detail = extractDetail(err);
+        if (detail === 'Only ACTIVE churches can be suspended.') retry();
+        setDetailError(detail ?? "Couldn't update. Try again.");
+      } finally {
+        setActionInFlight(false);
+      }
+    })();
   }
 
   // Tier flip — money-INERT (no wallet, no expiry, no charge; backend enforces). Inline,
@@ -382,37 +462,27 @@ export default function SuperChurchesScreen() {
     })();
   }
 
+  // Same arm→confirm contract as handleSuspend above.
   function handleReactivate(id: string) {
     if (actionInFlight) return;
     const church = churches.find(c => c.id === id);
     if (!church) return;
-    Alert.alert(
-      'Reactivate Church',
-      `Reactivate "${church.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reactivate',
-          onPress: async () => {
-            if (actionInFlight) return;
-            setDetailError(null);
-            setActionInFlight(true);
-            try {
-              const updated = await superadminService.reactivateChurch(id);
-              setSelected(updated);       // open sheet flips to "Suspend" from server
-              retry();
-              showToast(`${church.name} reactivated.`);
-            } catch (err) {
-              const detail = extractDetail(err);
-              if (detail === 'Only SUSPENDED churches can be reactivated.') retry();
-              setDetailError(detail ?? "Couldn't update. Try again.");
-            } finally {
-              setActionInFlight(false);
-            }
-          },
-        },
-      ]
-    );
+    void (async () => {
+      setDetailError(null);
+      setActionInFlight(true);
+      try {
+        const updated = await superadminService.reactivateChurch(id);
+        setSelected(updated);       // open sheet flips to "Suspend" from server
+        retry();
+        showToast(`${church.name} reactivated.`);
+      } catch (err) {
+        const detail = extractDetail(err);
+        if (detail === 'Only SUSPENDED churches can be reactivated.') retry();
+        setDetailError(detail ?? "Couldn't update. Try again.");
+      } finally {
+        setActionInFlight(false);
+      }
+    })();
   }
 
   const isWideWeb = useIsWideWeb();
@@ -764,6 +834,36 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: FontSize.md,
     color: Colors.primary,
+  },
+
+  // Arm→confirm affordances. Palette-locked: the armed fills reuse the SAME tokens the
+  // unarmed outlines already use (danger / primary), inverting fill and text rather than
+  // introducing any new colour.
+  armedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  armedRowBtn: { flex: 1 },
+  // Same tokens as detailErrorText, minus its flex:1 (that exists for detailErrorBox's
+  // row context and would stretch this line vertically in the sheetActions column).
+  armedWarnText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.sm,
+    color: Colors.danger,
+  },
+  suspendBtnArmed: { backgroundColor: Colors.danger },
+  reactivateBtnArmed: { backgroundColor: Colors.primary },
+  armedBtnText: { color: Colors.white },
+  armedCancelBtn: {
+    height: 46,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+  },
+  armedCancelText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
   },
   auditBtn: {
     flexDirection: 'row',
