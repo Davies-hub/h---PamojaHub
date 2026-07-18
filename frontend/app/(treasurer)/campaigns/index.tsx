@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   Linking,
   ScrollView,
@@ -16,8 +17,13 @@ import { useIsWideWeb } from '../../../components/layout/Screen';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
+import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignStatus, TreasurerCampaign } from '../../../types';
+
+// Focused-poll cadence — matches the treasurer Overview dashboard so both surfaces
+// refresh on the same rhythm. One lightweight GET per tick.
+const POLL_INTERVAL_MS = 45_000;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -226,10 +232,6 @@ const CampaignRowCard = React.memo(function CampaignRowCard({
 export default function TreasurerCampaignsScreen() {
   const isWideWeb = useIsWideWeb();
   const router = useRouter();
-  const [campaigns, setCampaigns] = useState<TreasurerCampaign[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState('');
   // Pause/Resume write state. actingSlug holds the slug currently being acted on so
   // only that row's buttons disable; actionError is a screen-level inline message
@@ -242,24 +244,26 @@ export default function TreasurerCampaignsScreen() {
   // campaign being confirmed (null = sheet hidden).
   const [closeTarget, setCloseTarget] = useState<TreasurerCampaign | null>(null);
 
-  // Authed GET /campaigns/mine/ (church-scoped server-side). Read-only here — the
-  // pause/resume/close handlers below stay LOCAL-only (write/status slice is later).
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    (async () => {
-      try {
-        const data = await campaignsService.listMine();
-        if (!cancelled) setCampaigns(data);
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [reloadKey]);
+  // Authed GET /campaigns/mine/ (church-scoped server-side) via the shared focus hook:
+  // the first load shows the full-screen spinner, every later fetch — focus, a status
+  // action's re-sync, the poll below — runs in the BACKGROUND with keep-last-good
+  // semantics. The list never blanks and the scroll position survives, which the old
+  // reloadKey effect could not do (it set loading=true on every bump).
+  const {
+    data: fetchedCampaigns,
+    status: listStatus,
+    retry: refetchCampaigns,
+  } = useFocusRefetch(() => campaignsService.listMine());
+
+  // Stable identity so the search memo below doesn't re-run on every render.
+  const campaigns = useMemo(() => fetchedCampaigns ?? [], [fetchedCampaigns]);
+
+  // The hook only reports 'loading' while it holds NO data (useFocusRefetch.ts:54,
+  // `const foreground = !hasDataRef.current`), so a background refetch can never
+  // re-enter the spinner branch. The explicit null check states that contract at the
+  // call site rather than leaning on it silently.
+  const loading = listStatus === 'loading' && fetchedCampaigns === null;
+  const error = listStatus === 'error';
 
   // ── Derived data ────────────────────────────────────────────────────────
 
@@ -267,6 +271,57 @@ export default function TreasurerCampaignsScreen() {
     const q = search.toLowerCase().trim();
     return campaigns.filter(c => !q || c.title.toLowerCase().includes(q));
   }, [campaigns, search]);
+
+  // ── Focused polling ───────────────────────────────────────────────────────
+
+  // Read inside the poll tick without being effect deps (assigned during render, the
+  // same shape as Overview's has*Ref guards).
+  //   hasDataRef    — polling with no data yet would run retry() as a FOREGROUND fetch
+  //                   and flash the full-screen spinner every tick; the error state's
+  //                   Try-again control owns that path instead.
+  //   actingSlugRef — a background refetch landing mid-write would race the
+  //                   one-action-at-a-time guard and could revert a row the server has
+  //                   already flipped.
+  //   closeTargetRef— a refetch behind an open destructive confirm has no upside.
+  const hasDataRef = useRef(false);
+  hasDataRef.current = fetchedCampaigns !== null;
+  const actingSlugRef = useRef<string | null>(null);
+  actingSlugRef.current = actingSlug;
+  const closeTargetRef = useRef<TreasurerCampaign | null>(null);
+  closeTargetRef.current = closeTarget;
+
+  // Refresh every POLL_INTERVAL_MS, active only while the screen is FOCUSED **and** the
+  // app is FOREGROUNDED — both conditions, because a blurred tab or a backgrounded app
+  // would otherwise keep burning battery, data, and backend requests for a list nobody
+  // is looking at. The interval is cleared on blur (useFocusEffect cleanup) and on
+  // background (AppState listener). Errors are silent by construction: retry() with data
+  // present is a background refetch — last-good rows stay on screen, no spinner.
+  useFocusEffect(
+    useCallback(() => {
+      let timer: ReturnType<typeof setInterval> | null = null;
+      const start = () => {
+        if (timer) return;
+        if (__DEV__) console.log('[campaigns-poll] started');
+        timer = setInterval(() => {
+          if (actingSlugRef.current) return;    // status write in flight
+          if (closeTargetRef.current) return;   // destructive confirm open
+          if (hasDataRef.current) refetchCampaigns();
+        }, POLL_INTERVAL_MS);
+      };
+      const stop = () => {
+        if (!timer) return;
+        if (__DEV__) console.log('[campaigns-poll] stopped');
+        clearInterval(timer);
+        timer = null;
+      };
+      if (AppState.currentState === 'active') start();
+      const sub = AppState.addEventListener('change', s => {
+        if (s === 'active') start();
+        else stop();
+      });
+      return () => { stop(); sub.remove(); };
+    }, [refetchCampaigns]),
+  );
 
   // ── Pause / Resume / Close (wired: write → refetch from server truth; NO optimistic flip) ──
 
@@ -279,8 +334,9 @@ export default function TreasurerCampaignsScreen() {
       else if (action === 'resume') await campaignsService.resumeCampaign(slug);
       else await campaignsService.closeCampaign(slug);
       // SUCCESS (200): re-sync the list from the server (same path as "Try again").
-      // The row flips only now, from server truth — no optimistic mutation.
-      setReloadKey(k => k + 1);
+      // The row flips only now, from server truth — no optimistic mutation. retry()
+      // with data present is a BACKGROUND refetch, so the list never blanks mid-action.
+      refetchCampaigns();
     } catch (err) {
       // Do NOT flip the row. Surface the reason. A 400 (detail present) — wrong-status
       // race OR the backend in-flight-money guard ("…withdrawal in progress…") — gets
@@ -288,7 +344,7 @@ export default function TreasurerCampaignsScreen() {
       // failure (no detail) leaves the list as-is and shows the generic message.
       const detail = extractDetail(err);
       setActionError(detail ?? "Couldn't update. Try again.");
-      if (detail !== undefined) setReloadKey(k => k + 1);
+      if (detail !== undefined) refetchCampaigns();
     } finally {
       setActingSlug(null);
     }
@@ -403,7 +459,7 @@ export default function TreasurerCampaignsScreen() {
           <Text style={styles.emptySubtitle}>Please check your connection and try again.</Text>
           <TouchableOpacity
             style={styles.retryBtnState}
-            onPress={() => setReloadKey(k => k + 1)}
+            onPress={refetchCampaigns}
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityLabel="Try again"

@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   Keyboard,
   ScrollView,
@@ -30,6 +32,12 @@ const POLL_MAX_ATTEMPTS = 10;
 // Mirrors the backend's MAX_RETRIES (withdrawals/models.py) — gates the Retry button
 // client-side; the backend re-checks under lock regardless.
 const MAX_RETRIES = 5;
+
+// Whole-list refresh cadence while this screen is focused AND foregrounded, matching the
+// treasurer Overview dashboard. Deliberately NOT named POLL_INTERVAL_MS: that constant
+// above is the 3s VERDICT poll for one dispatching row, a different poll with a different
+// job. Two names because they are two mechanisms, not one knob.
+const LIST_POLL_INTERVAL_MS = 45_000;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -484,6 +492,67 @@ export default function PayoutsScreen() {
       setRetrySubmitting(false);
     }
   }
+
+  // ── Focused list polling ──────────────────────────────────────────────────
+
+  // Read inside the poll tick without becoming effect deps (assigned during render, the
+  // same shape as Overview's has*Ref guards). Each ref closes a specific hazard:
+  //   hasDataRef        — retry() is foreground-if-empty (useFocusRefetch.ts:54), so a
+  //                       tick before the first load lands would flash the full-screen
+  //                       spinner; the error state's Try-again owns that path.
+  //   writeInFlightRef  — THE money guard. The mirror-sync above (:269-271) replaces the
+  //                       WHOLE array, so a list() that observed a row pre-write can
+  //                       overwrite the fresh row — reverting a payout that is already
+  //                       dispatching real money back to PENDING_APPROVAL with its
+  //                       Approve/Reject buttons restored. Never refetch mid-write.
+  //   verdictPollingRef — the 3s verdict poll (startApprovalPoll) already refetches and
+  //                       writes the mirror itself for those rows. Two uncoordinated
+  //                       writers to one array buys nothing; let the tighter poll own it.
+  //   confirmOpenRef    — no upside refetching behind an open approve/reject/retry confirm.
+  const hasDataRef = useRef(false);
+  hasDataRef.current = fetchedWithdrawals !== null;
+  const writeInFlightRef = useRef(false);
+  writeInFlightRef.current = approveSubmitting || rejectSubmitting || retrySubmitting;
+  const verdictPollingRef = useRef(false);
+  verdictPollingRef.current = confirmingIds.size > 0;
+  const confirmOpenRef = useRef(false);
+  confirmOpenRef.current =
+    approvalTarget !== null || rejectTarget !== null || retryTarget !== null;
+
+  // Refresh every LIST_POLL_INTERVAL_MS, active only while the screen is FOCUSED **and**
+  // the app is FOREGROUNDED — both conditions, because a blurred tab or a backgrounded
+  // app would otherwise keep burning battery, data, and backend requests for a list
+  // nobody is looking at. Cleared on blur (useFocusEffect cleanup) and on background
+  // (AppState listener). Errors are silent by construction: retry() with data present is
+  // a background refetch — last-good rows stay on screen, no spinner.
+  useFocusEffect(
+    useCallback(() => {
+      let timer: ReturnType<typeof setInterval> | null = null;
+      const start = () => {
+        if (timer) return;
+        if (__DEV__) console.log('[payouts-poll] started');
+        timer = setInterval(() => {
+          if (!hasDataRef.current) return;        // nothing loaded yet
+          if (writeInFlightRef.current) return;   // approve/reject/retry in flight
+          if (verdictPollingRef.current) return;  // the 3s verdict poll owns these rows
+          if (confirmOpenRef.current) return;     // a confirm dialog/sheet is open
+          refetchList();
+        }, LIST_POLL_INTERVAL_MS);
+      };
+      const stop = () => {
+        if (!timer) return;
+        if (__DEV__) console.log('[payouts-poll] stopped');
+        clearInterval(timer);
+        timer = null;
+      };
+      if (AppState.currentState === 'active') start();
+      const sub = AppState.addEventListener('change', s => {
+        if (s === 'active') start();
+        else stop();
+      });
+      return () => { stop(); sub.remove(); };
+    }, [refetchList]),
+  );
 
   const isWideWeb = useIsWideWeb();
 

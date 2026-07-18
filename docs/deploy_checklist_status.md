@@ -153,6 +153,14 @@ Ship without these. Listed so they're not forgotten.
 ### 5.5 — Context-file hygiene
 - Test baseline drift: docs said 299, then 385/422. **✅ RECONCILED 2026-07-09 — see CURRENT VERIFIED BASELINE above.** Older 299/385/422 figures were historical floors.
 
+### 5.6 — Payouts poll: §4a money-revert race NARROWED, not closed [LIVE follow-up] — added 2026-07-18
+- The treasurer payouts 45s list poll guards on `writeInFlightRef`, so a tick can no longer **start** a refetch while an approve/reject/retry is submitting. That closes the common window.
+- **Still open:** a `list()` GET **already in flight** when the write lands can resolve *after* it and revert the row, because the mirror-sync at `payouts.tsx:269-271` replaces the **whole** array (`setWithdrawals(fetchedWithdrawals)`) with no row-level merge. `useFocusRefetch`'s seq guard only orders hook runs against each other — it knows nothing about a concurrent `approve` POST.
+- **Symptom:** a payout already dispatching real money briefly renders `PENDING_APPROVAL` with Approve/Reject restored — i.e. it invites a double-approve. Cosmetic-looking, money-adjacent.
+- **Exposure:** ~one in-flight GET (50–300ms) per 45s tick, and only if the treasurer taps a write inside that window. Low probability, non-zero.
+- **Real fix:** generation guard on the mirror-sync — stamp each local write and drop any resolved fetch whose generation predates it. Deferred to keep the polling slice tight.
+- **Not coverable by the existing harness:** the 2026-07-18 in-page XHR stub proved all four tick guards deterministically (zero DB footprint), but it can only prove no tick *starts*; it cannot prove ordering of an already-dispatched GET. Needs either the fix + a unit test on the merge, or a timing-controlled overlap gate.
+
 ---
 
 ## What I can and can't do
