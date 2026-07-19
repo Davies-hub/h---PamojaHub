@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  AppState,
   FlatList,
   Linking,
   ScrollView,
@@ -18,6 +17,7 @@ import ProgressBar from '../../../components/ui/ProgressBar';
 import ResponsiveSheet from '../../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
+import { usePolledFocusRefetch } from '../../../hooks/usePolledFocusRefetch';
 import { campaignsService } from '../../../services/campaigns.service';
 import { CampaignStatus, TreasurerCampaign } from '../../../types';
 
@@ -290,38 +290,19 @@ export default function TreasurerCampaignsScreen() {
   const closeTargetRef = useRef<TreasurerCampaign | null>(null);
   closeTargetRef.current = closeTarget;
 
-  // Refresh every POLL_INTERVAL_MS, active only while the screen is FOCUSED **and** the
-  // app is FOREGROUNDED — both conditions, because a blurred tab or a backgrounded app
-  // would otherwise keep burning battery, data, and backend requests for a list nobody
-  // is looking at. The interval is cleared on blur (useFocusEffect cleanup) and on
-  // background (AppState listener). Errors are silent by construction: retry() with data
-  // present is a background refetch — last-good rows stay on screen, no spinner.
-  useFocusEffect(
-    useCallback(() => {
-      let timer: ReturnType<typeof setInterval> | null = null;
-      const start = () => {
-        if (timer) return;
-        if (__DEV__) console.log('[campaigns-poll] started');
-        timer = setInterval(() => {
-          if (actingSlugRef.current) return;    // status write in flight
-          if (closeTargetRef.current) return;   // destructive confirm open
-          if (hasDataRef.current) refetchCampaigns();
-        }, POLL_INTERVAL_MS);
-      };
-      const stop = () => {
-        if (!timer) return;
-        if (__DEV__) console.log('[campaigns-poll] stopped');
-        clearInterval(timer);
-        timer = null;
-      };
-      if (AppState.currentState === 'active') start();
-      const sub = AppState.addEventListener('change', s => {
-        if (s === 'active') start();
-        else stop();
-      });
-      return () => { stop(); sub.remove(); };
-    }, [refetchCampaigns]),
-  );
+  // Refresh every POLL_INTERVAL_MS, armed only while the screen is FOCUSED **and** the app
+  // is FOREGROUNDED — the shared hook owns that scaffolding. Errors are silent by
+  // construction: retry() with data present is a background refetch — last-good rows stay
+  // on screen, no spinner.
+  usePolledFocusRefetch({
+    intervalMs: POLL_INTERVAL_MS,
+    label: 'campaigns-poll',
+    onTick: () => {
+      if (actingSlugRef.current) return;    // status write in flight
+      if (closeTargetRef.current) return;   // destructive confirm open
+      if (hasDataRef.current) refetchCampaigns();
+    },
+  });
 
   // ── Pause / Resume / Close (wired: write → refetch from server truth; NO optimistic flip) ──
 

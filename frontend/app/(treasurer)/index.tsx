@@ -4,7 +4,6 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  AppState,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -19,6 +18,7 @@ import { campaignsService } from '../../services/campaigns.service';
 import { dashboardService } from '../../services/dashboard.service';
 import { notificationsService } from '../../services/notifications.service';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
+import { usePolledFocusRefetch } from '../../hooks/usePolledFocusRefetch';
 import { useAuth } from '../../stores/auth.store';
 import { useNotifications } from '../../stores/notifications.store';
 import { DashboardStats, RecentDonation, TreasurerCampaign } from '../../types';
@@ -274,38 +274,21 @@ export default function OverviewScreen() {
   const hasCampaignsRef = useRef(false);
   hasCampaignsRef.current = allCampaigns !== null;
 
-  // Focused polling (this screen ONLY): refresh every POLL_INTERVAL_MS, active only
-  // while the screen is FOCUSED **and** the app is FOREGROUNDED — both conditions,
-  // because a blurred tab or a backgrounded app would otherwise keep burning battery,
-  // data, and backend requests for a dashboard nobody is looking at. The interval is
-  // cleared on blur (useFocusEffect cleanup) and on background (AppState listener).
-  // Errors are silent by construction: retry() with data present is a background
-  // refetch — last-good data stays on screen, no spinner, no toast.
-  useFocusEffect(
-    useCallback(() => {
-      let timer: ReturnType<typeof setInterval> | null = null;
-      const start = () => {
-        if (timer) return;
-        if (__DEV__) console.log('[overview-poll] started');
-        timer = setInterval(() => {
-          if (hasStatsRef.current) retryStats();
-          if (hasCampaignsRef.current) retryCampaigns();
-        }, POLL_INTERVAL_MS);
-      };
-      const stop = () => {
-        if (!timer) return;
-        if (__DEV__) console.log('[overview-poll] stopped');
-        clearInterval(timer);
-        timer = null;
-      };
-      if (AppState.currentState === 'active') start();
-      const sub = AppState.addEventListener('change', s => {
-        if (s === 'active') start();
-        else stop();
-      });
-      return () => { stop(); sub.remove(); };
-    }, [retryStats, retryCampaigns]),
-  );
+  // Focused polling (this screen ONLY): refresh every POLL_INTERVAL_MS, armed only while
+  // the screen is FOCUSED **and** the app is FOREGROUNDED — the shared hook owns that
+  // scaffolding. Errors are silent by construction: retry() with data present is a
+  // background refetch — last-good data stays on screen, no spinner, no toast.
+  //
+  // The two guards stay PER-CALL, not whole-tick: stats and campaigns load independently,
+  // so one may hold data while the other doesn't, and each must refresh on its own merit.
+  usePolledFocusRefetch({
+    intervalMs: POLL_INTERVAL_MS,
+    label: 'overview-poll',
+    onTick: () => {
+      if (hasStatsRef.current) retryStats();
+      if (hasCampaignsRef.current) retryCampaigns();
+    },
+  });
 
   // Bell unread count (Slice 2b, A-plain): refetch on Overview focus — useFocusEffect
   // fires on the FIRST focus (initial mount-focus, so a fresh login shows the real

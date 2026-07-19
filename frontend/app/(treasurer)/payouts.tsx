@@ -1,9 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  AppState,
   FlatList,
   Keyboard,
   ScrollView,
@@ -19,6 +17,7 @@ import Modal from '../../components/ui/Modal';
 import ResponsiveSheet from '../../components/ui/ResponsiveSheet';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../constants/theme';
 import { useFocusRefetch } from '../../hooks/useFocusRefetch';
+import { usePolledFocusRefetch } from '../../hooks/usePolledFocusRefetch';
 import { withdrawalsService } from '../../services/withdrawals.service';
 import { Withdrawal, WithdrawalStatus } from '../../types';
 import { fmtKes, timeAgo } from '../../utils/formatters';
@@ -500,7 +499,7 @@ export default function PayoutsScreen() {
   //   hasDataRef        — retry() is foreground-if-empty (useFocusRefetch.ts:54), so a
   //                       tick before the first load lands would flash the full-screen
   //                       spinner; the error state's Try-again owns that path.
-  //   writeInFlightRef  — THE money guard. The mirror-sync above (:269-271) replaces the
+  //   writeInFlightRef  — THE money guard. The mirror-sync above (:276-278) replaces the
   //                       WHOLE array, so a list() that observed a row pre-write can
   //                       overwrite the fresh row — reverting a payout that is already
   //                       dispatching real money back to PENDING_APPROVAL with its
@@ -519,40 +518,21 @@ export default function PayoutsScreen() {
   confirmOpenRef.current =
     approvalTarget !== null || rejectTarget !== null || retryTarget !== null;
 
-  // Refresh every LIST_POLL_INTERVAL_MS, active only while the screen is FOCUSED **and**
-  // the app is FOREGROUNDED — both conditions, because a blurred tab or a backgrounded
-  // app would otherwise keep burning battery, data, and backend requests for a list
-  // nobody is looking at. Cleared on blur (useFocusEffect cleanup) and on background
-  // (AppState listener). Errors are silent by construction: retry() with data present is
-  // a background refetch — last-good rows stay on screen, no spinner.
-  useFocusEffect(
-    useCallback(() => {
-      let timer: ReturnType<typeof setInterval> | null = null;
-      const start = () => {
-        if (timer) return;
-        if (__DEV__) console.log('[payouts-poll] started');
-        timer = setInterval(() => {
-          if (!hasDataRef.current) return;        // nothing loaded yet
-          if (writeInFlightRef.current) return;   // approve/reject/retry in flight
-          if (verdictPollingRef.current) return;  // the 3s verdict poll owns these rows
-          if (confirmOpenRef.current) return;     // a confirm dialog/sheet is open
-          refetchList();
-        }, LIST_POLL_INTERVAL_MS);
-      };
-      const stop = () => {
-        if (!timer) return;
-        if (__DEV__) console.log('[payouts-poll] stopped');
-        clearInterval(timer);
-        timer = null;
-      };
-      if (AppState.currentState === 'active') start();
-      const sub = AppState.addEventListener('change', s => {
-        if (s === 'active') start();
-        else stop();
-      });
-      return () => { stop(); sub.remove(); };
-    }, [refetchList]),
-  );
+  // Refresh every LIST_POLL_INTERVAL_MS, armed only while the screen is FOCUSED **and**
+  // the app is FOREGROUNDED — the shared hook owns that scaffolding. Errors are silent by
+  // construction: retry() with data present is a background refetch — last-good rows stay
+  // on screen, no spinner.
+  usePolledFocusRefetch({
+    intervalMs: LIST_POLL_INTERVAL_MS,
+    label: 'payouts-poll',
+    onTick: () => {
+      if (!hasDataRef.current) return;        // nothing loaded yet
+      if (writeInFlightRef.current) return;   // approve/reject/retry in flight
+      if (verdictPollingRef.current) return;  // the 3s verdict poll owns these rows
+      if (confirmOpenRef.current) return;     // a confirm dialog/sheet is open
+      refetchList();
+    },
+  });
 
   const isWideWeb = useIsWideWeb();
 
