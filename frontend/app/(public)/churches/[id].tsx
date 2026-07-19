@@ -2,10 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   StatusBar,
   StyleSheet,
   Text,
@@ -19,10 +20,27 @@ import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
 import { churchesService } from '../../../services/churches.service';
+import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
+import { usePolledFocusRefetch } from '../../../hooks/usePolledFocusRefetch';
 import { PublicCampaign, PublicChurch } from '../../../types';
 
-type LoadState = 'loading' | 'error' | 'notfound' | 'ok';
-type SectionState = 'loading' | 'error' | 'ok';
+// Focused-poll cadence — public screens poll slower than the treasurer dashboard
+// (45s): anonymous traffic is higher-volume and far less latency-sensitive than a
+// treasurer watching money land. Its own named constant, per the hook's contract
+// (usePolledFocusRefetch exports no default on purpose).
+const PROFILE_POLL_INTERVAL_MS = 90_000;
+
+// A 404 is NOT an error here — it is a distinct, terminal, NON-retryable outcome with
+// its own copy ("may not exist" vs "check your connection"). useFocusRefetch only has
+// loading/error/ok, so the fetcher RESOLVES this sentinel instead of throwing; only a
+// real failure (network, 5xx) throws through to the hook's 'error'.
+//
+// The sentinel must be NON-NULL: useFocusRefetch.ts:48 tests `data !== null` to decide
+// foreground-vs-background, so resolving `null` would pin the screen in a permanent
+// first-load spinner on every run.
+type ChurchResult =
+  | { kind: 'ok'; church: PublicChurch }
+  | { kind: 'notfound' };
 
 // ─── Profile header (used as ListHeaderComponent) ─────────────────────────────
 // Address row REMOVED (Decision A — the public church serializer omits address).
@@ -126,58 +144,76 @@ export default function ChurchProfileScreen() {
   const isWideWeb = useIsWideWeb();
   const numColumns = isWideWeb ? 3 : 1;
 
-  const [church, setChurch] = useState<PublicChurch | null>(null);
-  const [churchState, setChurchState] = useState<LoadState>('loading');
-  const [churchReloadKey, setChurchReloadKey] = useState(0);
+  // TWO independent hook instances — the church and its campaigns stay DELIBERATELY
+  // decoupled (this was two separate effects with two separate reloadKeys). A campaigns
+  // failure must NOT blank the church page: it drives only the campaigns section's own
+  // error/retry, and vice versa. Both refetch on every screen FOCUS with keep-last-good
+  // semantics, so a failed background refresh leaves the page as it was.
+  const {
+    data: churchResult,
+    status: churchStatus,
+    retry: retryChurch,
+  } = useFocusRefetch<ChurchResult>(async () => {
+    try {
+      return { kind: 'ok', church: await churchesService.getById(id) };
+    } catch (err) {
+      // 404 (nonexistent / non-ACTIVE) → the not-found sentinel, NOT an error.
+      if (axios.isAxiosError(err) && err.response?.status === 404) return { kind: 'notfound' };
+      throw err;   // network / 5xx → the hook's 'error' state (retryable)
+    }
+  });
 
-  const [campaigns, setCampaigns] = useState<PublicCampaign[]>([]);
-  const [campaignsState, setCampaignsState] = useState<SectionState>('loading');
-  const [campaignsReloadKey, setCampaignsReloadKey] = useState(0);
+  // No sentinel here: the ?church=<id> filter returns this church's ACTIVE campaigns,
+  // and a church with none is an empty list — [] is a legitimate result, not a 404 and
+  // not an error. [] is also non-null, so it counts as data and keeps later runs in the
+  // background exactly like a populated list.
+  const {
+    data: campaigns,
+    status: campaignsStatus,
+    retry: retryCampaigns,
+  } = useFocusRefetch<PublicCampaign[]>(
+    async () => (await campaignsService.browse({ church: id })).results,
+  );
 
-  // Church load — independent. A 404 (nonexistent/non-ACTIVE) → whole-screen
-  // not-found; any other failure → whole-screen retryable error.
-  useEffect(() => {
-    let cancelled = false;
-    setChurchState('loading');
-    (async () => {
-      try {
-        const data = await churchesService.getById(id);
-        if (cancelled) return;
-        setChurch(data);
-        setChurchState('ok');
-      } catch (err) {
-        if (cancelled) return;
-        if (axios.isAxiosError(err) && err.response?.status === 404) setChurchState('notfound');
-        else setChurchState('error');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, churchReloadKey]);
+  const church = churchResult?.kind === 'ok' ? churchResult.church : null;
 
-  // Campaigns load — INDEPENDENT of the church load. The backend ?church=<id>
-  // filter returns this church's ACTIVE campaigns (paginated); a church with none
-  // → empty results (not an error). A failure here must NOT blank the church page —
-  // it only drives the campaigns section's own error/retry.
-  useEffect(() => {
-    let cancelled = false;
-    setCampaignsState('loading');
-    (async () => {
-      try {
-        const res = await campaignsService.browse({ church: id });
-        if (cancelled) return;
-        setCampaigns(res.results);
-        setCampaignsState('ok');
-      } catch {
-        if (cancelled) return;
-        setCampaignsState('error');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, campaignsReloadKey]);
+  // Pull-to-refresh: RefreshControl owns its own spinner; both retries run as
+  // background refetches (data present), so nothing else flashes.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([retryChurch(), retryCampaigns()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [retryChurch, retryCampaigns]);
+
+  // Whether each fetch currently holds data — read inside the poll tick without being
+  // effect deps. Polling a section that has NO data yet would run retry() as a
+  // FOREGROUND fetch and flash its spinner every tick; skip it instead (the manual
+  // Try-again control owns that path).
+  const hasChurchRef = useRef(false);
+  hasChurchRef.current = churchResult !== null;
+  const hasCampaignsRef = useRef(false);
+  hasCampaignsRef.current = campaigns !== null;
+
+  // Focused polling: armed only while the screen is FOCUSED **and** the app is
+  // FOREGROUNDED — the shared hook owns that scaffolding.
+  //
+  // The two guards stay PER-CALL, not whole-tick: church and campaigns load
+  // independently, so one may hold data while the other doesn't, and each must refresh
+  // on its own merit. A whole-tick skip cannot express "refresh the church but not its
+  // campaigns" — it collapses to both-or-neither (same asymmetry as the Overview
+  // dashboard; see usePolledFocusRefetch.ts:15-20).
+  usePolledFocusRefetch({
+    intervalMs: PROFILE_POLL_INTERVAL_MS,
+    label: 'church-profile-poll',
+    onTick: () => {
+      if (hasChurchRef.current) retryChurch();
+      if (hasCampaignsRef.current) retryCampaigns();
+    },
+  });
 
   const BackButton = (
     <TouchableOpacity
@@ -191,16 +227,18 @@ export default function ChurchProfileScreen() {
     </TouchableOpacity>
   );
 
-  // Whole-screen states (church-driven).
-  if (churchState !== 'ok' || !church) {
+  // Whole-screen states (church-driven). Order mirrors the pre-migration ternary:
+  // spinner (first load only — status is 'loading' only while there is no data),
+  // then the not-found sentinel, then the retryable error.
+  if (!church) {
     return (
       <View style={styles.root}>
         <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
         {BackButton}
         <View style={styles.center}>
-          {churchState === 'loading' ? (
+          {churchStatus === 'loading' ? (
             <ActivityIndicator size="large" color={Colors.primary} />
-          ) : churchState === 'notfound' ? (
+          ) : churchResult?.kind === 'notfound' ? (
             <>
               <View style={styles.stateIconCircle}>
                 <Ionicons name="business-outline" size={34} color={Colors.primary} />
@@ -219,7 +257,7 @@ export default function ChurchProfileScreen() {
               <Text style={styles.stateSub}>Please check your connection and try again.</Text>
               <TouchableOpacity
                 style={styles.retryBtn}
-                onPress={() => { setChurchReloadKey(k => k + 1); setCampaignsReloadKey(k => k + 1); }}
+                onPress={() => { retryChurch(); retryCampaigns(); }}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel="Try again"
@@ -234,9 +272,11 @@ export default function ChurchProfileScreen() {
   }
 
   // Church loaded OK — render profile + the campaigns section (own loading/error/empty).
+  // The hook's FetchStatus union is identical to the old SectionState, so this maps
+  // across unchanged; the section retry drives the campaigns instance ALONE.
   const campaignsEmpty =
-    campaignsState === 'loading' ? <CampaignsLoading /> :
-    campaignsState === 'error' ? <CampaignsError onRetry={() => setCampaignsReloadKey(k => k + 1)} /> :
+    campaignsStatus === 'loading' ? <CampaignsLoading /> :
+    campaignsStatus === 'error' ? <CampaignsError onRetry={() => { retryCampaigns(); }} /> :
     <EmptyCampaigns />;
 
   return (
@@ -245,11 +285,19 @@ export default function ChurchProfileScreen() {
       {BackButton}
 
       <FlatList
-        data={campaigns}
+        data={campaigns ?? []}
         keyExtractor={item => item.id}
         numColumns={numColumns}
         key={numColumns}
         columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <View style={isWideWeb ? styles.gridItem : styles.cardWrapper}>
             <CampaignCard

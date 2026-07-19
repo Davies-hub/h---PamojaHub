@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -23,6 +22,7 @@ import ProgressBar from '../../../components/ui/ProgressBar';
 import RemoteImage from '../../../components/ui/RemoteImage';
 import { BorderRadius, Colors, FontSize, Shadows, Spacing } from '../../../constants/theme';
 import { campaignsService } from '../../../services/campaigns.service';
+import { useFocusRefetch } from '../../../hooks/useFocusRefetch';
 import { PublicCampaign } from '../../../types';
 import { formatDate } from '../../../utils/formatters';
 
@@ -36,7 +36,18 @@ const stickyWide = Platform.OS === 'web'
   ? ({ position: 'sticky', top: Spacing.lg } as unknown as ViewStyle)
   : null;
 
-type LoadState = 'loading' | 'error' | 'notfound' | 'ok';
+// A 404 (campaign gone / non-ACTIVE church) is NOT an error — it is a distinct,
+// terminal, NON-retryable outcome with its own copy ("may have been removed" vs
+// "check your connection"), and it is the state a dead share link lands on.
+// useFocusRefetch only has loading/error/ok, so the fetcher RESOLVES this sentinel
+// instead of throwing; only a real failure (network, 5xx) throws through to 'error'.
+//
+// The sentinel must be NON-NULL: useFocusRefetch.ts:48 tests `data !== null` to decide
+// foreground-vs-background, so resolving `null` would pin the screen in a permanent
+// first-load spinner on every run.
+type CampaignResult =
+  | { kind: 'ok'; campaign: PublicCampaign }
+  | { kind: 'notfound' };
 
 export default function CampaignDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -45,46 +56,54 @@ export default function CampaignDetailScreen() {
   const statusBarHeight = insets.top || (StatusBar.currentHeight ?? 24);
   const isWideWeb = useIsWideWeb();
 
-  const [campaign, setCampaign] = useState<PublicCampaign | null>(null);
-  const [state, setState] = useState<LoadState>('loading');
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    setState('loading');
-    (async () => {
-      try {
-        const data = await campaignsService.getBySlug(slug);
-        if (cancelled) return;
-        setCampaign(data);
-        setState('ok');
-      } catch (err) {
-        if (cancelled) return;
-        // 404 = campaign gone / non-ACTIVE church → distinct not-found state.
-        // Anything else (network, 5xx) → retryable error.
-        if (axios.isAxiosError(err) && err.response?.status === 404) setState('notfound');
-        else setState('error');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, reloadKey]);
-
-  // BACKGROUND refresh after a successful donation — deliberately NOT reloadKey:
-  // that path sets state('loading'), whose branch replaces the whole page with a
-  // spinner and would UNMOUNT the DonationForm success card (receipt and all).
-  // Silent swap instead: new snapshot on success, keep last-good on any failure
-  // (same keep-last-good discipline as useFocusRefetch).
-  const refreshCampaign = useCallback(async () => {
+  // Refetches on every screen FOCUS; first focus shows the spinner, every later run is
+  // a BACKGROUND refresh with keep-last-good semantics.
+  //
+  // This subsumes the hand-rolled `refreshCampaign` that used to live here: its whole
+  // point was a SILENT swap (never state('loading'), whose branch replaces the page with
+  // a spinner and would UNMOUNT the DonationForm success card, receipt and all), keeping
+  // last-good on failure. retry() with data present is exactly that — foreground is
+  // decided by hasData (useFocusRefetch.ts:54), not by the call site.
+  //
+  // NOTE for Slice D. A refetch that lands a status flip ACTIVE→PAUSED/CLOSED unmounts
+  // DonationForm via the :235 ternary — destroying an in-flight verdict poll or a
+  // success card's receipt. There are THREE callers of retry() here, needing TWO
+  // different guard shapes:
+  //
+  //   1. poll tick (Slice D, not yet added) — SKIP the refetch while donationState
+  //      is not 'idle'. A whole-tick early return in onTick.
+  //   2. onSuccess={retry} (PRE-EXISTING, reachable today — predates this migration,
+  //      identical under the old refreshCampaign since cb5ed65) — here you WANT the
+  //      refetch (the donor must see their shilling land), so the fix is the opposite:
+  //      DON'T UNMOUNT a non-idle form. Gate the :235 ternary on
+  //      `status === 'ACTIVE' || donationState !== 'idle'`.
+  //   3. focus run — UNREACHABLE with a non-idle form: expo-router's useFocusEffect
+  //      subscribes to nav 'focus'/'blur' ONLY, never AppState (so backgrounding the
+  //      app mid-donation, e.g. via the WhatsApp share, does not refetch), and this
+  //      screen has no push/blur path that preserves state — every exit unmounts and
+  //      resets donationState. No guard needed.
+  //
+  // Both fixes need the same new prop surface (donationState surfaced to the parent),
+  // which is why they belong in ONE slice.
+  const { data: result, status, retry } = useFocusRefetch<CampaignResult>(async () => {
     try {
-      const data = await campaignsService.getBySlug(slug);
-      setCampaign(data);
-    } catch {
-      // Background only — the donor already has their success card; stale progress
-      // self-corrects on the next visit.
+      return { kind: 'ok', campaign: await campaignsService.getBySlug(slug) };
+    } catch (err) {
+      // 404 = campaign gone / non-ACTIVE church → distinct not-found state.
+      // Anything else (network, 5xx) → retryable error.
+      if (axios.isAxiosError(err) && err.response?.status === 404) return { kind: 'notfound' };
+      throw err;
     }
-  }, [slug]);
+  });
+
+  const campaign = result?.kind === 'ok' ? result.campaign : null;
+
+  // NO pull-to-refresh on this screen (church profile has it; this one deliberately
+  // does not). P2R here would be a second user-reachable path into retry(): a donor
+  // mid-'confirming' could pull, land a status flip, and the :229 ternary would unmount
+  // DonationForm — destroying the in-flight verdict poll or a success card's receipt.
+  // Near-zero value on a single detail page, so the exposure isn't worth buying.
+  // The in-flight guard that makes refetching safe here is Slice D's job.
 
   return (
     <View style={styles.root}>
@@ -101,11 +120,14 @@ export default function CampaignDetailScreen() {
         <Ionicons name="arrow-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
 
-      {state === 'loading' ? (
+      {/* Order mirrors the pre-migration ternary: spinner (first load only — status is
+          'loading' only while there is no data), then the not-found sentinel, then the
+          retryable error. */}
+      {status === 'loading' ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
-      ) : state === 'notfound' ? (
+      ) : result?.kind === 'notfound' ? (
         <View style={styles.center}>
           <View style={styles.stateIconCircle}>
             <Ionicons name="search-outline" size={34} color={Colors.primary} />
@@ -115,7 +137,7 @@ export default function CampaignDetailScreen() {
             This campaign may have been removed or is no longer available.
           </Text>
         </View>
-      ) : state === 'error' ? (
+      ) : status === 'error' ? (
         <View style={styles.center}>
           <View style={styles.stateIconCircle}>
             <Ionicons name="cloud-offline-outline" size={34} color={Colors.primary} />
@@ -124,7 +146,7 @@ export default function CampaignDetailScreen() {
           <Text style={styles.stateSub}>Please check your connection and try again.</Text>
           <TouchableOpacity
             style={styles.retryBtn}
-            onPress={() => setReloadKey(k => k + 1)}
+            onPress={() => { retry(); }}
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityLabel="Try again"
@@ -233,7 +255,7 @@ export default function CampaignDetailScreen() {
                   campaignTitle={campaign.title}
                   // Donor sees their own shilling land: refresh raised/progress in the
                   // background on the SUCCESS verdict only.
-                  onSuccess={refreshCampaign}
+                  onSuccess={retry}
                 />
               ) : (
                 <View style={styles.statusNotice}>
